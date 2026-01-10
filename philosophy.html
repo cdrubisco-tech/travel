@@ -1,0 +1,4357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>哲学笔记</title>
+	<link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background-color: #fff;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            border-right: 1px solid #ddd;
+        }
+        
+        .sidebar-header {
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .sidebar-title {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        .sidebar-subtitle {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        .philosopher-category {
+            margin-bottom: 25px;
+        }
+        
+        .philosopher-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            padding: 10px 12px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 6px;
+            transition: all 0.2s;
+            background-color: #f8f9fa;
+            margin-bottom: 5px;
+        }
+        
+        .philosopher-name:hover {
+            background-color: #f0f7ff;
+            color: #3498db;
+        }
+        
+        .toggle-icon {
+            font-size: 0.8rem;
+            transition: transform 0.3s;
+            color: #7f8c8d;
+        }
+        
+        .works-list {
+            list-style-type: none;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            padding-left: 5px;
+        }
+        
+        .works-list.expanded {
+            max-height: 800px;
+        }
+        
+        .work-item {
+            padding: 5px 0;
+            margin-bottom: 3px;
+        }
+        
+        .work-link {
+            color: #3498db;
+            text-decoration: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            font-size: 0.95rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .work-link:hover, .work-link.active {
+            background-color: #f0f7ff;
+            color: #2980b9;
+        }
+        
+        .work-toggle {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+        }
+        
+        .subsections-list {
+            list-style-type: none;
+            padding-left: 15px;
+            margin-top: 5px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .subsections-list.expanded {
+            max-height: 800px;
+			overflow-y: auto; 
+        }
+        
+        .subsection-item {
+            padding: 3px 0;
+        }
+        
+        .subsection-link {
+            color: #7f8c8d;
+            text-decoration: none;
+            font-size: 0.85rem;
+            display: block;
+            padding: 6px 12px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+        
+        .subsection-link:hover, .subsection-link.active {
+            color: #2c3e50;
+            background-color: #f8f9fa;
+            border-left: 3px solid #3498db;
+        }
+        
+        .main-content {
+            flex: 1;
+            padding: 40px 60px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .note-header {
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .note-title {
+            color: #2c3e50;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .note-author {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+        
+        .note-section {
+            margin-bottom: 40px;
+            padding: 25px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .note-section:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            color: #2c3e50;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .section-content {
+            color: #444;
+            line-height: 1.8;
+            font-size: 1.05rem;
+        }
+        
+        .section-content p {
+            margin-bottom: 18px;
+        }
+        
+        .section-content .highlight {
+            background-color: #fffacd;
+            padding: 2px 5px;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+        }
+        
+        .section-content .highlight-bold {
+            background-color: #fffacd;
+            font-weight: bold;
+            padding: 2px 5px;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+        }
+        
+        .section-content ol, .section-content ul {
+            padding-left: 25px;
+            margin-bottom: 18px;
+        }
+        
+        .section-content li {
+            margin-bottom: 8px;
+        }
+        
+        .section-meta {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .tag {
+            display: inline-block;
+            background-color: #ecf0f1;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-right: 8px;
+            margin-bottom: 5px;
+        }
+        
+        .plato-tag {
+            background-color: #e8f4f8;
+            color: #2980b9;
+        }
+        
+        .aristotle-tag {
+            background-color: #f0f8e8;
+            color: #27ae60;
+        }
+        
+        .augustine-tag {
+            background-color: #f8e8f0;
+            color: #8e44ad;
+        }
+        
+        .epicurus-tag {
+            background-color: #f8f0e8;
+            color: #d35400;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            body {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 60vh;
+                position: relative;
+            }
+            
+            .main-content {
+                padding: 30px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px;
+            }
+            
+            .note-title {
+                font-size: 1.8rem;
+            }
+            
+            .note-section {
+                padding: 15px;
+            }
+        }
+		.red-title {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    
+	<!-- 左侧目录 -->
+    <aside class="sidebar" id="sidebar">
+	<span class="red-title"><a href="/china.html">瓷器</a> | <a href="/sh_history.html">上海历史</a> | 哲学笔记 | <br><a href="euro.html">欧洲皇室谱系</a> | <a href="/index.html">返回</a></span>
+        
+        <!-- 柏拉图作品 -->
+        <div class="philosopher-category">
+            <div class="philosopher-name" id="plato-toggle">
+                柏拉图
+                <span class="toggle-icon">▼</span>
+            </div>
+            <ul class="works-list" id="plato-works">
+                <li class="work-item">
+                    <a href="#phaedo" class="work-link active">
+                        《斐多篇》
+                        <span class="work-toggle">▼</span>
+                    </a>
+                    <ul class="subsections-list" id="phaedo-subsections">
+                        <li class="subsection-item">
+                            <a href="#section1" class="subsection-link">关于死亡</a>
+                        </li>
+                        <li class="subsection-item">
+                            <a href="#section2" class="subsection-link">灵魂不灭</a>
+                        </li>
+                        <li class="subsection-item">
+                            <a href="#section3" class="subsection-link">灵魂不朽</a>
+                        </li>
+                        <li class="subsection-item">
+                            <a href="#section4" class="subsection-link">番外：地球设想</a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="work-item">
+                    <a href="#phaedrus" class="work-link active">
+                        《斐德若篇》
+                        <span class="work-toggle">▼</span>
+                    </a>
+                    <ul class="subsections-list" id="phaedrus-subsections">
+                        <li class="subsection-item">
+                            <a href="#section5" class="subsection-link">对爱情的批判与辩护</a>
+                        </li>
+                        <li class="subsection-item">
+                            <a href="#section6" class="subsection-link">灵魂的性质与等级</a>
+                        </li>
+                        <li class="subsection-item">
+                            <a href="#section7" class="subsection-link">爱情的迷狂</a>
+                        </li>
+                        <li class="subsection-item">
+                            <a href="#section8" class="subsection-link">修辞学与写作</a>
+                        </li>
+                    </ul>
+                </li>
+				<li class="work-item">
+					<a href="#republic" class="work-link">
+						《理想国》
+						<span class="work-toggle">▼</span>
+					</a>
+					<ul class="subsections-list" id="republic-subsections">
+						<li class="subsection-item">
+							<a href="#section9" class="subsection-link">第一卷：何为正义</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section10" class="subsection-link">第二-三卷：护卫者的条件</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section11" class="subsection-link">第四卷：正义是正确分工</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section12" class="subsection-link">第五卷：爱智者</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section13" class="subsection-link">第六卷：善即真理</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section14" class="subsection-link">第七卷：洞穴人</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section15" class="subsection-link">第八卷：共和最高</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section16" class="subsection-link">第九卷：快乐等级</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section17" class="subsection-link">第十卷：拒绝模仿&灵魂永在</a>
+						</li>
+					</ul>
+				</li>
+				<li class="work-item">
+					<a href="#symposium" class="work-link">
+						《会饮篇》
+						<span class="work-toggle">▼</span>
+					</a>
+					<ul class="subsections-list" id="symposium-subsections">
+						<li class="subsection-item">
+							<a href="#section18" class="subsection-link">斐德若的讲辞：EROS的荣耀</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section19" class="subsection-link">泡赛尼阿斯的讲辞：两个爱神</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section20" class="subsection-link">厄里克希马库斯的讲辞：爱的和谐</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section21" class="subsection-link">阿里斯托芬的讲辞：球形人的神话</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section22" class="subsection-link">阿迦通的讲辞：爱神之美</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section23" class="subsection-link">苏格拉底的诘难与回忆</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section24" class="subsection-link">蒂俄提玛的对话:爱的阶梯</a>
+						</li>
+					</ul>
+				</li>
+				<li class="work-item">
+					<a href="#theaetetus" class="work-link">
+						《泰阿泰德篇》
+						<span class="work-toggle">▼</span>
+					</a>
+					<ul class="subsections-list" id="theaetetus-subsections">
+						<li class="subsection-item">
+							<a href="#section25" class="subsection-link">开篇：知识定义的方法论</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section26" class="subsection-link">知识是知觉</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section27" class="subsection-link">哲学家在社会中的处境</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section28" class="subsection-link">知识是真实的论断</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section29" class="subsection-link">知识是带理由的真实意见</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section30" class="subsection-link">结论</a>
+						</li>
+					</ul>
+				</li>
+				<li class="work-item">
+					<a href="#timaeus" class="work-link">
+						《蒂迈欧篇》
+						<span class="work-toggle">▼</span>
+					</a>
+					<ul class="subsections-list" id="timaeus-subsections">
+						<li class="subsection-item">
+							<a href="#section31" class="subsection-link">宇宙的创造与本性</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section32" class="subsection-link">宇宙的结构与秩序</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section33" class="subsection-link">时间、灵魂与天界诸神</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section34" class="subsection-link">必然性与理智的相互作用</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section35" class="subsection-link">存在的基本范畴</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section36" class="subsection-link">一些有趣的说法</a>
+						</li>
+					</ul>
+				</li>
+				<li class="work-item">
+					<a href="#sophist" class="work-link">
+						《智者篇》
+						<span class="work-toggle">▼</span>
+					</a>
+					<ul class="subsections-list" id="sophist-subsections">
+						<li class="subsection-item">
+							<a href="#section38" class="subsection-link">智者与摹仿术</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section39" class="subsection-link">"非存在"与"存在"</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section40" class="subsection-link">通种论：存在、动、静、同、异</a>
+						</li>
+					</ul>
+				</li>
+				<li class="work-item">
+					<a href="#parmenides" class="work-link">
+						《巴门尼德篇》
+						<span class="work-toggle">▼</span>
+					</a>
+					<ul class="subsections-list" id="parmenides-subsections">
+						<li class="subsection-item">
+							<a href="#section41" class="subsection-link">对理念论的第一轮批判</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section42" class="subsection-link">对理念论的第二轮批判</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section43" class="subsection-link">对理念论的第三轮批判</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section44" class="subsection-link">八组假设的辩证练习</a>
+						</li>
+					</ul>
+				</li>
+
+				<li class="work-item">
+					<a href="#philebus" class="work-link">
+						《菲利布篇》
+						<span class="work-toggle">▼</span>
+					</a>
+					<ul class="subsections-list" id="philebus-subsections">
+						<li class="subsection-item">
+							<a href="#section45" class="subsection-link">形而上学方法论</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section46" class="subsection-link">快乐和痛苦的探讨</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section47" class="subsection-link">理智和知识的探讨</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section48" class="subsection-link">善的等级</a>
+						</li>
+					</ul>
+				</li>
+
+				<li class="work-item">
+                    <a href="#minor-dialogues" class="work-link">
+                        其他对话录
+                        <span class="work-toggle">▼</span>
+                    </a>
+					<ul class="subsections-list" id="apology-subsections">
+						<li class="subsection-item">
+							<a href="#section49" class="subsection-link">《申辩篇》</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section50" class="subsection-link">《美诺篇》：美德</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section51" class="subsection-link">《大希庇亚篇》：美</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section52" class="subsection-link">《卡尔米德篇》：节制</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section53" class="subsection-link">《克里托篇》：公民义务</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section54" class="subsection-link">《游绪弗伦篇》：虔诚</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section55" class="subsection-link">《伊安篇》：诗歌</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section56" class="subsection-link">《高尔吉亚篇》：修辞</a>
+						</li>
+					</ul>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- 亚里士多德作品 -->
+        <div class="philosopher-category">
+            <div class="philosopher-name" id="aristotle-toggle">
+                亚里士多德
+                <span class="toggle-icon">▼</span>
+            </div>
+            <ul class="works-list" id="aristotle-works">
+				<li class="work-item">
+					<a href="#metaphysics" class="work-link">
+						《形而上学》
+						<span class="work-toggle">▼</span>
+					</a>
+					<ul class="subsections-list" id="metaphysics-subsections">
+						<li class="subsection-item">
+							<a href="#section57" class="subsection-link">第一卷：四因说</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section58" class="subsection-link">第二卷：元一存在</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section59" class="subsection-link">第三卷：哲学主题</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section60" class="subsection-link">第四卷：矛盾律/排中律</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section61" class="subsection-link">第五卷：名词解释</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section62" class="subsection-link">第六卷：本性之是</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section63" class="subsection-link">第七卷：何为本体</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section64" class="subsection-link">第八卷：形式优先</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section65" class="subsection-link">第九卷：潜能与实现</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section66" class="subsection-link">第十卷：一非本体</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section67" class="subsection-link">第十一卷：总结归纳</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section68" class="subsection-link">第十二卷：不动的推动者</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section69" class="subsection-link">第十三卷：理念不存在</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section70" class="subsection-link">第十四卷：续论数非本体</a>
+						</li>
+					</ul>
+				</li>
+				<li class="work-item">
+					<a href="#nichomachean-ethics" class="work-link">
+						《尼各马可伦理学》
+						<span class="work-toggle">▼</span>
+					</a>
+					<ul class="subsections-list" id="nichomachean-ethics-subsections">
+						<li class="subsection-item">
+							<a href="#section71" class="subsection-link">第一卷：最高善是幸福</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section72" class="subsection-link">第二卷：道德德性是在实践中选择适度的品质</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section73" class="subsection-link">第三卷：行为</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section74" class="subsection-link">第四卷：德性追求高尚而不带痛苦</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section75" class="subsection-link">第五卷：公正在于平等</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section76" class="subsection-link">第六卷：理智德性——明智</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section77" class="subsection-link">第七卷：自制低于善，是知而不行</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section78" class="subsection-link">第八卷：最高的友爱来自善的需求和相似</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section79" class="subsection-link">第九卷：友爱是自爱的延伸</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section80" class="subsection-link">第十卷：幸福在于沉思</a>
+						</li>
+					</ul>
+				</li>
+				<li class="work-item">
+					<a href="#physics" class="work-link">
+						《物理学》
+						<span class="work-toggle">▼</span>
+					</a>
+					<ul class="subsections-list" id="physics-subsections">
+						<li class="subsection-item">
+							<a href="#section81" class="subsection-link">第一章 本原为二或三</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section82" class="subsection-link">第二章 目的论</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section83" class="subsection-link">第三章 可感无限不存在</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section84" class="subsection-link">第四章 空间是限/虚空不存在/时间是数</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section85" class="subsection-link">第五章 运动的分类与对反</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section86" class="subsection-link">第六章 万物皆可分</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section87" class="subsection-link">第七章 运动必有推动者</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section88" class="subsection-link">第八章 不动的推动者在球面上</a>
+						</li>
+					</ul>
+				</li>
+				<li class="work-item">
+					<a href="#poetics" class="work-link">
+						《诗学》
+						<span class="work-toggle">▼</span>
+					</a>
+					<ul class="subsections-list" id="poetics-subsections">
+						<li class="subsection-item">
+							<a href="#section89" class="subsection-link">第一卷：摹仿的本性与分类</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section90" class="subsection-link">第二卷：悲剧的构成要素</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section91" class="subsection-link">第三卷：史诗与悲剧的差异</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section92" class="subsection-link">第四卷：诗的效果与净化</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section93" class="subsection-link">第五卷：诗的创作原则</a>
+						</li>
+					</ul>
+				</li>
+				<li class="work-item">
+					<a href="#politics" class="work-link">
+						《政治学》
+						<span class="work-toggle">▼</span>
+					</a>
+					<ul class="subsections-list" id="politics-subsections">
+						<li class="subsection-item">
+							<a href="#section94" class="subsection-link">第一卷：城邦的本质与家庭</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section95" class="subsection-link">第二卷：理想政体的批判</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section96" class="subsection-link">第三卷：公民与政体分类</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section97" class="subsection-link">第四卷：现实政体的研究</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section98" class="subsection-link">第五卷：政体变革与保全</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section99" class="subsection-link">第六卷：民主制与寡头制的组织</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section100" class="subsection-link">第七卷：理想城邦的构建</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section101" class="subsection-link">第八卷：教育与公民培养</a>
+						</li>
+					</ul>
+				</li>
+            </ul>
+        </div>
+        
+        <!-- 其他哲学家 -->
+        <div class="philosopher-category">
+            <div class="philosopher-name" id="others-toggle">
+                其他
+                <span class="toggle-icon">▼</span>
+            </div>
+            <ul class="works-list" id="others-works">
+				<li class="work-item">
+					<a href="#confessiones" class="work-link">
+						奥古斯丁《忏悔录》
+						<span class="work-toggle">▼</span>
+					</a>
+					<ul class="subsections-list" id="confessiones-subsections">
+						<li class="subsection-item">
+							<a href="#section102" class="subsection-link">第一卷：上帝充塞天地</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section103" class="subsection-link">第三卷：正义与法律</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section104" class="subsection-link">第四卷：灵魂与至善</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section105" class="subsection-link">第五卷：知识与信仰</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section106" class="subsection-link">第七卷：善恶与自由意志</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section107" class="subsection-link">第八卷：意志的同一性</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section108" class="subsection-link">第十卷：记忆与遗忘</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section109" class="subsection-link">第十一卷：创世与时间</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section110" class="subsection-link">第十二卷：天外之天与混沌</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section111" class="subsection-link">第十三卷：三位一体与创世象征</a>
+						</li>
+					</ul>
+				</li>
+				<li class="work-item">
+					<a href="#de-trinitate" class="work-link">
+						奥古斯丁《论三位一体》
+						<span class="work-toggle">▼</span>
+					</a>
+					<ul class="subsections-list" id="de-trinitate-subsections">
+						<li class="subsection-item">
+							<a href="#section112" class="subsection-link">一：三位一体信仰的基础</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section113" class="subsection-link">二：子与父的关系</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section114" class="subsection-link">三：圣灵的位格与工作</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section115" class="subsection-link">四：救赎中的三一显明</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section116" class="subsection-link">五：本质同一与位格区分</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section117" class="subsection-link">六：关系与属性</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section118" class="subsection-link">七：内在三一与经世三一</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section119" class="subsection-link">八：爱的类比</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section120" class="subsection-link">九：心灵三一：记忆、理解、意志</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section121" class="subsection-link">十：自我认识与三位一体</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section122" class="subsection-link">十一：感官与内在三一</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section123" class="subsection-link">十二：智慧的等级</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section124" class="subsection-link">十三：信望爱的三一结构</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section125" class="subsection-link">十四：上帝形象与三一恢复</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section126" class="subsection-link">十五：超越类比与信仰奥秘</a>
+						</li>
+					</ul>
+				</li>
+				<li class="work-item">
+					<a href="#enneads" class="work-link">
+						普罗提诺《九章集》
+						<span class="work-toggle">▼</span>
+					</a>
+					<ul class="subsections-list" id="enneads-subsections">
+						<li class="subsection-item">
+							<a href="#section127" class="subsection-link">第一卷：灵魂与美</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section128" class="subsection-link">第二卷：可感世界与天界</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section129" class="subsection-link">第三卷：命运与自由意志</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section130" class="subsection-link">第四卷：灵魂本质与转世</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section131" class="subsection-link">第五卷：理智世界与太一</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section132" class="subsection-link">第六卷：存在与范畴</a>
+						</li>
+					</ul>
+				</li>
+                <li class="work-item">
+                    <a href="#epicurus" class="work-link">
+                        伊壁鸠鲁
+                        <span class="work-toggle">▼</span>
+					</a>
+					<ul class="subsections-list" id="epicurus-subsections">
+						<li class="subsection-item">
+							<a href="#section133" class="subsection-link">自然哲学</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section134" class="subsection-link">伦理学</a>
+						</li>
+					</ul>
+                </li>
+            </ul>
+        </div>
+    </aside>
+    
+    <!-- 右侧内容区域 -->
+    <main class="main-content">
+        <header class="note-header">
+            <h1 class="note-title">《斐多篇》</h1>
+            <div class="note-author">柏拉图</div>
+        </header>
+        
+        <section id="section1" class="note-section">
+            <h2 class="section-title">关于死亡</h2>
+            <div class="section-content" id="section1-content">
+                <p>人不该自杀，因为死是神才能安排的；但真正追求哲学的人也不该畏惧死亡，而应该感到轻松愉快（后面用天鹅之歌作比，顺便在这里再次鄙视了一下女人）。</p>
+                <p>因为哲学家看重的是灵魂，肉体反而是负担，而死正是灵魂脱离肉体，所以可以说追寻哲学就是学习死。同理，勇敢与节制的最高境界都是不畏死。</p>
+            </div>
+        </section>
+        
+        <section id="section2" class="note-section">
+            <h2 class="section-title">灵魂不灭</h2>
+            <div class="section-content" id="section2-content">
+                <p>四种论证：</p>
+				<ol>
+					<li>事物都存在对立面，并在对立中转换，而生的对立是死，所以生也由死转化而来。如果只有生转化为死没有死转化为生，事物最终会全部化为同一种形式（死）而没别的变化了。</li>
+					<li>认识是记忆，所以人生来就有的认识（尤其是抽象而绝对的知识）必是前世的记忆（<i>婴儿出生时没有认识，是因为前世带来的记忆现世得有个回忆的过程</i>）。</li>
+					<li>灵魂是最纯粹的存在（看不见的比看得见的更恒定更神圣），无从分解，因而不会消亡。</li>
+					<li>灵魂是单一的、不可分的，因此不会像复合物那样分解消亡。</li>
+				</ol>
+				<p>所谓鬼魂，便是对肉体仍有眷念的灵魂，由于被肉体的世俗玷污，因而显形。不爱智慧的好人则会转世为人或动物，只有哲学家的灵魂能与神交往。</p>
+				<p>把灵魂束缚于肉体的是快乐与痛苦，所以追求智慧的灵魂当抛弃这两者，只跟随理智。</p>
+            </div>
+        </section>
+        
+        <section id="section3" class="note-section">
+            <h2 class="section-title">灵魂不朽</h2>
+            <div class="section-content" id="section3-content">
+                <p>辩驳之前先对自己嘲解，说相信灵魂存在有好处，不相信也没坏处（实用主义出现！）</p>
+				<p><strong>对"灵魂和谐说" - "灵魂只是人身的和谐，所以灵魂比基底的肉体先消亡"的反驳</strong>：</p>
+				<ol>
+					<li>和谐不能先于被和谐的事物存在，所以有身体前，灵魂中的记忆不可能存在，这和公理是前世的记忆矛盾</li>
+					<li>和谐只能是附属，无法作为主宰指导被和谐的事物（肉体）</li>
+					<li>和谐没有程度之分，而灵魂却有差别</li>
+				</ol>	
+				<p><strong>对"灵魂磨损说" - "灵魂在转世过程中也可能逐渐磨损，最终虽然比其待过的所有肉体持久，却比其待过的最后一个肉体先消亡"的反驳</strong>：</p>
+				<p>首先指出至善至美存在的（这是公理，不能论证），现实中美的东西是因为拥有（分有？）本质的美；包含了相反本质的事物往往互相排斥（例如火与雪），所以因为灵魂拥有生的本质，于是便会排斥死的本质，因而不朽</p>
+				<p><i>注意同一事物也能同时拥有例如大小的本质（而不是大的本质既可大也可小），只是会在不同地方表现出来（前面说到事物在对立中转换是指具体事物，本质则不会转变）；大概生与死是绝对不是相对，所以不能像大小那样同时被拥有？</i></p>
+                
+                <p>最后，因为灵魂不朽，我们的善恶都会带入灵魂而得以不朽，所以我们应该爱护灵魂。</p>
+            </div>
+        </section>
+        
+        <section id="section4" class="note-section">
+            <h2 class="section-title">番外篇：闲聊心中设想的地球</h2>
+            <div class="section-content" id="section4-content">                
+                <ol>
+                    <li>地球不用别的力量托着，自能保持平衡，不偏向任何一方；</li>
+                    <li>地球很大;</li>
+                    <li>我们所居住的并非地球表面，神所在的上天才是表面；</li>
+                    <li>地下有四条大河：大洋河、苦河、火河和冥河。</li>
+                </ol>
+                
+                <p><i>注意地下河流的划分与柏拉图的伦理学相关：不同品质的灵魂在死后会去往不同的地方。</i></p>
+        </section>
+		
+        <header class="note-header">
+            <h1 class="note-title">《斐德若篇》</h1>
+            <div class="note-author">柏拉图</div>
+        </header>
+
+        <section id="section5" class="note-section">
+            <h2 class="section-title">对爱情的批判与辩护</h2>
+            <div class="section-content" id="section5-content">
+                <p>吕西阿斯认为：年轻人应该接受一个不爱他的人的追求，而不是一个爱他的人，因为：</p>
+                
+                <ol>
+                    <li>爱是疯狂的：情人会失去理智，渴望最终带来悔恨</li>
+                    <li>爱是盲目的：情人会过度赞美爱人，甚至将其不具备的优点加诸其身</li>
+                    <li>爱使交际圈变小：人会限制爱人的自由，阻止其与他人交往</li>
+                    <li>爱是迷狂的病态：情人会嫉妒爱人的其他朋友</li>
+                    <li>爱是喜新厌旧：爱情消失后，情人会背弃承诺</li>
+                </ol>
+                
+                <p>对此，苏格拉底指出，问题不在于爱情本身，而在于爱情的性质。有两种爱：</p>
+                
+                <ul>
+                    <li><strong>属民的爱情</strong>：追求快乐的欲念，自私而短暂</li>
+                    <li><strong>属天的爱情</strong>：追求至善的理性，导向哲学和智慧</li>
+                </ul>
+                
+                <p>被属民的爱情控制的情人会像吕西阿斯描述的那样，厌恶爱人的优越，试图降低爱人的水平，使其在身体上柔弱，在心灵上远离哲学，在社会上一无所获。当这种爱情消失时，情人就会失信背义。这样的"爱情"对爱人是无益的。</p>
+            </div>
+        </section>
+
+        <section id="section6" class="note-section">
+            <h2 class="section-title">灵魂的性质与等级</h2>
+            <div class="section-content" id="section6-content">
+                <p>为了理解属天的爱情，苏格拉底转向对灵魂本性的探讨。他指出：</p>
+                
+                <p><strong>灵魂是自动的，因而是不朽的。</strong>所有自动的事物都是运动的根源，不会停止运动，因此不朽。灵魂正是这样一种自我运动的原则。</p>
+                
+                <p>然而，灵魂可能堕落。当灵魂受罪恶的拖累或不顺从神而不见真理时，不能跟随神上升至理念世界，就会投胎为人。根据灵魂所见真理的多寡(正义程度)，人分为九等：</p>
+                
+                <ol>
+                    <li><strong>哲学家</strong>：见过最多真理，追求智慧与美</li>
+                    <li><strong>好的君主/战士</strong>：见过较多真理，追求荣誉</li>
+                    <li><strong>政治家/经济家</strong>：管理城邦事务</li>
+                    <li><strong>医生/运动员</strong>：关注身体健康</li>
+                    <li><strong>预言家/宗教家</strong>：关注宗教仪式</li>
+                    <li><strong>诗人/艺术家</strong>：模仿性的创作</li>
+                    <li><strong>工匠/农夫</strong>：物质生产</li>
+                    <li><strong>诡辩家</strong>：操纵语言与意见</li>
+                    <li><strong>专制君主</strong>：最远离真理，受最低等欲望支配</li>
+                </ol>
+                
+                <p>为了恢复到纯粹状态并上升至天界，灵魂需要由尘世的美来回忆起上界的美，并渴望理念的美。这就是爱情的真正功能。</p>
+            </div>
+        </section>
+
+        <section id="section7" class="note-section">
+            <h2 class="section-title">爱情的迷狂</h2>
+            <div class="section-content" id="section7-content">
+                <p>苏格拉底讨论了四种神灵导致的迷狂：</p>
+                
+                <ol>
+                    <li><strong>预言的迷狂</strong>：来自阿波罗</li>
+                    <li><strong>宗教的迷狂</strong>：来自狄俄尼索斯</li>
+                    <li><strong>诗歌的迷狂</strong>：来自缪斯</li>
+                    <li><strong>爱情的迷狂</strong>：来自阿佛洛狄忒和厄洛斯</li>
+                </ol>
+                <p><i>这段是在讨论灵魂等级之前，既是插曲，意在批驳因爱情的迷狂而鄙视爱情的看法，也是为后面说爱的迷狂更伟大所作的铺垫。</i></p>
+                <p>既然前三种迷狂被公认为神圣而有价值，那么爱情的迷狂也就未必比不爱的清醒差。事实上，爱情的迷狂是最伟大的，因为它能使灵魂回忆起上界的真理。</p>
+                
+                <p>当情人看到美的对象时，会回忆起上界美的理念。这种回忆引发灵魂的翅膀重新生长，产生温暖和滋润。这种美流注到情人的灵魂中，使情人离不开爱人。相应地，情人也反过来充实爱人，通过心灵的熏陶提升对方（爱是镜子）。两人都追求着至善，因而灵魂变得更纯粹，从而向天界靠拢。</p>
+                
+                <p>灵魂如同一辆马车，由：</p>
+                <ul>
+                    <li><strong>驭者（理性）</strong>：控制方向</li>
+                    <li><strong>白马（激情/高尚欲望）</strong>：听从理性</li>
+                    <li><strong>黑马（卑劣欲念）</strong>：难以控制，追求肉体快乐</li>
+                </ul>
+                
+                <p>情欲上升时，欲念情不自禁，理性却不肯贸然前往，所以爱是哪种就取决于二者的竞争（本我VS超我？）。需要用理智下大力气驾驭灵魂，方能不坠兽欲之道。</p>
+            </div>
+        </section>
+        
+        <section id="section8" class="note-section">
+            <h2 class="section-title">修辞学与写作</h2>
+            <div class="section-content" id="section8-content">
+                <p>关于爱的讨论到此为止，然后说写文章，写文章本身没有好坏，只有内容的好坏。于是开始探讨三个问题：</p>
+                
+                <p><strong>关于好文章与坏文章：</strong></p>
+                <p>人们受欺骗时，总是从真理的小类似走到大不类似。因此，即使是诡辩者也要先知道真理，才知道如何欺骗人。所以，好文章必须：</p>
+                <ol>
+                    <li>先给出定义，揭示真理</li>
+                    <li>有完整而自然的结构</li>
+                    <li>基于辩证法，追求真理（修辞学）</li>
+                </ol>
+                
+                <p><strong>修辞学是否只是一门技艺：</strong></p>
+                <p>当时的修辞学注重的都是细枝末节的技艺，或说片断式的规矩，缺乏串成整体的脉络。真正的修辞学需要三个条件：</p>
+                <ol>
+                    <li><strong>天赋</strong>：天生的才能</li>
+                    <li><strong>知识</strong>：包括自然科学（分析复合种类至单一定义）和心理学（对不同心灵写不同文章）</li>
+                    <li><strong>练习</strong>：持续的实践</li>
+                </ol>
+                
+                <p><strong>写作何时适当何时不适当：</strong></p>
+                <p>写作应该被视为一种辅助工具，而不是思想的替代品：</p>
+                <ul>
+                    <li>文字是"偷懒的工具"，使人们放弃了思考和记忆（那么电脑更是大大地偷懒了……）</li>
+                    <li>文字无法互动，存在误读的可能</li>
+                    <li>传承文字（娱乐性文章或备忘录）与传承思想不同</li>
+                    <li>真正的文章是心灵中的文章，文字只是其影像</li>
+                </ul>
+                
+                <p>因此，真正的思想交流需要辩证术。</p>
+            </div>
+        </section>
+
+		<header class="note-header">
+			<h1 class="note-title">《理想国》</h1>
+			<div class="note-author">柏拉图</div>
+		</header>
+
+		<section id="section9" class="note-section">
+			<h2 class="section-title">第一卷：何为正义</h2>
+			<div class="section-content" id="section9-content">
+				<p>首先驳斥了"正义就是帮助朋友伤害敌人"的说法：</p>
+				<ol>
+					<li>如此定义不能体现正义有多么有用；</li>
+					<li>伤害是恶的属性，即便伤害的是敌人也不能算是善。</li>
+				</ol>
+				
+				<p>其次反驳的是"正义就是统治者的利益"：</p>
+				<ol>
+					<li>统治者不一定永远正确，于是可能自相矛盾；</li>
+					<li>如果是真正无瑕疵的统治者，其统治一定是为了被统治的弱者的利益，一如真正的医生是寻求对病人的利益。</li>
+				</ol>
+				
+				<p>顺便驳斥的分论点"不正义比正义对个人更有好处，人们谴责不正义只是怕吃不正义的亏"：</p>
+				
+				<ol>
+					<li>任何技艺的利益都是特殊的，不因为其有额外的结果（例如收入）而使技艺本身变质，所以因正义而赚钱并非不正义。</li>
+					<li>正义者只想胜过不正义者，不正义者却同类异类都想胜过，对比其他才能可知正义是美德，因而不屑于与其对立面相争。</li>
+					<li>任何事物都有自己特有的功能，正义便是心灵的功能，所以国家的不正义会引起动乱，个人的不正义则会失去心智（第四卷末再次引援这个论点）。</li>
+				</ol>
+			</div>
+		</section>
+
+		<section id="section10" class="note-section">
+			<h2 class="section-title">第二-三卷：护卫者的条件</h2>
+			<div class="section-content" id="section10-content">
+				<p>接着第一卷，开始反驳"正义是为了其背后隐藏的好处，并非为正义本身"。从研究国家的正义着手，得出定义：正义就是人尽所用各司其职。</p>
+				
+				<p>然后话锋一转，开始由护卫者的条件：智慧和勇敢来谈教育制度，分别对应音乐和体操（第三卷写到音乐培养温和，体操培养激情，两者需和谐共处）。</p>
+				
+				<p>音乐（包括故事）为最早的课程，为了保护孩子的心灵，不能给他们听丑恶的故事：</p>
+				<ol>
+					<li>写神的丑陋面（与神至善的本质不符）</li>
+					<li>写神变化莫测（也与神至善的本质不符）</li>
+					<li>描写死后生活的悲惨以及各种忧伤或狂喜的刻画（对培养勇敢和克制不利）</li>
+				</ol>
+				
+				<p>也不能让他们看含模仿丑恶性质的演剧，而曲式和节奏方面也得舍弃那些挽歌与靡靡之音，配器方面也只要简单的七弦琴，而不要长笛和竖琴等。总之就是说文艺教育只能是高大全。</p>
+				
+				<p>体操方面，首先要培养吃苦耐劳而朴素的精神。接着由此写到了国家的司法和医术制度。疾病也被看做是放纵的一种，所以没用的人就别治病了。司法方面与医术类似。</p>
+				<p>然后又回到了护卫者的选拔，不论出身但需要历经考验证明他们不仅有天赋还真正一心为了国家利益。一旦选拔出来的护卫者就不能再有私人财产，一切充公。<i>共产主义提前到达……</i></p>
+			</div>
+		</section>
+
+		<section id="section11" class="note-section">
+			<h2 class="section-title">第四卷：正义是正确分工</h2>
+			<div class="section-content" id="section11-content">
+				<p>为何这样"什么都没有"的护卫却是最幸福的？因为国家的目标不是某一阶级的幸福而是全体公民的最大幸福。再次重申正义是每个阶层尽到自己的职责，贫富两者都有损于国家。为了达到这个目标需要良好的教育，不仅在物质上还在精神上（例如抵御猎奇诗歌的进入）。而在这样良好的国度中法律变得不必要，只有对鬼神的祭祀需要规定。</p>
+				
+				<p>接下来建立金字塔结构：</p>
+				<ul>
+					<li><strong>塔尖的统治者</strong>：具有智慧</li>
+					<li><strong>中部的护卫者</strong>：具有勇敢</li>
+					<li><strong>底部的民众</strong>：具有节制（这里意思是统治者与被统治者意见一致，可看作不具智慧的民众节制自己的欲望跟随统治者的智慧）</li>
+				</ul>
+				<p>这就是所谓国家的正义。</p>
+				
+				<p>由此反推至人身上，理性便是统治者，激情是辅助者，欲望则被统治，这便是人之正义。</p>
+				
+				<p>再回到第一卷结尾处的反驳，不正义便是心灵各部分失调，是一种疾病，自然谈不上幸福。</p>
+			</div>
+		</section>
+
+		<section id="section12" class="note-section">
+			<h2 class="section-title">第五卷：爱智者</h2>
+			<div class="section-content" id="section12-content">
+				<p>首先借外人的问题提出了男女平等的思想，表明天赋与性别无关。</p>
+				
+				<p>接下来摆出了配偶与儿童应该公有的观点，确切地说应该是优秀的男女允许结合，以保证后代质量；儿童同理遵循优胜劣汰原则。同时因为小家庭意识淡薄，培养出所有人的大家庭意识，增进了国家凝聚力。</p>
+				
+				<p>作为护卫者培养的后代尤其需要用心，例如从小带上战场观战，教育他们不要争抢战利品等等。这里顺便表达了他把人类分为希腊人与蛮族两类，希腊人之间是善意告诫的内讧，不是恶意的战争，于是不该毁房占地等。</p>
+				
+				<p>到这里为止理想国的体系已经基本完善，本卷最后也是最重要的问题是如何建立这样的理想国。他指出的第一点是哲学家需作为统治者。然后针对什么是真正的哲学家展开了一系列讨论。在这里他区分了知识与意见，认为意见是介于知识与无知之间的。意见的对象是一般事物，用知识才能认识到事物本身甚至永恒事物。哲学家便是热爱这样的知识的人（爱智者），而不是只对意见好奇。</p>
+			</div>
+		</section>
+
+		<section id="section13" class="note-section">
+			<h2 class="section-title">第六卷：善即真理</h2>
+			<div class="section-content" id="section13-content">
+				<p>开头归纳了哲学家需有的品质：热爱真实，轻视世俗欢乐，眼界广阔，不自夸不胆怯，公正温良，聪慧过人。</p>
+				
+				<p>接着回答疑问：为什么哲学家看上去对国家没用。揭示哲学家被轻视的原因不在自身而在跟不上的众人身上。而且现在充斥社会的大多是伪哲学家。由于哲学家集所有美德于一身，稍有一处不慎接受引诱就容易坠入魔道。而真正的哲学家往往由于孤立无援反而远离了社会，只能活在自己的世界里。</p>
+				
+				<p>真正的哲学家就需要看清何为善/真理。真理照耀可理知事物，于是人的灵魂便有了理智；一旦离开了真理来到生灭世界，灵魂便只剩下暗淡的意见。于是善不是实在，而是高于实在。</p>
+				
+				<p>提出四线段理论：灵魂有四种状态，知识、理智、信念和想象，等级逐渐降低，若换成线段长短依次增长。前两者合称理性，是用理念认知，高于合称意见的后两者所用的感觉，而知识高于理智的地方在于其不以假设为出发点。</p>
+			</div>
+		</section>
+
+		<section id="section14" class="note-section">
+			<h2 class="section-title">第七卷：洞穴人</h2>
+			<div class="section-content" id="section14-content">
+				<p>现实可感世界犹如地下洞穴，我们所见的只是由善的光芒映出的影像（<i>这里有点小问题，首先被火光映照的物体代表什么？其次太阳若是善那么火光象征什么？</i>）。</p>
+				<p>为了达到可知世界，需要灵魂的上升而不只是发展。而由于习惯了可感世界中模糊的影像，看到鲜明的可知世界后会不适应，即使适应了也很难将自己的感受与还在可感世界中的各位交流。而理想国中为了达到利益最大化的目的，需要强迫这些看到可知世界的哲学家们回到可感世界进行治理。</p>
+				
+				<p>体操与音乐均不是培养哲学家所需的，哲学家的先修课程为数学、几何（包括立体几何）与天文，因为这些均是研究可知事物的。而研习哲学本身即是学习辩证法，以不用假设而上升到第一真理。</p>
+				
+				<p>讲到该挑选怎样的人培养，再次谈论到哲学家的品质：擅于学习、吃苦耐劳、上进求真。具体做法：</p>
+				<ol>
+					<li>体育训练2-3年</li>
+					<li>用作游戏的方式学习数学等</li>
+					<li>20岁起对之前课程进行综合研究联系</li>
+					<li>30岁终于开始学习辩证法……</li>
+					<li>35岁成为公务员</li>
+					<li>到了50岁终于能当领导人了</li>
+				</ol>
+			</div>
+		</section>
+
+		<section id="section15" class="note-section">
+			<h2 class="section-title">第八卷：共和最高</h2>
+			<div class="section-content" id="section15-content">
+				<p>与理想国的贵族政制不同，现有的四种政体均有缺陷，缺陷从小到大依次为：斯巴达制（荣誉政制）、寡头政制、民主政制和僭主政制。四种政体对应四种心灵。</p>
+				<ul>
+				<li><strong>荣誉政制</strong>：由于智者的堕落，只敢选拥有其次美德的人——护卫者来统治，特征是好胜与爱荣誉，可谓是贵族制与寡头制的混合。对应的人爱好荣誉，缺乏而不排斥文化，有向善之心却随着年龄成长日趋淡薄。</li>
+				
+				<li><strong>寡头政制</strong>：权力在富人手里，从爱智慧降为爱荣誉再降到爱财。国家产生贫富分裂，并出现因破产而堕落的犯罪者。对应的人自然是贪财，理性与激情被金钱的欲望统治，但仍勤俭节约克制着其他欲望。</li>
+				
+				<li><strong>民主政制</strong>：则是由于穷人的增多而夺权，特征是自由。对应的人是放纵，将自己不必要的欲望全部同等对待同等满足。</li>
+				
+				<li><strong>僭主政制</strong>：类似于独裁或者暴政，在民主的过程中权力逐渐集中所致。对应的人在欲望斗争中将较好的欲望全部抛弃，只留下低等的欲望驱使激情而动，如酒鬼，最终会抛弃良知道德。</li>
+				</ul>
+			</div>
+		</section>
+
+		<section id="section16" class="note-section">
+			<h2 class="section-title">第九卷：快乐等级</h2>
+			<div class="section-content" id="section16-content">
+				<p>比较起来僭主制最理性的部分被最邪恶的部分统治，所以是最不正义的。要形成这样的国家需要大量的欺诈与暴力，虽然暴君物质生活满足了，精神上却终日不得安寝，因而也是最不幸的。于是再次证明了第一卷末的结论：不正义才是不幸。</p>
+				
+				<p>为了说明爱智者的快乐最高，再次提出心灵分为理性（爱智）、激情（爱誉）和欲望（爱钱）三部分，不同部分统治便是不同类型的人。爱智者能体验其他两种快乐，其他两种类型却无法体验爱智的快乐。</p>
+				<p>此外由于判断是理智做出，所以由理智说出爱智最快乐才是最可信的，其他两种快乐都可能只是不痛苦而已，不一定是真正的快乐。</p>
+				<p>最后，身体可灭，心灵永恒，身体不如心灵真实，填充前者的也不如填充后者得到的快乐大。最终计算结果，僭主比哲学家痛苦729倍……</p>
+			</div>
+		</section>
+
+		<section id="section17" class="note-section">
+			<h2 class="section-title">第十卷：拒绝模仿&灵魂永在</h2>
+			<div class="section-content" id="section17-content">
+				<p>万物只是可感世界的理念的影子，那么画家和诗人创造的就只是影子的影子，更远离真实。平静而克制的精神是善，而诗人擅长模仿的恰恰是不平静的精神，是心灵的低贱状态。</p>
+				<p><i>于第三卷放逐剧作家后又将诗人放逐出了理想国。</i></p>
+				
+				<p>全书最后一个理论是<b>灵魂不灭</b>：</p>
+				<ol>
+				<li>与心灵相关的恶不能真正地毁灭心灵；</li>
+				<li>心灵之外的恶由于是外物，无法影响心灵。</li>
+				</ol>
+				<p>由此推论灵魂不增不减，核心是爱智的部分。所以可以相信大善的神最终会根据人的正义与否给以相应的奖惩，即使不是当时当世。</p>
+				<p>最后柏拉图自己开始讲故事描述报应的思想，而且是他前面所说最不适合理想国的那种教育故事……</p>
+			</div>
+		</section>
+		<header class="note-header">
+			<h1 class="note-title">《会饮篇》</h1>
+			<div class="note-author">柏拉图</div>
+		</header>
+
+		<section id="section18" class="note-section">
+			<h2 class="section-title">斐德若的讲辞：EROS的荣耀</h2>
+			<div class="section-content" id="section18-content">
+				<p><strong>EROS（爱欲）是一切最美好事物的起因</strong>：</p>
+				
+				<ol>
+					<li>爱欲能激发人天性中最好的品质。当人陷入爱情时，会感到羞耻于做坏事，渴望做高尚的事。</li>
+					<li>死亡在爱欲面前也黯然无力。引用阿尔刻斯提斯为丈夫赴死的例子，说明爱能让人勇敢面对死亡。</li>
+				</ol>
+				
+				<p>因此，EROS最有权引导人在生前和死后拥有美德和福气。</p>
+				
+				<p><i>注意他特别指出，愿意为爱赴死的只有情人，因而只有情人被众神眷顾。</i></p>
+			</div>
+		</section>
+
+		<section id="section19" class="note-section">
+			<h2 class="section-title">泡赛尼阿斯的讲辞：两个爱神</h2>
+			<div class="section-content" id="section19-content">
+				<p><strong>实际上有两个EROS</strong>，分别对应两位爱神：</p>
+				
+				<ul>
+					<li><strong>属民的阿佛洛狄忒</strong>（潘得摩斯，Pandemus）→ <strong>属民的爱</strong>：</li>
+					<ol>
+						<li>随机而生，不论对象好坏</li>
+						<li>更看重身体而非灵魂</li>
+						<li>追求短暂的肉体快乐</li>
+						<li>需要用法律强制约束</li>
+					</ol>
+					<li><strong>属天的阿佛洛狄忒</strong>（乌拉尼亚，Urania）→ <strong>属天的爱</strong>：</li>
+					<ol>
+						<li>成熟的<b>只对少男的</b>情爱</li>
+						<li>为了上进和磨练品德而诞生</li>
+						<li>看重灵魂的美德而非身体的美丽</li>
+						<li>应该有充分的自由，不受法律限制</li>
+					</ol>
+				</ul>
+				
+				<p>爱情中的美德标准：</p>
+				<ul>
+					<li><strong>情人的美德</strong>：万分殷勤，甚至做连奴隶也不屑做的殷勤事也是值得肯定的</li>
+					<li><strong>爱人的美德</strong>：百依百顺，但不应该太快屈服（否则显得轻浮）</li>
+				</ul>
+				
+			</div>
+		</section>
+
+		<section id="section20" class="note-section">
+			<h2 class="section-title">厄里克希马库斯的讲辞：爱的和谐</h2>
+			<div class="section-content" id="section20-content">
+				<p><strong>EROS不仅是对人的情感，也是对万事万物的情感</strong>：</p>
+				<ol>
+					<li><strong>医学中的爱</strong>：医术就是关于身体中对立元素（冷热、干湿）如何通过爱达成和谐的知识。健康就是对立元素之间产生了恰当的爱。</li>
+					<li><strong>音乐中的爱</strong>：音乐艺术是关于高低音、快慢节奏如何通过爱达成和谐。没有爱就没有和谐的音乐。</li>
+					<li><strong>宇宙中的爱</strong>：季节的变换、天体的运行都受到爱欲法则的支配。</li>
+				</ol>
+				
+				<p>将泡赛尼阿斯的二分法推广：</p>
+				<ul>
+					<li><strong>属天的EROS</strong>对应属天的缪斯，和谐而品行端正</li>
+					<li><strong>属民的EROS</strong>对应属众的缪斯，虽有快感却无节制</li>
+				</ul>
+				
+				<p>只有当EROS扶助好的事物时才能带来福分。医生、音乐家等专业人士的任务就是引导爱欲朝向好的方向。</p>
+			</div>
+		</section>
+
+		<section id="section21" class="note-section">
+			<h2 class="section-title">阿里斯托芬的讲辞：球形人的神话</h2>
+			<div class="section-content" id="section21-content">
+				<p>三种原初人类：</p>
+					<ul>
+						<li>太阳的后代 → 纯男人</li>
+						<li>大地的后代 → 纯女人</li>
+						<li>月亮的后代 → 又男又女</li>
+					</ul>
+				<p>每种人都是球形，像是现在的两个人转过头去再肚子对肚子黏在一起（<i>就算这样也不是球形吧</i>）。</p>
+				<p>由于力量太大被神切成两半，结果人一遇到另一半就相互交缠至死方休；神又只好把人的生殖器移到了前面（本来在后部的）。</p>
+				<p>人的情欲,就是想重新找到另一半回复原本的自然而已。</p>
+				
+				<p>他特别强调：<strong>由纯男人割成的想找男人的男人是最MAN的</strong>，因为他们最有男子气概。</p>
+			</div>
+		</section>
+
+		<section id="section22" class="note-section">
+			<h2 class="section-title">阿迦通的讲辞：爱神之美</h2>
+			<div class="section-content" id="section22-content">				
+				<p>EROS有<strong>四种美</strong>：</p>
+				<ol>
+					<li><strong>年轻</strong>：永远年轻，不会变老</li>
+					<li><strong>轻柔</strong>：脚步轻盈，在柔软的心灵上行走</li>
+					<li><strong>柔软</strong>：形态柔软，能进入任何心灵</li>
+					<li><strong>优雅</strong>：姿态优美</li>
+				</ol>
+				
+				<p>EROS还有<strong>四种美德</strong>：</p>
+				<ol>
+					<li><strong>正义</strong>：爱神不行暴力，因为暴力违背爱</li>
+					<li><strong>勇敢</strong>：阿瑞斯（战神）都被爱神俘获</li>
+					<li><strong>明智</strong>：掌管好快感和情欲</li>
+					<li><strong>智慧</strong>：爱神是卓越的诗人，能启发所有人</li>
+				</ol>
+				
+				<p>总之EROS就是最美好的。<i>等于什么都没说，但引发了苏格拉底随后的诘难</i>。</p>
+			</div>
+		</section>
+
+		<section id="section23" class="note-section">
+			<h2 class="section-title">苏格拉底的诘难与回忆</h2>
+			<div class="section-content" id="section23-content">
+				
+				<p>如果EROS是对美的爱欲，渴望拥有美，那么EROS本身就缺乏美（否则不会渴望自己已经拥有的东西）。同理，EROS也缺乏善和其他美好品质。</p>
+				
+				<p><strong>回忆与女先知蒂俄提玛的对话</strong>：</p>
+				<ul>
+					<li><strong>EROS不是神</strong>，而是介于神与人之间的大精灵（daimon）</li>
+					<li><strong>EROS是贫乏与丰盈之子</strong>：母亲是贫乏（Penia），父亲是丰盈（Poros）</li>
+					<li>因此EROS<strong>介于两者之间</strong>：既不富足也不贫穷，既不智慧也不愚昧</li>
+				</ul>
+				
+				<p>正是这种中间状态解释了为什么EROS爱智慧：<strong>智慧者不自认需要智慧，愚昧者不自知需要智慧，只有既非智慧者也非愚昧者才追求智慧</strong>。</p>
+			</div>
+		</section>
+
+		<section id="section24" class="note-section">
+			<h2 class="section-title">蒂俄提玛的对话：爱的阶梯</h2>
+			<div class="section-content" id="section24-content">
+				
+				<p>爱欲就是欲求自己永远拥有好的东西，或者说<strong>追求不朽</strong>。实现方式是在美中孕育生产后代：</p>
+				<ul>
+					<li><strong>凭身体生育</strong>：得到子女，获得肉体的不朽</li>
+					<li><strong>凭灵魂生育</strong>：得到美德和智慧，获得精神的不朽</li>
+				</ul>
+				
+				<p><strong>爱的阶梯</strong>：</p>
+				<ol>
+					<li><strong>爱慕一个美的身体</strong>：被个别身体的美丽吸引</li>
+					<li><strong>认识到身体美的共性</strong>：发现所有美丽身体之间的相似性</li>
+					<li><strong>爱慕灵魂的美</strong>：超越身体，被高尚品德和美好灵魂吸引</li>
+					<li><strong>爱慕制度与法律的美</strong>：扩展到社会层面的美</li>
+					<li><strong>爱慕智慧的美</strong>：被各种学问和知识吸引</li>
+					<li><strong>领悟美本身</strong>：最后看到美的理念，那永恒、绝对、不增不减的美</li>
+				</ol>
+				
+				<p>爱的目的是完善自己而非占有他人。<b>爱就是哲学</b>，具体的美丽事物只是通向美本身的阶梯。</p>
+			</div>
+		</section>
+
+		<header class="note-header">
+			<h1 class="note-title">《泰阿泰德篇》</h1>
+			<div class="note-author">柏拉图</div>
+		</header>
+
+		<section id="section25" class="note-section">
+			<h2 class="section-title">开篇：知识定义的方法论</h2>
+			<div class="section-content" id="section25-content">
+				
+				<p>首先，在定义知识时，不能使用"某某的技艺"这样的同语反复（如"知识就是认知的技艺"），这等于没有解释任何东西。</p>
+				
+				<p>苏格拉底自比为心灵的产婆：</p>
+				<ol>
+					<li><strong>只帮男不帮女</strong>：只帮助男性进行哲学思考</li>
+					<li><strong>检验思想的真伪</strong>：像产婆检验婴儿健康一样，检验思想的真理性</li>
+					<li><strong>帮助"生产"真理</strong>：通过提问和辩难，帮助对话者产生真正的知识</li>
+					<li><strong>有时需要"流产"</strong>：如果产生的思想是假的，必须将其"流产"掉</li>
+				</ol>
+			</div>
+		</section>
+
+		<section id="section26" class="note-section">
+			<h2 class="section-title">第一观点：知识是知觉</h2>
+			<div class="section-content" id="section26-content">
+				<p><i>代表普罗泰戈拉的 "人是万物的尺度"</i></p>
+				
+				<p>苏格拉底的批判：</p>
+				
+				<ol>
+					<li>知觉时常变化，既可能增长也可能消亡；而知识应该是常真的、稳定的。如果知识依赖变化的感觉，就无法获得确定真理；</li>
+					<li>知觉需要同时有感觉者和被感觉物存在，因人、因感知方式而异，不能独立存世；</li>
+					<li>如果知识依赖知觉，就无法解释记忆中的知识；</li>
+					<li>如果知识是个人自认为真的意见（个人是存在与不存在的判断者），而人人意见不一致，就无法达到统一真理。</li>
+				</ol>
+				
+				<p>进一步分析了赫拉克利特的 "万物皆动"：</p>
+				<ul>
+					<li>运动有两种：性质的变更与位置的变动。如果万物皆动，那么知觉对象和知觉本身都在不断变化，那就无法获得稳定可靠的知识</li>
+				</ul>
+				
+				<p>最后，知觉是天生的本能，而知识却需要学习和教育获得。如果知识就是知觉，那么婴儿一出生就应该拥有所有知识，但这显然不是事实。</p>
+
+			</div>
+		</section>
+
+		<section id="section27" class="note-section">
+			<h2 class="section-title">哲学家在社会中的处境</h2>
+			<div class="section-content" id="section27-content">
+				<p>岔开一段话题，讨论哲学家为何在社会上总被轻视：</p>
+				
+				<p>哲学家的特征：</p>
+				<ol>
+					<li><strong>关注永恒</strong>：哲学家研究永恒的理念和真理，而非变化的现象世界</li>
+					<li><strong>疏于实务</strong>：由于专注于抽象思考，往往不擅长日常事务</li>
+					<li><strong>价值颠倒</strong>：哲学家看重智慧而非财富、荣誉等世俗价值</li>
+				</ol>
+				
+				<p>社会对哲学家的误解：</p>
+				<ul>
+					<li><strong>法庭上的笨拙</strong>：哲学家在法庭上不懂得讨好法官，只关心真理</li>
+					<li><strong>日常事务的无知</strong>：不知道邻居是谁，不关心政治权力</li>
+					<li><strong>"无用"的指责</strong>：社会认为哲学家不能带来实际利益</li>
+				</ul>
+				
+				<p>哲学家就像掉入井里的泰勒斯，抬头仰望星空（真理），却忽略了脚下的路（现实）。</p>				
+
+				<p><i>看似离题，实际暗示了真正的知识需要超越日常经验和社会实用，并且为苏格拉底自己即将受审的命运做了铺垫</i></p>
+			</div>
+		</section>
+
+		<section id="section28" class="note-section">
+			<h2 class="section-title">第二观点：知识是真实的论断</h2>
+			<div class="section-content" id="section28-content">				
+				<p>苏格拉底的批判：解释是心灵的自言自语，即内心的推理过程。如果知识只是真实的论断，那么虚假论断的产生不外乎三种混淆：</p>				
+				<ol>
+					<li><strong>以所知为另一所知</strong>：将已知的一物误认为另一已知物</li>
+					<li><strong>以所知为一尚未知</strong>：将已知物误认为未知物</li>
+					<li><strong>以所知为一正知觉的另一所知</strong>：混淆两个正在被感知的已知物</li>
+				</ol>
+				
+				<p>无论如何，未知的东西不可能造成混淆，所以虚假论断只存在于知觉和思想的配合中。</p>
+				
+				<p>接下来回顾学习的过程，提出<strong>蜡板比喻</strong>：</p>
+				<ul>
+					<li>心灵就像一块蜡板，知觉在上面留下印记</li>
+					<li>知识可以储存，不一定立刻使用</li>
+					<li>使用时可能出错：印记模糊、匹配错误等</li>
+				</ul>
+				
+				<p>继续提出<strong>鸟笼比喻</strong>：</p>
+				<ul>
+					<li>心灵像一个鸟笼，知识像各种鸟</li>
+					<li>学习就是捕捉鸟放入笼中</li>
+					<li>使用时可能抓错鸟（知识错位）</li>
+				</ul>
+				
+				<p>最终结论：真实论断是探索而得其所欲得者，而<b>虚假论断只是知识的错位，并非 "非知识"</b>。真正的知识应该是有根据的，而非偶然正确的意见。</p>
+			</div>
+		</section>
+
+		<section id="section29" class="note-section">
+			<h2 class="section-title">第三观点：知识是带理由的真实意见</h2>
+			<div class="section-content" id="section29-content">
+				
+				<p>定义解析：</p>
+				<ol>
+					<li><strong>真实性</strong>：意见必须是真的</li>
+					<li><strong>理由</strong>：必须能为意见提供解释或论证</li>
+					<li><strong>理解</strong>：知道为什么这个意见是真的</li>
+				</ol>
+				
+				<p>苏格拉底用<strong>元素与复合体</strong>的例子来反驳：</p>
+				<ul>
+					<li><strong>元素</strong>：可名不可说，无以附加"存在""这个"等属性</li>
+					<li><strong>复合体</strong>：由元素组成，可以认识和描述</li>
+					<li><strong>悖论</strong>：如果元素不可知，为何由元素组成的复合体可知？</li>
+				</ul>
+				
+				<p>继续引入<strong>写字比喻</strong>：有正确意见并加以理解，如同只懂音节组合并不懂得字义。这样的"理解"仍然不是真正的知识。</p>
+				
+				<p>另外，用"理解"定义"知识"，但理解本身需要知识，最终必须有一些不需要理由的基本知识。</p>
+				
+			</div>
+		</section>
+
+		<section id="section30" class="note-section">
+			<h2 class="section-title">结论</h2>
+			<div class="section-content" id="section30-content">
+				
+				<p>先区分了理解的三种可能含义：</p>
+				<ol>
+					<li><strong>解说</strong>（diēgēsis）：用语言表达思想，本身就是正确意见；</li>
+					<li><strong>分解</strong>（analysis）：将整体分解为部分，并不能使正确意见成为知识，因为分解本身可能错误；</li>
+					<li><strong>区别</strong>（diaphora）：认识一物与他物的差异，可能接近知识的本质</li>
+				</ol>
+				
+				
+				<p>最后提出观点：<strong>知识 = 正确意见 + 对其他事物相异之处的认识</strong></p>
+				<i>但其实并不是最终结论，苏格拉底赶着受审去了-_-</i>
+		</section>
+
+		<header class="note-header">
+			<h1 class="note-title">《蒂迈欧篇》</h1>
+			<div class="note-author">柏拉图</div>
+		</header>
+
+		<section id="section31" class="note-section">
+			<h2 class="section-title">宇宙的创造与本性</h2>
+			<div class="section-content" id="section31-content">
+				
+				<p>宇宙是被造的，但找出造物主是不可能的。造物主以永恒不变的存在（理念）为模式创造了宇宙，因而宇宙不是模式只是摹本。</p>
+				<p>宇宙是唯一的，因为神是完善的，所以所造的宇宙也只是最好的那一个。</p>
+				
+				<p><strong>宇宙的本性</strong>：</p>
+				<ul>
+					<li>宇宙拥有秩序（理性），所以是生命体;</li>
+					<li>宇宙是球形的（因而没有上下，后面说到），外表绝对平滑，与"外界"无联系;</li>
+					<li>宇宙不断地自我旋转，没有其他运动。</li>
+				</ul>
+				
+			</div>
+		</section>
+
+		<section id="section32" class="note-section">
+			<h2 class="section-title">宇宙的结构与秩序</h2>
+			<div class="section-content" id="section32-content">
+				
+				<p>宇宙由水、火、土、气四种元素构成，每种元素对应一种柏拉图立体：</p>
+					<ul>
+						<li><strong>火</strong>：正四面体（最锐利，对应火的穿透性）</li>
+						<li><strong>气</strong>：正八面体</li>
+						<li><strong>水</strong>：正二十面体（最接近球形，对应水的流动性）</li>
+						<li><strong>土</strong>：立方体（最稳定）</li>
+					</ul>
+				<p>火、气、水可以互相转化（因为它们都由30度直角三角形构成），但土（由等腰直角三角形构成）不能与其他三者转化。</p>
+				<p><strong>第五种立体</strong>：正十二面体代表宇宙整体或灵魂。</p>
+			
+				<p>宇宙的数学和谐：</p>
+				<ul>
+					<li><strong>灵魂的数学构成</strong>：宇宙也有灵魂，其材料是"存在"、"同"和"异"，按照数的和谐比例混合；</li>
+					<li><strong>世界灵魂的划分</strong>：造物主将世界灵魂分割成一系列区间，对应着天体运行的和谐比例；</li>
+					<li><strong>天体的数学秩序</strong>：行星和恒星的运行遵循数学规律，体现了宇宙的理性本质。</li>
+				</ul>
+				
+			</div>
+		</section>
+
+		<section id="section33" class="note-section">
+			<h2 class="section-title">时间、灵魂与天界诸神</h2>
+			<div class="section-content" id="section33-content">
+				
+				<p>时间是造物主的动态形象，与宇宙同生同灭：</p>
+					<ul>
+						<li><strong>现在</strong>：属于造物主，是永恒在时间中的镜像</li>
+						<li><strong>过去与将来</strong>：属于生成物，是变化的现象</li>
+					</ul>
+				<p>时间是运动的尺度：通过天体的规则运动来度量时间，特别是太阳的周期运动定义了日和年。</p>
+
+				
+				<p>灵魂一旦进入可朽身体，便开始丧失理智（例如婴儿总是无理性的），而一旦适应身体后理性可能重新出现。</p>
+				<p>视觉与音乐都是为了让无序的人类回复秩序：视觉让我们观察天体运行而思考宇宙理性，音乐通过和谐训练灵魂。</p>
+				
+				<p>天界诸神的地位：</p>
+				<ol>
+					<li><strong>被造的神圣存在</strong>：天上的诸神（星体）也是造物主所造，不朽但并非永恒。</li>
+					<li><strong>次级造物者</strong>：造物主创造了诸神，然后诸神帮助创造了生物和人。</li>
+					<li><strong>崇拜的理性基础</strong>：对天体的崇拜基于对其理性和秩序的认知，而非盲目的迷信。</li>
+				</ol>
+			</div>
+		</section>
+
+		<section id="section34" class="note-section">
+			<h2 class="section-title">必然性与理智的相互作用</h2>
+			<div class="section-content" id="section34-content">
+				
+				<p>两个基本原则：</p>
+				<ul>
+					<li><strong>理智</strong>：代表目的、秩序、理性、善；</li>
+					<li><strong>必然性</strong>：指无目的无规则的随机运动、物质世界的自发倾向。</li>
+				</ul>
+				
+				<p><strong>二者的关系</strong>：</p>
+				<ol>
+					<li><strong>说服而非控制</strong>：理智通过说服来驾驭必然。既然是说服而不是控制，所以世上也可以有不那么完善的东西存在；</li>
+					<li><strong>宇宙的双重因果</strong>：任何现象都是理智和必然性共同作用的结果；</li>
+					<li><strong>恶的起源</strong>：世界的不完美来自必然性的抵抗，而非造物主的意愿。</li>
+				</ol>
+				
+				<p>工匠与材料的类比：</p>
+				<ul>
+					<li>理智就像工匠，有明确的目的和计划；</li>
+					<li>必然性就像材料，有自己的性质和限制；</li>
+					<li>最终产品是工匠的智慧与材料特性妥协的结果。</li>
+				</ul>
+				
+				<p>医学的例子：</p>
+				<ol>
+					<li>理智设计的结构：如大脑的位置（保护理性）、感官的配置（获取信息）；</li>
+					<li>必然性导致的结构：如消化系统的复杂性、疾病的发生机制；</li>
+					<li><strong>最好的治疗方式是体育（促进自然恢复），其次是颠簸（物理干预），最后是用药（强制改变）</strong>。</li>
+				</ol>
+
+			</div>
+		</section>
+
+		<section id="section35" class="note-section">
+			<h2 class="section-title">存在的基本范畴</h2>
+			<div class="section-content" id="section35-content">
+				
+				<p><strong>存在的三范畴</strong>：</p>
+				
+				<table style="width:100%; margin:20px 0; font-size:14px">
+					<tr>
+						<td><strong>范畴</strong></td>
+						<th><strong>理念（实在者）</strong></th>
+						<th><strong>可感事物（生成者）</strong></th>
+						<th><strong>空间（接受者）</strong></th>
+					</tr>
+					<tr>
+						<td><strong>特性</strong></td>
+						<td>不生不灭，不进入他物也不被进入</td>
+						<td>与理念同名并相似，但变动不居</td>
+						<td>不朽而永恒，物质世界得以形成的场所</td>						
+					</tr>
+					<tr>
+						<td><strong>认识方式</strong></td>
+						<td>只能被思想把握</td>
+						<td>被知觉和信念把握</td>
+						<td>可被理性认识，但无法被感觉和信念把握</td>
+					</tr>
+					<tr>
+						<td><strong>性质</strong></td>
+						<td>
+							<ul>
+								<li>是原型、标准和原因</li>
+								<li>提供事物形式和定义</li>
+								<li>是知识的对象</li>
+							</ul>
+						</td>
+						<td>
+							<ul>
+								<li>是理念的摹本和影像</li>
+								<li>处于永恒的生成和消灭中</li>
+								<li>是意见的对象</li>
+							</ul>
+						</td>
+						<td>
+							<ul>
+								<li>介于理念与具体事物之间</li>
+								<li>是理念"印刻"形成事物的场所</li>
+								<li>"第三类"存在</li>
+							</ul>
+						</td>						
+					</tr>
+				</table>
+				
+				<p><strong>"印刻"比喻：</strong></p>
+				<ul>
+					<li><strong>形式</strong>：可感事物的形式会改变</li>
+					<p><i>注意理念作为原型是永恒的，但当它们"印刻"在载体上形成具体事物时，这些具体事物的形式会随着事物的变化而变化。</i></p>
+					<li><strong>载体</strong>：不可改变，不具形状的接受者</li>
+					<p><i>注意不是土、气、火、水等元素（因为他们也可变化，只是物质的一部分）</i></p>
+					<li>形式在载体上刻印，从而生成实物</li>
+				</ul>
+				
+				<p>运动与静止的原理：静止存在于均同中，运动则存在于非均同中，需要同时有推动者和被动者。</p>
+				<p>非均同的本质在于四元素的大小与渗透性不等，根本原因在于造物主为其安排了不同的几何结构。</p>
+			</div>
+		</section>
+
+		<section id="section36" class="note-section">
+			<h2 class="section-title">一些有趣的说法</h2>
+			<div class="section-content" id="section36-content">
+				<ol>
+					<li>男人的灵魂比女人高贵纯洁……胆小鬼和爱犯错的男人会投胎成女人。</li>				
+					<li>智力低下的人会投胎成为鸟，而不向往智慧的人就成为兽，最蠢最笨的则成为鱼贝。</li>				
+					<li>愚蠢有两种，疯癫和无知。疯癫是灵魂的疾病，无知是教育的缺乏。</li>				
+					<li>视觉是因为外界的"火"进入眼睛与身体内的火整合而造成的。这火还能在镜面上转向，可以说已经有了光线的概念。</li>				
+					<li>亚特兰蒂斯就是曾经出现过的理想国。</li>
+				</ol>
+			</div>
+		</section>
+
+		<header class="note-header">
+			<h1 class="note-title">《智者篇》</h1>
+			<div class="note-author">柏拉图</div>
+		</header>
+
+		<section id="section38" class="note-section">
+			<h2 class="section-title">智者与摹仿术</h2>
+			<div class="section-content" id="section38-content">
+				
+				<p>先来定义智者，运用二分法：</p>
+				<span><strong>技术</strong></span>
+				<ul>
+					<li>生产术：创造新事物（如建筑、农业）</li>
+					<li><strong>聚敛术</strong>：获取已有事物，包括学识和金钱（如狩猎、贸易）</li>
+						<ul>
+							<li>自愿获取（如教学、咨询））</li>
+							<li><strong>强取</strong></li>
+								<ul>
+									<li>明抢（如战争、抢劫）</li>
+									<li><strong>暗取</strong></li>
+										<ul>
+											<li>猎取无生之物（如渔猎）</li>
+											<li>猎取有生之物（如陆猎）</li>
+										</ul>
+								</ul>
+						</ul>
+				</ul>
+				
+				<p><strong>三种定义算法</strong>：</p>
+				<ol>
+					<li>暗取→陆猎→驯猎→人猎→私人游说→谋利</li>
+					<li>聚敛→自愿交易→商贾→贩卖→行商→心灵</li>
+					<li>明抢→斗争→舌争→辩论→诡辩→赚钱</li>
+				</ol>
+				<p>另一种方式，先区别了心灵的两种罪恶：</p>
+					<ol>
+						<li><strong>病态</strong>（nosos）：心灵的疾病，如无知、偏见</li>
+						<li><strong>愚昧</strong>（agnoia）：缺乏知识的状态</li>
+					</ol>
+				
+				<p>按此说法，智者似乎又是用盘诘的方法来清除心灵罪恶的人，但二者只是相似。真正的哲学教育旨在清除无知，而智者只是制造知识的假象。</p>
+				<p>既然智者有这么多种定义，说明大家都不了解其技术的性质。由于一个人不可能全知一切，所以他们只是运用一种<strong>摹仿术</strong>而非知晓事物本身。</p>
+				
+				<p><i>总之怎么分都不是什么好东西</i></p>
+				
+				<p>在摹仿术中，智者又只<strong>仿像不仿真</strong>，因而是<strong>幻象术</strong>：</p>
+				
+				<table style="width:100%; margin:15px 0; border-collapse: collapse;">
+					<tr>
+						<th>摹仿类型</th>
+						<th>性质</th>
+						<th>例子</th>
+						<th>与真理的关系</th>
+					</tr>
+					<tr>
+						<td><strong>仿像术</strong></td>
+						<td>按照事物的真实比例摹仿</td>
+						<td>精确的肖像画</td>
+						<td>接近真理</td>
+					</tr>
+					<tr>
+						<td><strong>幻象术</strong></td>
+						<td>为了看起来像而改变比例</td>
+						<td>从下往上看的高大雕像</td>
+						<td>远离真理</td>
+					</tr>
+				</table>
+				
+				<p>智者的诡辩：幻象是<strong>"非存在"</strong>，但"非存在"既不能被认识也不能被言说（后面会解释），所以自己说出的并非"非存在"的幻象之道。</p>
+			</div>
+		</section>
+
+		<section id="section39" class="note-section">
+			<h2 class="section-title">"非存在"与"存在"</h2>
+			<div class="section-content" id="section40-content">
+				
+				<p><strong>"非存在"是不能想象其没有意义的</strong>：</p>
+				<ul>
+					<li>"非存在"意思是不能用于任何存在的事物，但当我们在主语位置说出"非存在"时，已经肯定了其存在</li>
+					<li>再加上用于修饰的"一个"或"这个"，本身就包含了以数的方式存在的"1"</li>
+					<li>我们在描述"非存在"时本身就肯定了其意义（否则无法像这句话那样描述它）</li>
+				</ul>
+				
+				<p>这个悖论暂时难以解决，于是先搁置一边，转而探讨"存在"问题：</p>
+				<ol>
+					<li>如果世界是一元的，"一"便是存在。但存在是整体，必有部分，而存在若是一本身又不能有部分。</li>
+					<li>如果世界是二元的，那么"存在"本身是二者之一还是异于二者的东西？</li>
+						<ul>
+							<li>如果"存在"是二者之一，那么它不能包含二者；</li>
+							<li>如果"存在"异于二者，那么还有第三类东西，这会导致无穷后退。</li>
+						</ul>
+					<li>存在若是一种形式，那既不知也不被知（形式不受影响），于是十全的存在既不能动也没有心了，生命和理智也不会存在。</li>
+				</ol>
+				<p>最终结论：<strong>存在只是一种能力/元素</strong>。</p>
+			</div>
+		</section>
+
+		<section id="section40" class="note-section">
+			<h2 class="section-title">通种论：存在、动、静、同、异</h2>
+			<div class="section-content" id="section42-content">
+			
+				<p>先指名<strong>五个最大的种</strong>（基本范畴）：</p>
+				<ol>
+					<li><strong>存在</strong>（to on）</li>
+					<li><strong>动</strong>（kinēsis）</li>
+					<li><strong>静</strong>（stasis）</li>
+					<li><strong>同</strong>（tauton）</li>
+					<li><strong>异</strong>（thateron）</li>
+				</ol>
+				
+				<ul>
+					<li>如果范畴都不相通，则万物都不存在（因为"存在"与他们所拥有的元素不相通）。</li>
+					<li>如果范畴都相通，则矛盾便不存在（一切都可以是其他）；</li>
+					<li>所以只能是部分相通，哲学就是考察这部分相通的学术。</li>
+				
+				<p>进一步思考得出，"非存在"其实只是一种<strong>"异"</strong>，即<strong>异于"存在"者</strong>，而不是与"存在"绝对相反。这样就能得出作为"异"的"非存在"也是一种存在。</p>
+				
+				<p>另一方面，语言只是有声的思想，而思想（同与异的结合）可以有真有假。</p>				
+				<p>结论：智者的诡辩无效，他们确实在制造幻象，这些幻象也是某种"存在"。</p>
+				
+				
+				<p>回到最初的问题，智者的最终定义：<strong>生产术中属人的——造像术——幻象术——摹仿——装作——用言语制造矛盾</strong>。</p>
+				<p><strong>辩证法与诡辩术的对比</strong>：</p>
+				<table style="width:100%; margin:15px 0; border-collapse: collapse;">
+					<tr>
+						<th>方面</th>
+						<th>辩证法</th>
+						<th>诡辩术</th>
+					</tr>
+					<tr>
+						<td><strong>目的</strong></td>
+						<td>追求真理</td>
+						<td>追求胜利</td>
+					</tr>
+					<tr>
+						<td><strong>方法</strong></td>
+						<td>概念划分与综合</td>
+						<td>模棱两可与矛盾</td>
+					</tr>
+					<tr>
+						<td><strong>与存在的关系</strong></td>
+						<td>揭示存在的结构</td>
+						<td>制造存在的幻象</td>
+					</tr>
+					<tr>
+						<td><strong>语言使用</strong></td>
+						<td>澄清意义</td>
+						<td>混淆意义</td>
+					</tr>
+					<tr>
+						<td><strong>结果</strong></td>
+						<td>知识的增进</td>
+						<td>意见的混乱</td>
+					</tr>
+				</table>
+			</div>
+		</section>
+
+		<header class="note-header">
+			<h1 class="note-title">《巴门尼德篇》</h1>
+			<div class="note-author">柏拉图</div>
+		</header>
+
+		<section id="section41" class="note-section">
+			<h2 class="section-title">对理念论的第一轮批判</h2>
+			<div class="section-content" id="section41-content">
+				<p>初步的理念论：</p>
+				<ol>
+					<li><strong>理念的存在</strong>：承认有相似、正义、美、善等理念；</li>
+					<li><strong>分有说</strong>：具体事物因分有理念而获得属性；</li>
+					<li><strong>有限范围</strong>：只承认某些事物有理念，否认污秽物（如头发、泥土）有理念；</li>
+					<li><strong>分离问题</strong>：理念存在于自身之中，与具体事物分离。</li>
+				</ol>
+				
+				<p>第一轮批判：</p>
+				<ol>
+					<li>要么所有事物都有理念，要么都没有，否则就是武断的区分，缺乏统一的原则</li>
+					<li>如果具体事物通过分有理念而获得属性，那么事物是分有整个理念，还是分有理念的一部分？</li>
+						<ul>
+							<li>如果分有整个理念：一个理念要同时在许多事物中</li>
+							<li>如果分有一部分：理念被分割，破坏了其统一性</li>
+						</ul>
+					<li>如果理念只是心中的思想，那么一切事物都只是思想；但思想总是关于某物的思想，因此思想之外必须有理念作为对象。</li>
+				</ol>
+				
+				<p>第一轮回应：理念是<strong>范式</strong>（paradeigmata），具体事物是它们的<strong>摹本</strong>。但这仍然没有解决根本问题。</p>
+			</div>
+		</section>
+
+		<section id="section42" class="note-section">
+			<h2 class="section-title">对理念论的第二轮批判</h2>
+			<div class="section-content" id="section42-content">
+				<p>如果<strong>理念与具体事物是分离存在的</strong>，会产生一系列问题：</p>
+				<ol>
+					<li>我们生活在具体事物世界中，而理念存在于另一个分离的世界。我们如何能认识那个世界的理念？</li>					
+					<li>即使神能认识理念，神也不能认识我们这个世界的事物（因为神的知识只能是关于理念的知识），这削弱了神的全知性。</li>
+					<li>理念就像船帆：如果我们像水手一样被绑在具体世界的桅杆上，我们无法接触到那个分离的理念世界。</li>
+				</ol>
+				
+				<p><strong>可能的解决方案及其问题</strong>：</p>
+				<table style="width:100%; margin:15px 0; border-collapse: collapse;">
+					<tr>
+						<th>解决方案</th>
+						<th>核心主张</th>
+						<th>存在的问题</th>
+					</tr>
+					<tr>
+						<td><strong>彻底分离</strong></td>
+						<td>理念世界与现象世界完全分开</td>
+						<td>无法解释两个世界的联系</td>
+					</tr>
+					<tr>
+						<td><strong>不完全分离</strong></td>
+						<td>理念以某种方式存在于事物中</td>
+						<td>违背理念的超越性和纯粹性</td>
+					</tr>
+					<tr>
+						<td><strong>否定分离</strong></td>
+						<td>理念只是概念或思想</td>
+						<td>失去理念的客观实在性</td>
+					</tr>
+				</table>
+				
+				<p><i>引出《蒂迈欧篇》中的"接受者"理论</i></p>
+			</div>
+		</section>
+
+		<section id="section43" class="note-section">
+			<h2 class="section-title">对理念论的第三轮批判</h2>
+			<div class="section-content" id="section43-content">
+				<p><strong>第三人论证</strong>（Third Man Argument）：如果有"大"的理念使事物变大，那么"大"的理念本身必须比大的事物更大。这需要另一个"大"的理念来解释，导致无穷后退。</p>
+				
+				<p><strong>回应与反驳</strong>：</p>
+				<table style="width:100%; margin:15px 0; border-collapse: collapse;">
+					<tr>
+						<th>回应</th>
+						<th>主张</th>
+						<th>反驳</th>
+					</tr>
+					<tr>
+						<td><strong>理念只是思想</strong></td>
+						<td>理念不存在于实在中</td>
+						<td>但思想总是关于某物的思想</td>
+					</tr>
+					<tr>
+						<td><strong>理念是范式</strong></td>
+						<td>理念作为模型不参与集合</td>
+						<td>但范式必须具有所代表的属性</td>
+					</tr>
+					<tr>
+						<td><strong>自我述谓否定</strong></td>
+						<td>理念不具有相应属性</td>
+						<td>这违背了理念作为本质的定义</td>
+					</tr>
+				</table>
+			</div>
+		</section>
+
+		<section id="section44" class="note-section">
+			<h2 class="section-title">八组假设的辩证练习</h2>
+			<div class="section-content" id="section44-content">
+				<p>关于理念论的讨论告一段落，后面是八组关于"一"的辩证法练习：</p>
+
+				<p><strong>八组假设的结构</strong>：围绕"一"与"存在"的关系展开</p>
+				
+				<table style="width:100%; margin:15px 0; border-collapse: collapse;">
+					<tr>
+						<th>组别</th>
+						<th>假设</th>
+						<th>对象</th>
+						<th>结论</th>
+						<th>哲学意义</th>
+					</tr>
+					<tr>
+						<td><strong>第一组</strong></td>
+						<td>是一且与他者无联系</td>
+						<td>一</td>
+						<td>一不能是多，不能有部分，不能运动</td>
+						<td>巴门尼德的一元论</td>
+					</tr>
+					<tr>
+						<td><strong>第二组</strong></td>
+						<td>是一且与他者有联系</td>
+						<td>一</td>
+						<td>一既是多，又有部分，能运动</td>
+						<td>理念论的分有</td>
+					</tr>
+					<tr>
+						<td><strong>第三组</strong></td>
+						<td>是一且与他者有联系</td>
+						<td>他者</td>
+						<td>他者也拥有对立属性</td>
+						<td>《蒂迈欧篇》"接受者"</td>
+					</tr>
+					<tr>
+						<td><strong>第四组</strong></td>
+						<td>是一且与他者无联系</td>
+						<td>他者</td>
+						<td>他者属性无法确定且不可知</td>
+						<td>极端多元论</td>
+					</tr>
+					<tr>
+						<td><strong>第五组</strong></td>
+						<td>不是一但与他者有联系</td>
+						<td>他者</td>
+						<td>他者仍能获得属性</td>
+						<td>《智者篇》"非存在"</td>
+					</tr>
+					<tr>
+						<td><strong>第六组</strong></td>
+						<td>不是一且与他者无联系</td>
+						<td>他者</td>
+						<td>他者失去结构和关系</td>
+						<td>虚无主义</td>
+					</tr>
+					<tr>
+						<td><strong>第七组</strong></td>
+						<td>不是一但与他者有联系</td>
+						<td>一</td>
+						<td>一是关系/形式而非实体</td>
+						<td>亚里士多德形式因</td>
+					</tr>
+					<tr>
+						<td><strong>第八组</strong></td>
+						<td>不是一且与他者无联系</td>
+						<td>一</td>
+						<td>最彻底的否定性结论</td>
+						<td>虚无主义</td>
+					</tr>
+				</table>
+				
+				<p><i>这八组假设并未给出确定的答案，而是要展示哲学思考本身的过程和严格性（辩证法本身就是哲学）</i></p>
+			</div>
+		</section>
+
+		<header class="note-header">
+			<h1 class="note-title">《菲利布篇》笔记</h1>
+			<div class="note-author">柏拉图</div>
+		</header>
+
+		<section id="section45" class="note-section">
+			<h2 class="section-title">形而上学方法论</h2>
+			<div class="section-content" id="section45-content">
+				<p>"对所有生物来说，快乐、喜悦、享受是善" vs "理智、思想、记忆及真意见是更大的善"</p>
+				<p>首先指出，快乐虽然只是一个词，样式却多样，有好坏之分，需要具体分析。</p>
+				<p><i>此处暗示了可能有比二者更大的善，为后面善的层级讨论做铺垫。</i></p>
+				
+				<p>引入了<strong>四重分类法</strong>：</p>
+				
+				<table style="width:100%; margin:15px 0; border-collapse: collapse;">
+					<tr>
+						<th>范畴</th>
+						<th>希腊原文</th>
+						<th>性质</th>
+						<th>例子</th>
+						<th>在善生活中的作用</th>
+					</tr>
+					<tr>
+						<td><strong>无限</strong></td>
+						<td>apeiron</td>
+						<td>可增减，无确定限度</td>
+						<td>热、冷、多、少</td>
+						<td>提供变化的可能性</td>
+					</tr>
+					<tr>
+						<td><strong>有限</strong></td>
+						<td>peras</td>
+						<td>确定的比例、尺度、限度</td>
+						<td>相等、双倍、特定比例</td>
+						<td>引入秩序和和谐</td>
+					</tr>
+					<tr>
+						<td><strong>混合体</strong></td>
+						<td>meikton</td>
+						<td>有限对无限的节制</td>
+						<td>健康、音乐、季节</td>
+						<td>构成现实世界</td>
+					</tr>
+					<tr>
+						<td><strong>原因</strong></td>
+						<td>aitia</td>
+						<td>产生混合的原因</td>
+						<td>理智、技艺、智慧</td>
+						<td>创造有序的世界</td>
+					</tr>
+				</table>
+				
+				<p><strong>快乐作为"无限"的分析</strong>：</p>
+				<ul>
+					<li><strong>量的无限</strong>：快乐可以无限增强或减弱</li>
+					<li><strong>质的无限</strong>：快乐有无限多样的形式</li>
+					<li><strong>时间的无限</strong>：对快乐的追求永无止境</li>
+					<li><strong>结论</strong>：快乐本身缺乏内在尺度，需要外在的限度</li>
+				</ul>
+				
+				<p><strong>理智作为"原因"的分析</strong>：</p>
+				<ul>
+					<li><strong>认识限度</strong>：理智能够认识什么是适当的限度</li>
+					<li><strong>施加限度</strong>：理智能够对无限的欲望施加限度</li>
+					<li><strong>创造和谐</strong>：理智创造有限与无限的适当混合</li>
+					<li><strong>结论</strong>：理智是善的生活的创造原因</li>
+				</ul>
+				
+				<p>正如在人类中，理性以灵魂为前提，理性地、美好地排序的宇宙也必须有一个灵魂，即世界灵魂。</p>
+			</div>
+		</section>
+
+		<section id="section46" class="note-section">
+			<h2 class="section-title">快乐和痛苦的探讨</h2>
+			<div class="section-content" id="section46-content">
+				<p>快乐和痛苦的类型：</p>
+				<ul>
+					<li>第一类：由当前的生理状况引发的，身体快乐的本质是痛苦的解除；</li>
+					<li>第二类：源于灵魂对苦乐体验的预期（记忆）；</li>
+					<li>第三种状态：和谐宁静的状态，苦乐不会过度发生，是理性生活的特征；</li>
+					<li>不纯粹的快乐：快乐与痛苦的混合。<i>此处反驳了"快乐仅仅是源于消除痛苦，不具有独立性"；</i></li>
+					<li><strong>纯粹的快乐</strong>：对某种事物（善）的渴望（例如审美），源于记忆中的想象，只能出于灵魂。</li>
+				</ul>
+				
+				<p>快乐与痛苦中的真与假：</p>
+				<ul>
+					<li>感知及其记忆都可能是错误的，因此由这些记忆和期望产生的快乐和痛苦也是虚幻的；</li>
+					<li>基于虚幻的快乐是虚假的，它缺乏与真理的联系；</li>
+					<li>对快乐和痛苦强度的判断取决于人们在比较评估它们时所处的视角，也可能存在虚假信息（类似视错觉）。</li>
+				</ul>
+				<p>快乐需要原因且会消逝，因此只能是生成物。所以快乐不是善，因为一切生成并会衰败的事物本质上都是有缺陷的。</p>
+			</div>
+		</section>
+
+		<section id="section47" class="note-section">
+			<h2 class="section-title">理智和知识的探讨</h2>
+			<div class="section-content" id="section47-content">
+				<p><strong>知识的五重等级体系</strong>：</p>
+				
+				<table style="width:100%; margin:15px 0; border-collapse: collapse;">
+					<tr>
+						<th>等级</th>
+						<th>知识类型</th>
+						<th>例证</th>
+						<th>特点</th>
+					</tr>
+					<tr>
+						<td><strong>第一等</strong></td>
+						<td>哲学辩证法</td>
+						<td>理念本身的研究</td>
+						<td>不依赖感觉，纯粹理性，研究存在本身</td>
+					</tr>
+					<tr>
+						<td><strong>第二等</strong></td>
+						<td>纯粹数学</td>
+						<td>几何、算术</td>
+						<td>抽象对象，演绎推理，必然真理</td>
+					</tr>
+					<tr>
+						<td><strong>第三等</strong></td>
+						<td>应用数学</td>
+						<td>建筑学、和声学</td>
+						<td>数学应用于物理世界，依赖于假设</td>
+					</tr>
+					<tr>
+						<td><strong>第四等</strong></td>
+						<td>经验技艺</td>
+						<td>医学、航海</td>
+						<td>基于观察和经验，概率性知识</td>
+					</tr>
+					<tr>
+						<td><strong>第五等</strong></td>
+						<td>日常意见</td>
+						<td>常识、传统</td>
+						<td>基于表象，未经反思，常常错误</td>
+					</tr>
+				</table>
+				
+				<p>理智的优越性论证：</p>
+					<ul>
+						<li>理智活动比快乐更精确，更接近真理；</li>
+						<li>理智活动本身不伴随痛苦；</li>
+						<li>理智活动不依赖外部对象；</li>
+						<li>神没有身体，因此没有身体快乐，只有理智活动。</li>
+					</ul>
+
+				<p>理智活动本身带来的快乐就是不依赖匮乏，不伴随痛苦的纯粹快乐。</p>
+			</div>
+		</section>
+
+		<section id="section48" class="note-section">
+			<h2 class="section-title">善的等级</h2>
+			<div class="section-content" id="section48-content">
+				<p>善的生活是理智与快乐的适当结合，需要正确的混合比例。</p>
+				
+				<p><strong>最终等级排序</strong>：</p>
+				
+				<table style="width:100%; margin:15px 0; border-collapse: collapse;">
+					<tr>
+						<th>名次</th>
+						<th>成分</th>
+						<th>性质</th>
+					</tr>
+					<tr>
+						<td><strong>第一</strong></td>
+						<td>尺度/适度	</td>
+						<td>首要的善，使事物恰当、合时、和谐</td>
+					</tr>
+					<tr>
+						<td><strong>第二</strong></td>
+						<td>比例/对称</td>
+						<td>事物的适当关系，美的数学基础</td>
+					</tr>
+					<tr>
+						<td><strong>第三</strong></td>
+						<td>理性</td>
+						<td>理解尺度和比例的能力，善的生活的指导原则</td>
+					</tr>
+					<tr>
+						<td><strong>第四</strong></td>
+						<td>科学/艺术</td>
+						<td>实现善的手段</td>
+					</tr>
+					<tr>
+						<td><strong>第五</strong></td>
+						<td>纯粹的快乐</td>
+						<td>善的次要成分，需要严格限制</td>
+					</tr>
+				</table>
+			</div>
+		</section>
+		
+		<header class="note-header">
+			<h1 class="note-title">其他对话录</h1>
+			<div class="note-author">柏拉图</div>
+		</header>
+
+		<section id="section49" class="note-section">
+			<h2 class="section-title">《申辩篇》</h2>
+			<div class="section-content" id="section49-content">
+				<p>首先表明自己不是雄辩家也不是自然哲学家，而只是说真话。自己的智慧在于知道自己无知（智慧只在神不在人），而不像众人们（政治家、诗人和手工艺者）以无知为有知。</p>
+				<p>自己招怨的原因则是为求真理而与人辩论，不仅得罪了某些人，还让很多青年因看着有趣而模仿。</p>
+				<p>对于自己蛊惑青年的辩驳：</p>	
+				<ul>
+					<li>自己一人与政客们教育相反：以马为例，只有马术师对马有利，大多数人对马有害，所以自己才是对青年好的（教育是一种技艺，不可能人人拥有）；</li>
+					<li>人都不愿意受害，青年不可能自动接近加害于他们的自己；</li>
+					<li>青年的家属虽已是成人仍没告他，足以说明自己无害。</li>
+				</ul>
+				<p>对自己不信神的辩驳：</p>	
+				<ul>
+					<li>表明自己的态度，并不认为日月只是土石；</li>
+					<li>表明自己的言谈中时时有鬼神的踪迹，说明自己信神；</li>
+					<li>对精灵（daimonion）的解释：并非"新神"，而是神与人之间的中介。</li>
+				</ul>
+				<p>总结：</p>	
+				<ul>
+					<li>自己是按神的安排研究神学，放弃才是不敬神，甚至较死这种不可知的痛苦更为恶；</li>
+					<li>自己是神派到城邦来的马虻，时时刺激城邦以使众人惊醒，是为了雅典的群众；</li>
+					<li>自己不从政，是因为与大众相悖的政治家往往不得善终（民主的弊端）；</li>
+					<li>自己教育从不收钱也不拒绝任何人，无可负责；</li>
+					<li>自己不用向审判官求情，否则既是丢国家的脸，也是让审判官显得不虔诚。</li>
+				</ul>
+				<p>定罪之后，先说自己的功绩与其受罚倒应受赏，至于替代的惩罚，监禁是在职官吏式的奴才生活，放逐又会遭同样境地，缄默则与神的旨意违背，只好付钱，但自己又没有钱，在学生担保下象征性出点好了。</p>
+				
+				<p>判死刑后：</p>
+				<ol>
+					<li>自己被判死刑的原因是不曾服软，但自己并不肯不择手段而求生；</li>
+					<li>预言判他死刑的人必不会有好下场；</li>
+					<li>安慰朋友，说自己将赴死是神将带自己去美好境界，勉励他们继续当好人；</li>
+					<li>托付自己的孩子，如果以后没出息一定要处罚他们……</li>
+				</ol>
+			</div>
+		</section>
+
+		<section id="section50" class="note-section">
+			<h2 class="section-title">《美诺篇》：美德</h2>
+			<div class="section-content" id="section50-content">
+				<p>美德不是向往和获得善的能力，因为没人向往恶，而且用善定义美德是循环论证。</p>
+				
+				<p>接下来在探寻美德的过程中，开始讨论是否能探寻自己不知道的东西。于是提出了回忆论：<strong>灵魂已经掌握了一切知识，学习只是为了使其回忆起来</strong>。</p>
+				<p>回到美德的问题：</p>
+				<ol>
+					<li>美德是某种智慧，所以不是天生；</li>
+					<li>美德不是知识，所以也无法传授；</li>
+					<ul>
+						<li>美德是有用的，但除了知识还有别的东西有用，例如正确的意见或被神上身作出的预言</li>
+						<li><i>注意《普罗泰戈拉篇》的相反结论：所有美德都是知识，并且实际上是可以传授的</i></li>
+					</ul>
+					<li>结论，美德是神的恩赐……</li>
+				</ol>
+			</div>
+		</section>
+
+		<section id="section51" class="note-section">
+			<h2 class="section-title">《大希庇亚篇》：美</h2>
+			<div class="section-content" id="section51-content">
+				<p>美是一种非具体的存在。美的东西由于分有美而显得美（相对的美），但并不是美本身</p>
+				<p>美不是恰当，因为恰当的搭配是使事物显得更美，而也不是显示了事物中的美本身。<i>（个人理解，柏拉图认为美是客观存在于某一事物中的，因而不会因为外界的搭配而增减其美）</i></p>
+				<p>美不是有用，因为人的目的有好有坏，并不都是美的。</p>
+				<p>美不是有益，因为有益产生善，这样善就是美产生的结果，而不是美本身了。</p>
+				<p>美一定是视听快乐所共有的某种东西，而不是视听快乐本身：</p>
+				<ul>
+					<li>食欲性欲也能带来快乐，但并不是美，所以美并不依存于快乐</li>
+					<li>视觉和听觉带来的是两种不同的快乐，却都是美</li>
+				</ul>
+			</div>
+		</section>
+
+		<section id="section52" class="note-section">
+			<h2 class="section-title">《卡尔米德篇》：节制</h2>
+			<div class="section-content" id="section52-content">
+				<p>节制不是平静或谦虚，因为平静并不总是好的。</p>				
+				<p>节制也不是自己做自己的事，这只是分工原则。</p>
+				<p>节制也不是做好事，因为做好事的时候并不见得自己知道自己在做好事，也就是说如果节制就是做好事，那节制的人就会不知道自己节制了。
+				<i>（按柏拉图的一向观点，知道德性本身是什么，比做出符合德性的行动更重要）</i></p>
+				<p>节制也不是自我认识：</p>				
+				<ul>
+					<li>自我认识，即知道什么是对什么是错的知识</li>
+					<li>这种知识即使存在也不能带来任何利益（带来利益的是具体的知识而非知识的知识）</li>
+					<li>所以如果节制是自我认识，那节制是没用的……</li>
+				</ul>
+			</div>
+		</section>
+
+		<section id="section53" class="note-section">
+			<h2 class="section-title">《克里托篇》：公民义务</h2>
+			<div class="section-content" id="section53-content">
+				<p>大众作为整体并不明智，所以比起大众的意见我们应该更看重专家（理性）的意见。</p>
+				
+				<p>活得好（高尚）比活着本身更重要。<i>《申辩篇》：宁选择可能的善（死亡），也不选择确定的恶（放弃哲学）</i></p>
+				
+				<p>人不会自愿作恶，因为作恶是伤害自己，即使在遇到外界的恶待时也不能以恶报恶。</p>
+				
+				<p>法律是一种义务（社会契约？），必须遵守；法律与个人的关系并不平等，哪怕法律本身错了，也应该坚持遵守，因为违法本身就是重罪。</p>
+		</section>		
+
+		<section id="section54" class="note-section">
+			<h2 class="section-title">《游绪弗伦篇》：虔诚</h2>
+			<div class="section-content" id="section54-content">
+				<p>虔诚不是做神喜欢的事，因为神之间也有争执，没有一致的喜好。</p>				
+				<p>是由于虔诚才被神喜爱，而不是被神喜爱才显得虔诚。</p>				
+				<p>虔诚不是与侍奉神有关的公正，因为神不需要侍奉而得到好处。</p>
+		</section>
+		
+		<section id="section55" class="note-section">
+			<h2 class="section-title">《伊安篇》：诗歌</h2>
+			<div class="section-content" id="section55-content">
+				<p>诗人的创作是凭灵感（神启）而非技艺。<i>（因此在《申辩篇》中称诗人为无知）</i></p>
+				<ul>
+					<li>诗人写到马车时得用车夫的技艺，写到美食时得用厨师的技艺，却没有诗人自己的技艺；</li>
+					<li>即使写到了战争，诗人仍然不能带兵遣将；</li>
+					<li>诵诗人也是凭灵感传递神通过诗人发出的信息，并不真正理解诗歌的深意</li>
+				</ul>
+				
+				<p>艺术既不靠某种专门知识，也不能给人带来某种专门知识，但却能像磁铁吸引铁一样吸引人。</p>
+		</section>
+		
+		<section id="section56" class="note-section">
+			<h2 class="section-title">《高尔吉亚篇》：修辞</h2>
+			<div class="section-content" id="section55-content">
+				<p>修辞学只关心说服，不关心真理，因而不是技艺，而是谄媚。</p>
+				<p><i>注意《克拉底鲁篇》中提到哲学研究的对象是事物本身而非描述它们的语言</i><p>				
+				<p>作恶远比无辜受害更糟糕，所以哲学家比暴君和修辞家更幸福。</p>
+				<p>作恶而逍遥法外又比单纯作恶更坏，所以作恶者应该寻求惩罚（净化灵魂）。</p>
+		</section>
+		
+		<header class="note-header">
+			<h1 class="note-title">《形而上学》</h1>
+			<div class="note-author">亚里士多德</div>
+		</header>
+
+		<section id="section57" class="note-section">
+			<h2 class="section-title">第一卷：四因说</h2>
+			<div class="section-content" id="section57-content">
+				<p>一些名词解读：</p>
+				<ul>
+					<li>本体：不可划分而能独立存在的实体。在判断句中只能做主语不能做宾语，例如可以说你是猪，不能说猪是你，你便是本体，猪不是。</li>
+					<li>怎是：事物之所以能成为事物的原理，类似于"本质"。</li>
+					<li>元一：第一原理，万物本源，上帝就是基督教中的元一。</li>
+					<li>实是：可以理解为"存在"，或说being。</li>
+					<li>元素/属性：这里一般指偶然赋予的属性，例如红花，"红"就不是花必备的属性，而是"这一个"花偶然得到的属性，即使它变成蓝色黄色仍然是"花"。</li>
+				</ul>
+				<p>求知是人的本性。人们首先使用感觉求知，然后产生技艺，再积累出经验。个别的经验推至普遍就成了技术。而求知的最终阶段便是智慧。</p>
+				<p>智慧为来自神的纯知识，最不切实用却优于其他知识。</p>
+				<p><strong>四因说：</strong></p>
+				<ul>
+					<li>本因（形式因）</li>
+					<li>物因（质料因）</li>
+					<li>动因（动力因）</li>
+					<li>极因（目的因）</li>
+				</ul>
+				<p>哲学就是研究四因的。以前的哲学家们都只研究了四因中的1-2种。重要的两派：毕达哥拉斯学派的"数"与柏拉图的理念都只是式因和物因。</p>
+			</div>
+		</section>
+
+		<section id="section58" class="note-section">
+			<h2 class="section-title">第二卷：元一存在</h2>
+			<div class="section-content" id="section58-content">
+				<p>智慧是靠一代一代的人积累出来的。每一事物的真理与该事物本身必然相符。</p>
+				<p>四因不能无限地向前追溯，因而世上必有第一原理（元一）。</p>
+				<p>研究一门学问有一门学问独有的方法，哲学也不例外。</p>
+			</div>
+		</section>
+
+		<section id="section59" class="note-section">
+			<h2 class="section-title">第三卷：哲学主题</h2>
+			<div class="section-content" id="section59-content">
+				<p>哲学需研究13类主题：</p>
+				<ol>
+					<li>哲学是一门还是多门学问？（事物并不一定都有四因，也并不是每种原因都可以回答特定的问题）</li>
+					<li>哲学只研究本体还是也研究公理（如矛盾律）？</li>
+					<li>如果只研究本体，是否一门学问就能统领一切本体？</li>
+					<li>研究本体之外，哲学是否也研究本体的属性/关系（如相等、先于）？</li>
+					<li>是否存在不可感觉的本体？（如抽象的数）若存在，其与现实之间是否有中间体？</li>
+					<li>原理应是科属还是个体？（"人"这个物种与某一特定的人谁更基本？）</li>
+					<li>是否有能脱离个体而独立抽象存在的事物，例如理念？</li>
+					<li>原理在数量还是种类上为一？同一的原理是怎么造出不同的个体的？</li>
+						<ul>
+							<li>如果数量上为一（只有一种原理），依靠不同组合方式得到不同个体，那若原理有限造物也只能有限；</li>
+							<li>如果种类为一（每种原理仅有一个），那就无法共通于各个体间了。</li>
+						</ul>
+					<li>可灭坏事物与不可灭坏事物的原理是否一样？可灭坏事物的原理又会不会灭坏？</li>
+					<li>实是与元一是不是本体？</li>
+						<ul>
+							<li>如果不是，因为这两者是最基础的存在，其他一切都不能作为本体了；</li>
+							<li>如果是，由相同的元一如何能生成不同的事物？</li>
+						</ul>
+					<li>数理对象（例如点）是否为本体？</li>
+					<li>元一是潜在还是实现？</li>
+					<li>元一是普遍的还是个别的？普遍则不能作为主体，不普遍则不能被认识。</li>
+				</ol>
+			</div>
+		</section>
+
+		<section id="section60" class="note-section">
+			<h2 class="section-title">第四卷：矛盾律/排中律</h2>
+			<div class="section-content" id="section60-content">
+				<p>哲学实际上是研究实是为什么能成为实是。</p>
+				<p>哲学是一门学问，但可以有很多分支。不仅研究本体，也研究属性和关系。（回答<strong>1、4</strong>）</p>
+				<p>哲学研究公理，第一条公理便是<strong>矛盾律</strong>：A不能是非A。（回答<strong>2</strong>）</p>
+				<p>不可能一切事物都能证明，否则将推至无限的关系。</p>
+				<p><strong>排中律</strong>：要么A，要么非A。</p>
+				<p>一切皆真/一切皆伪/一切皆静/一切皆动，这四个判断都是错的。</p>
+			</div>
+		</section>
+
+		<section id="section61" class="note-section">
+			<h2 class="section-title">第五卷：名词解释</h2>
+			<div class="section-content" id="section61-content">
+				<p>"原"有六意（原点、起始、基本、缘由、原意、原理）。</p>
+				<p>"元素"通义是内在的基本，能引申到单纯不可分割或族类的含义上。</p>
+				<p>"本性"也有六意（生物创造，生物机理，有机结合，原始材料，万物本质，怎是）。</p>
+				<p>"必需"是指非此不可。</p>
+				<p>"一"：</p>
+				<ul>
+					<li>属性之一：指代同一事物</li>
+					<li>本性之一：逻辑延续、相同底层、同一科属、不离定义</li>
+					<li>事物开端：可以是数的起点，也可以是其他事物开端</li>
+				</ul>
+				<p>"是"：</p>
+				<ul>
+					<li>属性之是：具有某种偶然属性</li>
+					<li>本性之是：表范畴、表判断、表潜能</li>
+				</ul>
+				<p>"本体"：<p>
+				<ul>
+					<li>单纯物体</li>
+					<li>内在原因</li>
+					<li>事物基础</li>
+					<li>"怎是"公式</li>
+				</ul>
+				<p>同（属性、本性）、异、似</p>
+				<p>相反（矛盾）、相对（最大的相反，如灰与白相反，但黑与白才是相对）、有别……</p>
+				<p>"有"有过程与状态两个意思。</p>
+			</div>
+		</section>
+
+		<section id="section62" class="note-section">
+			<h2 class="section-title">第六卷：本性之是</h2>
+			<div class="section-content" id="section62-content">
+				<p>物理研究独立却可灭的事物，数学研究不可灭却也不独立的事物，只有哲学研究独立而不可灭的事物。</p>
+				<p>研究属性之是不能成为哲学。</p>
+				<p>偶然起源于某一未定事件。</p>
+				<p>表判断之是出于思想而非事物，也不是基本之是（即事物本身并无是非，只有人为构造出判断命题才能说有是非）。</p>
+			</div>
+		</section>
+
+		<section id="section63" class="note-section">
+			<h2 class="section-title">第七卷：何为本体</h2>
+			<div class="section-content" id="section63-content">
+				<p>本体是最原始的实是，在定义、认识与时间方面都是最先的。</p>
+				<p>本体至少有四：怎是、普遍、科属和底层；</p>
+				<p>底层又有三类：物质、形式以及二者的组合；</p>
+				<p>其中，形式才是最适合以底层身份作为本体的。</p>
+				<p>复合词的怎是并不是其本身，只有说明可成为一个定义的方能有其怎是。</p>
+				<p>只有不含属性的本体能确定其怎是。其它范畴若要界说，必须附加一个决定性词（即不能独立定义），<strong>塌鼻与凹鼻</strong>的讨论。</p>
+				<p>本体的怎是就是本体自身。</p>
+				<p>创造的基础是物质。</p>
+				<p>制作既不是制作物质也不是制作形式，而是将两者结合为一个个体。形式并不脱离事物单独存在，而是依赖于同类事物的存在。</p>
+				<p>无论是本体上还是其他基本范畴如量与质上，形式均不产生形式，只有个体生成个体。</p>
+				<p>全体在形式上先于部分，但在物质上却可以后于部分。</p>
+				<p>某些形式（例如圆）可以脱离物质，某些（例如人）却不能。但物质虽然是综合实体的部分，却并不包含于本体的公式内。</p>
+				<p><strong>定义是种（物质）加属差（形式）</strong>。差异逐级累加直至终极差异</p>
+				<p>普遍性的事物都不能作为本体（回答<strong>6</strong>）。</p>
+				<p>理念不是独立本体也不是本体组合，所以不能独立存在（回答<strong>7</strong>）。</p>
+				<p>个别事物（如太阳）不能加以定义。</p>
+				<p>"元一"与"实是"也是普遍性事物，不是本体（回答<strong>10</strong>）。</p>
+				<p>形式是本因，使物质要素组成综合实体，因而<strong>形式是本体</strong>。</p>
+			</div>
+		</section>
+
+		<section id="section64" class="note-section">
+			<h2 class="section-title">第八卷：形式优先</h2>
+			<div class="section-content" id="section64-content">
+				<p><strong>物质也是本体</strong>。</p>
+				<p>可感觉本体是物质与形式的结合，物质是潜在，形式是实现。</p>
+				<p>形式的怎是与形式一致，综合实体却不一致。</p>
+				<p>每一可灭坏本体均有切身物质（与远因物质如水火相对）与动因；永存本体不一定有物质。</p>
+				<p>只有参与了变化过程的事物才有物质。</p>
+				<p>从潜在到实现的过程是因物质与形式两者的怎是而完成的。</p>
+				<p>不可感觉事物直接就是某种元一和实是，既不能脱离个体独立存在也不被包涵于其他"一"与"是"的科属。</p>
+			</div>
+		</section>
+
+		<section id="section65" class="note-section">
+			<h2 class="section-title">第九卷：潜能与实现</h2>
+			<div class="section-content" id="section65-content">
+				<p>潜能可能存在于作用事物，也可能存在于被作用事物。与潜能相对的无能则代表着阙失。</p>
+				<p>潜能分为无理知与有理知。无理知的能力只能起一种作用，有理知的却能起相对反的多种作用。</p>
+				<p>潜能与现存与否并无关系。即使此时并未正发生着作用，潜能仍然存在。</p>
+				<p>凡属潜能必能在某种情况下实现，只能生出不可能的不能称为潜能。</p>
+				<p>有理知的潜能由练习得来，非理知的潜能则是自备的内涵。有理知的潜能虽能起相对反的多种作用，但究竟起什么样的作用取决于意志。</p>
+				<p>"无限"与"空"永远不能实现。只用作用完毕能称为实现，而正在作用只能称为活动。</p>
+				<p>潜在有两种含义：由思想而实现，或内在本能而创生。</p>
+				<p>潜在不能越级，例如不能说铜矿潜在地是铜像，只能说铜潜在地是铜像。</p>
+				<p>实现在公式与本体上先于潜能，时间上则可先可后，例如铜像晚于铜，人却先于受精卵（<i>这就能解答先有鸡还是先有蛋的问题了</i>）。</p>
+				<p>不灭坏事物都是实现而无潜在；而可灭坏事物正因其有潜在，于是含有对反，所以会灭坏。</p>
+				<p>潜能既然含有对反，可能导向两方面的实现，所以好的实现比好的潜能更好，坏的实现也比坏的潜能更坏（几何证明便是潜在到实现的过程）。</p>
+				<p>对于组合事物，若认为相合者的确相合就是真，依赖于理性判断；对于非组合事物，无所谓真假，只有认识与未认识。</p>
+			</div>
+		</section>
+
+		<section id="section66" class="note-section">
+			<h2 class="section-title">第十卷：一非本体</h2>
+			<div class="section-content" id="section66-content">
+				<p>"一"有四类：延续、完整、个体和普遍。最终归纳起来，"一"是计量单位，可以是质的也可以是量的。不同地方有不同的一。</p>
+				<p>"一"不是本体，而是普遍云谓，也不能成为科属（回答<strong>13</strong>）。</p>
+				<p>"一"不单独属于任何范畴，但在各范畴上均与实是结合。</p>
+				<p>对反是指最大的差异，每一事物都只有一个对反。基本对成是由"有"和"阙失"构成。</p>
+				<p>"等"是大小的间体，同时是二者的阙失，所以可以同时和大小成为对成。</p>
+				<p>"多"的对反是"一"，而不是"少"。"单"与"众"只在可否区分的意义上是对反。</p>
+				<p>间体由对反复合而成，站在对反之间，与对反两者都属于同一科属。</p>
+				<p>"于种有别"是指在同科属内不能再分割（即已是基本单位）而具有一个对反的事物。</p>
+				<p>"于种有别"不在物质差异，而在形式差异。</p>
+				<p>可灭坏与不灭坏都不是偶然属性，所以可灭坏事物与不灭坏事物是不同种属的（回答<strong>9</strong>）。这样理念论所说同一事物既有可灭坏的现实也有不灭坏的理念存在就不可能了。</p>
+			</div>
+		</section>
+
+		<section id="section67" class="note-section">
+			<h2 class="section-title">第十一卷：总结归纳</h2>
+			<div class="section-content" id="section67-content">
+				<p>哲学研究的是实是而非动变（<i>中国哲学却正是研究动变的</i>）。虽然本体繁多，但在成为实是方面都是一致的，所以能归于一门学术（回答<strong>3</strong>）。</p>
+				<p>物理与数学都只是哲学的分支，因为它们研究的都是属性而非实是。</p>
+				<p>为矛盾律作辩护：有人认为是非取决于不同人的判断，因而可同是同非。亚里士多德则认为只有一种判断是正确的，另一种判断是错误或说病态的，不能相提并论。</p>
+				<p>哲学既不是实用之学也不是制造之学，研究的是独立而永恒的事物，为一切学术之首。</p>
+				<p>偶然不会先于本然，因而"理性"或"自然"才是万物的根本原因。</p>
+				<p>潜能与实现间为动变，即潜能趋于实现的过程。</p>
+				<p>可感觉事物中没有"无限"。无限不是一个原理，只能是某一主题的偶然属性，或因相关而成为无限。</p>
+				<p>本性之变只能是对反之变，于是不能负变为负。而正变为负与负变为正都只是灭坏和生成，不是运动。只有正变为正才是运动。</p>
+				<p>运动只能在质、量和场所三个范畴：</p>
+					<ul>
+						<li>主体无对反，不会运动；</li>
+						<li>关系的变化是附属的，也不会运动；</li>
+						<li>作用不能有运动的运动（作用本身就是运动，不能再运动），还是不会运动。</li>
+					</ul>
+			</div>
+		</section>
+
+		<section id="section68" class="note-section">
+			<h2 class="section-title">第十二卷：不动的推动者</h2>
+			<div class="section-content" id="section68-content">
+				<p>本体有三类：可灭坏可感觉，不可灭坏可感觉与不可灭坏不可感觉（回答<strong>5</strong>）。</p>
+				<p>一切可变化的事物都具有物质。不可灭坏的事物也有物质，但只运动不灭坏。</p>
+				<p>原理有三类：定义或通式，前两者的阙失，与物质（回答<strong>8</strong>）。</p>
+				<p>创造有四类：技术、自然、机遇（技术的阙失）和自发（自然的阙失），其中物质与通式均不能被创造。本体由同类相生。</p>
+				<p>不同事物有不同原因，但都不离形式、阙失、物质和动因。<strong>存在一个最初的原因</strong>。</p>
+				<p>实现与潜能存在于一切事物，但各有别。所谓普遍性，有三层意思，都具四因、本体为基和同一始因。</p>
+				<p>只有圆运动是永恒的运动。既然有永恒的运动就必然有只作为实现不作为潜在的永恒主体，先于一切事物（回答<strong>12</strong>）。</p>
+				<p><strong>永恒主体是不动的推动者</strong>，引起第一级运动，本质是善，没有量度也不能分割。</p>
+				<p>第一主体之外，不灭坏的星体也各具本体。</p>
+				<p>第一主体以自身为思想对象，所以只有善；人则思想对象多变，不能达到至善。</p>
+				<p>一切活动均为第一主体安排。第一主体使一切形式与事物成"一"。</p>
+			</div>
+		</section>
+
+		<section id="section69" class="note-section">
+			<h2 class="section-title">第十三卷：理念不存在</h2>
+			<div class="section-content" id="section69-content">
+				<p>数理对象不能独立存在于可感觉事物中</p>
+					<ul>
+						<li>可感觉事物不能分割;</li>
+						<li>面是体的分割，这样由于有可感觉体和数理体两种，就得有可感觉体上的面，数理体上的面，以及单独存在的面三种。继续下去会得到无数级系列;</li>
+						<li>若数理对象独立存在的，则天文对象也可独立存在；</li>
+						<li>若独立存在便需要多套间体的存在；</li>
+						<li>数理事物都可量度，怎么能合而为一？</li>
+						<li>立体可以实际存在，抽象的点线则不能；</li>
+						<li>数理对象定义上先于可感觉事物，并不一定在本体上也先于。</li>
+					</ul>
+				<p>数理对象的分离不是因为实际如此，而是人们思想造成。</p>
+				<p>理念不存在的理由：</p>
+					<ul>
+						<li>否则将有比现实事物还多的理念</li>
+						<li>非本体有没有理念？</li>
+						<li>理念与实物形式是否一致？</li>
+					</ul>
+				<p>理念对事物的存在与认识均无作用。</p>
+				<p>数若作为本体，要么独立存在要么存在于可感事物中，两者皆不可能（回答<strong>11</strong>）。</p>
+				<p>数内单位是否相通（2中的两个1与单独一个1是否一样）：</p>
+					<ul>
+						<li>若相通，不能有理念数；</li>
+						<li>若不相通，不能有数学计算或排序。</li>
+					</ul>
+				<p>1被视作量度的基本单位，于是许多1中便有一个"原1"（从1米1千克中抽出一个最基本的1），那么为什么没有"原2"？1是没有量度的，那么量度是怎么由1组成的？数若独立存在，应该是有限还是无限？无限则不能为实是，有限又以什么为限？其他的数如果由1组合而来，那么1是物质，其他的数是形式，反而应该先于作为物质的1了。</p>
+				<p>关于几何对象，长与宽到底是不是一样的属性？</p>
+					<ul>
+						<li>如果是，面与线就合而为一了；</li>
+						<li>如果不是，横线与竖线就得分离。</li>
+					</ul>
+				<p>几何对象与数一样也不能由单与众来组成。<strong>理念出于普遍，却被当作可分离的个别，这就是一切悖论的原因</strong>。</p>
+				<p>潜能不离实现，普遍不离个别。</p>
+			</div>
+		</section>
+
+		<section id="section70" class="note-section">
+			<h2 class="section-title">第十四卷：续论数非本体</h2>
+			<div class="section-content" id="section70-content">
+				<p>对反不是第一原理。元一是普遍，不等是关系，二者皆不是本体。</p>
+				<p>永恒本体不能由要素组成。若说元一的对成是"非是"，那么"非是"也有多项意义，不能明确。"非是"并非元一的潜在也非元一的否定，其本身就是一种"是"。</p>
+				<p>有人因点是线之端而认为其为实物，但首先极端并不一定是本体，其次就算是本体也是可感觉世界的本体，不能脱离而独立存在。最后，数即是永恒存在，就不能有创造过程。</p>
+				<p>善不是自然进化的产物，然而善也不是元一（善应该只是元一的属性而非元一本身）。</p>
+				<p>数不是物质，不是形式，不是动因也不是极因。</p>
+				<p>事物可以有数的关系，但有同样的数并不表示有因果关系。</p>
+			</div>
+		</section>
+		<header class="note-header">
+			<h1 class="note-title">《尼各马可伦理学》</h1>
+			<div class="note-author">亚里士多德</div>
+		</header>
+
+		<section id="section71" class="note-section">
+			<h2 class="section-title">第一卷：最高善是幸福</h2>
+			<div class="section-content" id="section71-content">
+				<p>一切事物均以善为目的，研究最高善的则是政治学。</p>
+				<p>学习政治学需要具有良好的品质和生活经验。</p>
+				<p>政治学的目的——最高善是幸福。</p>
+				<p>有三种生活：享乐的（动物性）、政治的（为荣誉）和沉思的。财富只是手段，荣誉取决于授予者而非接受者，甚至德性也可能不被运用，三者皆不是真正完善的幸福。</p>
+				<p>对柏拉图善的理念的批判：</p>
+				<ol>
+					<li>善若是理念，就不能又述说实体又述说性质，也不能同时被多门科学研究，除非其不是一个单独的概念。</li>
+					<li>若只有善的理念是自身即善，则善是言而无物的；若荣誉、智慧等都是自身即善，却没有共同彰显的东西。</li>
+					<li>善的理念是不可实行不可获得的，因而与伦理学无关。</li>
+				</ol>
+				<p>人所追求的是可实践的善。最高善（幸福）是完善而自足的。</p>
+				<p>幸福是德性、外在善（友情等）和运气的混合。</p>
+				<p>幸福需要完全的善和完整的时间，但并非说只有到死后才能判断其幸福（在这个意义上不一定把运气划为幸福的一部分）。</p>
+				<p>后人能影响先人的幸福，但不能从根本上改变。</p>
+				<p>我们称赞的只是德性，不是幸福。（称赞需要比照，最高善无从比照）</p>
+				<p>德性分为道德德性与理智德性。</p>
+			</div>
+		</section>
+
+		<section id="section72" class="note-section">
+			<h2 class="section-title">第二卷：道德德性是在实践中选择适度的品质</h2>
+			<div class="section-content" id="section72-content">
+				<p>道德德性由实践活动中的习惯养成，而非自然形成。（但其并不反自然，因为接受德性的能力还是来自自然）</p>
+				<p>培养德性的要点是避开过度和不及。</p>
+				<p>快乐/痛苦是道德德性的表征。</p>
+				<p>判断有无德性的标准是实际行动上的选择。</p>
+				<p>德性不是感情也不是能力，而是品质。</p>
+				<p>具体说来，德性是选择适度的品质。</p>
+				<p>只有谈到具体的德性才能确立何谓适度。</p>
+				<p>过度与不及互相反对，而都与适度对立，但对立程度可能有别。</p>
+				<p>做到适度首先需要避开与适度更相反的那端（过度/不及），其次要研究与适度相反的是什么，最后要警惕快乐。</p>
+			</div>
+		</section>
+
+		<section id="section73" class="note-section">
+			<h2 class="section-title">第三卷：行为</h2>
+			<div class="section-content" id="section73-content">
+				<p>行为有出于意愿和违背意愿之分，但做出选择的行为都是出于意愿的。出于对环境和后果无知的行为不是出于意愿，但只有引起悔恨时才是违背意愿。</p>
+				<p>选择不是意愿，不是欲望，不是希望，也不是意见。选择是需要理智进行预先考虑的行为。</p>
+				<p>考虑的对象是手段而非目的，而且是力所能及而不确定的事物。</p>
+				<p>希望的对象是目的，是对各人而言显得是善的东西。</p>
+				<p>作恶也是出于意愿，如果做与不做都在我们能力之内的话。</p>
+				<p>具体的德性：</p>
+				<ol>
+					<li>勇敢：恐惧与信心方面的适度，尤其是面对一个高尚的死之时。</li>
+					<li>勇敢的人也会有恐惧，但能按照理智的要求去恰当地对待恐惧。</li>
+					<li>有五种类似而非勇敢的品质：公民的勇敢（出于荣辱/奖惩）、经验的勇敢、怒气的勇敢（缺乏选择与目的）、乐观的勇敢和无知的勇敢。</li>
+					<li>勇敢本性上是痛苦的，虽然目的是愉悦的。越勇敢，就越能面对自己即将失去的善（在赴死的情况下），因而越痛苦。</li>
+					<li>节制：快乐方面的适度，专指肉体上的感觉，特别是触觉（包括味觉——美食通过喉咙的触觉）。</li>
+					<li>节制的人也期望愉悦，但是只适度地期望适当的愉悦，不会以不适当的事物为快乐。</li>
+					<li>放纵比怯懦更出于意愿，然而怯懦的品质却更出于意愿（放纵向往快乐，但放纵的品质本身伴随的是向往快乐和害怕失去快乐的痛苦）。要用理智指导欲望。</li>
+				</ol>
+			</div>
+		</section>
+
+		<section id="section74" class="note-section">
+			<h2 class="section-title">第四卷：德性追求高尚而不带痛苦</h2>
+			<div class="section-content" id="section74-content">
+				<p>慷慨：小笔财物给予/索取上的适度。过度是挥霍，不及是吝啬，后者更恶。</p>
+				<p>大方：大笔财物花费上的适度，专指为公众而非为自己。</p>
+				<p>大度：对重大荣誉的欲求的适度。大度的人也需要自视配得上欲求的荣誉。</p>
+				<p>对小荣誉的适度没有合适名称的品质。</p>
+				<p>温和：怒气方面的适度，偏向不及。要点有三，适当方式、适当事件和适当持续时间。</p>
+				<p>友善：社交方面的适度。过度是随意讨好，不及是随意让人痛苦。</p>
+				<p>诚实：也是社交方面的适度，相关于真实和虚伪。自夸比自贬更恶。</p>
+				<p>机智：消遣性交谈方面的适度，即有品味而得体地开/听玩笑。</p>
+				<p>羞耻不是德性，而是由坏行为引起的某种感情，但对年轻人的品质塑造有好处。</p>
+			</div>
+		</section>
+
+		<section id="section75" class="note-section">
+			<h2 class="section-title">第五卷：公正在于平等</h2>
+			<div class="section-content" id="section75-content">
+				<p>公正：有两种意义——守法和平等。前者不是德性的一部分，而是涵盖德性整体（即是最为完全的德性）。</p>
+				<p>具体的公正分为分配的公正和交易的公正。</p>
+				<p>分配的公正要求按比例分配的平等。</p>
+				<p>对违反意愿的交易结果进行纠正的公正在于数量上的平等（交易后=交易前）。</p>
+				<p>自愿交易的公正，即回报的公正也在于按比例分配的平等，且此比例须确立于交易前。</p>
+				<p>公正又可分为政治的公正和家室的公正。前者是平等意义上的真正公正，后者（不平等人之间的公正）只是类比意义上。</p>
+				<p>政治的公正可出于自然也可出于约定。</p>
+				<p>出于意愿的是品质公正与否；违反意愿的只是偶性地公正与否；出于无知的则可说是行为公正与否，但不能判断品质。</p>
+				<p>只有伤害自己的人可以说是出于意愿地受不公正，所以一般而言接受不公正都是违背意愿的。</p>
+				<p>公道优于法律的公正，是对法律缺陷的纠正。</p>
+				<p>本义上人不能对自己不公正，但可以自身一部分对另一部分不公正。</p>
+			</div>
+		</section>
+
+		<section id="section76" class="note-section">
+			<h2 class="section-title">第六卷：理智德性——明智</h2>
+			<div class="section-content" id="section76-content">
+				<p>是否适度是由理智决定的。理智又有两部分，思考可变的事物谓之推理，思考不变的事物谓之知识。</p>
+				<p>心灵和欲望主导着实践的理智（和沉思的理智相对，伏笔！）。推理的善在于正确，而知识的善在于真。</p>
+				<p>科学：以不变的事物作为对象，可以证明而永恒存在。</p>
+				<p>技艺：以可变的事物为对象，与真实的制作相关，其中包含德性。制作不同于实践。</p>
+				<p>明智：善于考虑对自身是善的事物的德性，对象是可变而是实践。</p>
+				<p>心灵：其他几类的起点，对象是不变的事物但不可证明。</p>
+				<p>智慧：心灵和科学的结合，最高的理论。智慧的对象是抽象而普遍的。</p>
+				<p>明智分为关于城邦（立法学/政治学）和关于个人的，需要经验。</p>
+				<p>明智包括好的考虑。好的考虑是理智的正确，既不是科学（科学只有真没有正确）也不是意见（意见也是确定之事）。</p>
+				<p>理解与明智都与变化而不确定的事物相关，但明智发出命令，理解只作判断。</p>
+				<p>明智也包括体谅。总而言之，心灵和明智是与生俱来却又会慢慢成长的。</p>
+				<p>智慧不关心德性生成，明智只能知道德性不能帮助其生成。但即使这两者不产生结果，本身也值得欲求。而事实上幸福正是这两者的结果。</p>
+				<p>明智需要道德德性的参与才不会变质，而自然产生的德性也需要明智才能上升为道德德性。</p>
+			</div>
+		</section>
+
+		<section id="section77" class="note-section">
+			<h2 class="section-title">第七卷：自制低于善，是知而不行</h2>
+			<div class="section-content" id="section77-content">
+				<p>品质有六种：神性、善、自制、不能自制、恶和兽性——即自制不是德性！自制者仍有恶的欲望，但基于理智而不实施。</p>
+				<p>提出关于自制的几个问题，后面详述。</p>
+				<p>不能自制者不是出于自己的选择而沉溺于事物中（与自己选择而放纵不同），或者是有知识不能运用，或者只运用大前提或小前提其一。</p>
+				<p>自制与否是指肉体快乐，精神层面的不能自制只是限定或类比意义上的。</p>
+				<p>不能自制的欲望只指人层面上的恶，兽性或病态导致的不能算是不能自制。</p>
+				<p>与精神层面的不能自制相同，怒气上的不能自制也是类比上的，不像欲望的不能自制那么可恶（因为怒气一定程度上服从理智，而且是正常冲动）。</p>
+				<p>放纵出于并非强烈欲望（追求快乐或逃避痛苦）的选择，因而比不能自制更坏；自制意味着战胜快乐，坚强则是抵抗痛苦，所以自制更值得珍惜。</p>
+				<p>不能自制者仍保持着德性的起点，存有悔恨，因而比放纵好纠正。</p>
+				<p>自制是抵抗欲望，固执则是抵抗理智。另外，对快乐追求过少也不是顺从理智，因而是坏品质，但比不能自制少见。</p>
+				<p>要明智（知而行）就一定要自制（知而不行）。</p>
+				<p>快乐有两种，向正常品质的回复和正常状态下不含痛苦和欲望的实现活动（而非过程）。前者只是偶性而非善，后者则是善。</p>
+				<p>必要的肉体快乐不是恶，但过度就是恶。不带痛苦的快乐就不会过度。</p>
+			</div>
+		</section>
+
+		<section id="section78" class="note-section">
+			<h2 class="section-title">第八卷：最高的友爱来自善的需求和相似</h2>
+			<div class="section-content" id="section78-content">
+				<p>友爱是一种德性或包含了一种德性，不仅是必要的更是高尚的。</p>
+				<p>有三种友爱，分别出自善、愉悦和用处。后两者有利害关系，所以只是偶性的。快乐的友爱更接近善的友爱。</p>
+				<p>善的友爱出自持久的相似，后两者只建立在暂时的相似上。</p>
+				<p>善的友爱包含了愉悦和用处。友爱是实践（共同生活）中的平等品质，与感情上的爱不同。</p>
+				<p>平等的友爱：善的朋友不能很多，快乐和有用的朋友却可以很多。</p>
+				<p>不平等的友爱：地位与需求不同，则爱需要按比例平等。但友爱首先需要爱的数量上的平等，因而差异太大的两人不能成立真正的友爱。</p>
+				<p>大多数人由于爱荣誉，更愿意被爱而非爱。但友爱中更重要的是爱而非被爱。（见下一卷）</p>
+				<p>友爱与公正一样，都依赖于共同体的性质。最高共同体是政治共同体，其公正就是共同利益。</p>
+				<p>君主制类似于父子间的友爱，公正和友爱在于比例；贵族制类于夫妻，公正和友爱在于德性；共和制类于兄弟，公正和友爱在于平等。</p>
+				<p>家室中的友爱均可看作从父子的友爱而派生。父母对子女的爱比子女对父母的爱更强烈持久。</p>
+				<p>平等的友爱中的争吵主要存在于有用的友爱，因为双方都想多得。此时的公正应在于按所得来偿还，又分为法律的公正和伦理的公正。</p>
+				<p>不平等的友爱中的争吵主要因为分配原则。此时的公正在于按需分配。</p>
+			</div>
+		</section>
+
+		<section id="section79" class="note-section">
+			<h2 class="section-title">第九卷：友爱是自爱的延伸</h2>
+			<div class="section-content" id="section79-content">
+				<p>不相似的友爱通过比例而平等，回报需按双方需求。若不能达到一致，则应由接受者事先确定回报内容。</p>
+				<p>回报应该比施惠更优先，但也要视情况的高尚性和迫切性而决定。</p>
+				<p>快乐和有用的友爱很容易因为对方变化而结束。善的友爱虽然也会结束，但仍对过去的友人有关照。</p>
+				<p>对朋友的爱是自爱的延伸。友爱存在于好人与自身的关系中，而不在坏人于其自身的关系中（坏人灵魂分裂，各部分灵魂不能同欢乐共悲伤）。</p>
+				<p>友爱始于善意，发展至亲密。但有用或快乐的友爱不存在善意。</p>
+				<p>团结是政治的友爱。</p>
+				<p>施惠者如同创造者，其行为带有高尚，所以更爱受惠者。</p>
+				<p>自爱若指对钱财荣誉的贪恋，则不应该；若指爱自身中最高贵的部分，则应当。</p>
+				<p>朋友是善，所以幸福的人必定需要朋友来接受善举&进行持续的活动。</p>
+				<p>有用和快乐的朋友都既不可无也不可多，善的朋友也以能持续交往的最大数量为限。</p>
+				<p>人在幸运时需要善的朋友，不幸时更需要有用的朋友。</p>
+				<p>友爱的本质是共同生活。共同生活使得好人的友爱更好，坏人的友爱更坏。</p>
+			</div>
+		</section>
+
+		<section id="section80" class="note-section">
+			<h2 class="section-title">第十卷：幸福在于沉思</h2>
+			<div class="section-content" id="section80-content">
+				<p>来自高尚事物的快乐本身就值得欲求，因而是善。</p>
+				<p>快乐不是运动，而是一种完整的实现活动，并且完善着实现活动本身。</p>
+				<p>完善着完美而享受幸福的人的实现活动的快乐是最充分意义上的快乐。</p>
+				<p>幸福不是品质，而是实现活动。幸福不是消遣而是严肃的活动。</p>
+				<p>最完美的活动（幸福）是沉思，来自自身中神性的心灵。</p>
+				<ol>
+					<li>沉思来自心灵，因而是最高等的实现活动。</li>
+					<li>沉思是最持久连续的活动。</li>
+					<li>爱智慧是最大的快乐。</li>
+					<li>沉思是自足的。</li>
+					<li>沉思自己就是目的而非手段。</li>
+					<li>沉思既包括严肃也包括闲暇。</li>
+				</ol>
+				<p>道德德性属于人，因而其实现活动的幸福次于沉思（需要外在之物）。</p>
+				<p>要获得德性需要用好法律来培养好品质，因而接下来要研究立法学（政治学）……政治学需要经验。</p>
+			</div>
+		</section>
+		<header class="note-header">
+			<h1 class="note-title">《物理学》</h1>
+			<div class="note-author">亚里士多德</div>
+		</header>
+
+		<section id="section81" class="note-section">
+			<h2 class="section-title">第一章 本原为二或三</h2>
+			<div class="section-content" id="section81-content">
+				<p>要了解自然，首要任务是了解其本原。我们采取的方法是从整体（我们所易了解的）到部分（自然的基本）来研究。</p>
+				<p>必有一个或多个本原，若是一个，则要么不变要么可变；若是多个，则要么有限要么无限。若说只有一个不变的本原，这不是自然科学研究的问题。</p>
+				<ol>
+					<li>若说万物是一，那么都是实体还是数量还是性质？首先存在若只是数量或性质，便不能有实体存在，而数量和性质都只是实体的属性；而若是实体，便不可能有大小（大小本身就是数量），但无限的实体是不存在的。</li>
+					<li>“一”是指不可分还是连续还是定义一致？若是不可分，就不能是数量，这样既不能无限也不能有限；若连续，其本身就能分割成多；若定义相同，则违反矛盾律。</li>
+				</ol>
+				<p>最后说明，实现的一可能是潜在的多。</p>
+				<p>继续驳斥，指出从“产生的事物都有开始”不能得出“非产生的事物都没有开始”，也不能把时间上的无限推至空间的无限。其次，“一”也可以有运动变化。</p>
+				<p>继续指出，“是”就算只有一个涵义也能有多个存在，恰如只有一种白色而有无数白物一样。并且如果“存在”只有一义，那便不是属性（属性只能作宾语，这样成为“存在”的就只能是“不存在”了）；而如果存在不是属性，万物皆不存在。</p>
+				<p>接着举出的论点是一个实体可以分析成几个别的实体，若分离的只是属性，那组合起来还只是属性。</p>
+				<p>最后总结，存在不是一而是多。“不存在”可以只是特定的不存在而不是绝对的不存在。</p>
+				<p>指出万物的本原种类和数目都有无限多也是不可能的。</p>
+				<ol>
+					<li>无限不可知，这样万物也不可知。</li>
+					<li>万物不可能任意大小。</li>
+					<li>有限的物体包含无限的元素是不可能的。</li>
+					<li>最小的物体不能再被分割了。</li>
+					<li>属性是无法作为本体被分离出来的。</li>
+				</ol>
+				<p>有人用对反作为本原，但对反只能生成介于对反之间的特定事物，所以万物都是对反的一端或中间。（其实我觉得承认这个观点大有问题）</p>
+				<p>从上面的讨论得知，本原是有限数目的对反。但单有对反是无法生成实体的（热不能与冷结合就成了实体），需要有第三者作为基础。结论：本原有两个或三个（因为实体同属存在这个类，本原也不能有类的差别）。</p>
+				<p>所谓变化，虽只一物，却有两个基础，一个变化之后仍然存在，一个则消失。任何变化者都是合成的（包括新产生的事物与发生变化的事物），要么是变化前为基础+缺失，要么是变化后为基础+形式。结论：基础就数目说是一，就形式而言为二；于是本原可以说是两个也可以说是三个（质料、形式、缺失）。</p>
+				<p>反驳存在不需产生而不存在不能产生他物，这样万物都不生不灭。解决方法是承认存在的多样性（潜在？），某些情况下不存在也能产生。</p>
+				<p>质料只因偶然而不存在，缺失则本性就是不存在；质料某种意义上自己也是实体，缺失当然不是。要求形式的是质料而非缺失。质料本身不生不灭，但其蕴含的缺失本性却可灭亡。</p>
+			</div>
+		</section>
+
+		<section id="section82" class="note-section">
+			<h2 class="section-title">第二章 目的论</h2>
+			<div class="section-content" id="section82-content">
+				<p>万物分为由自然而存在与由外因而存在两种。“自然”是指因本性而非偶然而运动静止的原因。要证明自然的存在是不必要的。“自然”可以被解释为质料或形式，但形式才是决定“生成”的，所以把形式作为“自然”更确切。</p>
+				<p>研究数学家、自然哲学家和哲学家的区别。结论是自然哲学家研究对象是不脱离质料而存在的形式。另外提出了连续运动的最善终结就是目的。</p>
+				<p>提出四因说，物因、式因、动因和极因。原因可以指“类”也可以指个别事物，可以指本性也可以指偶然，可以是潜在也可以是实现。</p>
+				<p>论述偶然性和自发性（自发可并不是必然/自然），提出两者是否存在的问题。</p>
+				<p>先表明偶然性和自发性都存在（提了一节的问题，一段就回答完了-_-）。二者都是有意图有目的的行动中由于偶然属性而造成（本来也可以由思考或自然造成）结果的原因，都属于既不是绝对地也不是通常地如此发生的事物。偶然性虽然存在，但不是任何事物的原因。</p>
+				<p>由于偶然的事物全都可以说是由于自发，由于自发的事物却不全都是由于偶然。偶然与幸运有关，因而只能被有道德价值的事物拥有（？）。自发出于外因，偶然则出于内因。自发和偶然后于思考和自然。</p>
+				<p>式因、动因和极因可以合而为一，也就是说原因可以只追求为质料和形式两种。“为什么”有四层涵义，必然性、必需性、本质性和善性。</p>
+				<p>自然是属于目的因的。因为自然既不能处于巧合（否则会灭亡，汗，难道是进化论）也不能处于自发，所以只能有目的了。由于前面所说，万物的终结都是目的，所以自然也不例外。自然中的畸形就是没达到目的。</p>
+				<p>必然性只存在于产生过程中，应该说只是因“假设”而必然的。必然性蕴藏在质料中，目的因却是在形式中。目的是一切的起点。</p>
+			</div>
+		</section>
+
+		<section id="section83" class="note-section">
+			<h2 class="section-title">第三章 可感无限不存在</h2>
+			<div class="section-content" id="section83-content">
+				<p>先指出，运动离不开事物，然后给出定义，潜在的事物的实现（作为能运动者而非本身实现时）即为运动。自然的推动者自己也在运动（当然以后会说到有个不动的推动者）。</p>
+				<p>运动本意即尚未实现，所以有人将之定义为“不定”，但这个定义并不好（不明确）。运动的原因（推动者）是形式。</p>
+				<p>运动是在被动者中进行的。若说推动者与被动者的运动不同，那么就都在被动者内，这样同一时间被动者内就有两种运动了；若二者相同，则作用将等于被作用。解决的方法依然是潜在与实现的问题，二者并非定义上同一，只是实现上同一罢了。</p>
+				<p>各种学说基本都承认无限存在，证据有五。</p>
+				<ol>
+					<li>时间无限。</li>
+					<li>量无限可分。</li>
+					<li>产生与消亡无穷尽。</li>
+					<li>有“限”总是以别的事物为限，其实没有真正的“限”。</li>
+					<li>思想不能被限制。</li>
+				</ol>
+				<p>自然哲学家主要研究是否有可感事物是无限的。</p>
+				<p>无限的部分只能是无限，所以无限不可分，于是没有量的概念，就不能是实现的事物云云。这一节用现代无限的观点很容易反驳，就不多说了……总之结论就是，不可能有可感事物是无限的。</p>
+				<p>实现的无限不存在，潜在的无限却存在（又来了-_-）。无限的真正涵义是“此外永有”而非“此外全无”（这是完全，即有终结）。无限只是潜在的完全，所以宇宙不会是无限的。</p>
+				<p>类似于物体包含质料，完全者也包含无限。所以无限是物因，本质是缺失。从这个意义上说没有累加所得无限，只有分割所得无限（因为累加所得包括原物，分割所得却被原物包括）。</p>
+				<p>驳斥第四节中提到的后三个证据。</p>
+				<ol>
+					<li>事物总数有限，却可以此生彼灭。</li>
+					<li>有限不需要接触。</li>
+					<li>思想只是过程不能留存。</li>
+				</ol>
+			</div>
+		</section>
+
+		<section id="section84" class="note-section">
+			<h2 class="section-title">第四章 空间是限/虚空不存在/时间是数</h2>
+			<div class="section-content" id="section84-content">
+				<p>空间存在，但既不是实体也不是属性更不是四因之一。</p>
+				<p>空间若是包含事物的“限”，便是形式；若是事物占有的体积，则是质料。但质料和形式都不能脱离事物单独存在，而空间可以，所以空间既不是形式也不是质料。</p>
+				<p>“里”有八种含义。</p>
+				<ol>
+					<li>部分于整体。</li>
+					<li>整体于部分。</li>
+					<li>种于科属。</li>
+					<li>科属于种。</li>
+					<li>形式于质料。</li>
+					<li>被动于能动。</li>
+					<li>事物于目的。</li>
+					<li>事物于空间。</li>
+				</ol>
+				<p>然而这所有含义都不能有事物在其自身里的情况发生。结论是，空间可以独立存在，不需要在空间里。</p>
+				<p>空间的特性有：</p>
+				<ol>
+					<li>事物的直接包围者而非事物部分。</li>
+					<li>不大于也不小于包围的事物。</li>
+					<li>可分离。</li>
+					<li>有上下之分。</li>
+				</ol>
+				<p>空间不是形式（不是事物的限）不是质料（可分离）不是体积（否则将有无限套着的空间），于是只是包围事物的“限”。空间因运动（位移和增减）而被认识，但本身并不动。</p>
+				<p>若干推论：</p>
+				<ol>
+					<li>连续的事物潜在地存在于空间中，分离的事物实现地存在于空间中。</li>
+					<li>有的事物（如实物）因自身存在于空间，有的事物（如灵魂）因外因存在于空间。</li>
+					<li>空间不是宇宙，只是宇宙的内限。</li>
+					<li>空间并不必须和其内的物体同时增长。</li>
+					<li>点没有空间。</li>
+					<li>两个物体不能处于同一空间。</li>
+				</ol>
+				<p>提出问题，虚空是否存在。</p>
+				<p>先给出定义，虚空就是失去了物体的空间，因而是不存在的。事物的运动是可以互相提供空间的，而事物的浓缩增大都是因为失去或吸收了别的事物，都不能证明虚空存在。反而说，若事物增大是虚空之故，那事物本身也会成为虚空了。</p>
+				<p>与物体分离的虚空是不存在的。虚空被认为是位移的原因，然而并不是。虚空中事物没有运动的倾向性（？大概是说全无差异），因而虚空没有运动，而且已有的运动也会在虚空中停下来（他认为惯性是有别的事物如空气继续推动导致的）。就算真能运动，由于没东西阻碍，虚空中的运动速度会无限（……）。</p>
+				<p>虚空也不能存在于事物之中。若稀薄是虚空所致，那么虚空就只是上升（因为较轻）而非一切运动的原因了；而且因为虚空最轻，上升速度也会是无限快。物体变浓变稀都只是因为质料在潜在与实现中转换罢了。最后指出，潜在的虚空也不存在，稀和密都只是性质变化的原因而非位移的原因。</p>
+				<p>探讨时间的疑难。时间一部分已不存在，一部分尚未存在，然而合起来却存在。“现在”若是不同的若干个，则“现在”既不能消失于其本身，也不能消失于别的“现在”中（这样就会同时有两个“现在”）；但若现在只是一个，就无法作为过去与未来的限。最后提出，时间不是一种运动和变化，因为时间无处不在且无论快慢。</p>
+				<p>时间也不能脱离运动存在。运动有前后，时间也有前后，所以时间就是被一前一后两个“现在”所定限的事物，换句话说就是让运动成为可计数的东西。“现在”在某一定义下是同一的，另一定义下又不是，如同扔石头，在手上的那块与落地的那块既可说是相同也可说是不同。时间因“现在”得以连续也得以划分，如同点与线的关系，“现在”也只是属于时间而不是时间。时间的本质是数。</p>
+				<p>时间是运动存在的尺度。“存在于时间里”有两种涵义，在时间存在着时存在着（其实这并不是存在于时间里，但反过来说是必然：事物存在时时间存在），或事物本身是时间/时间的方式/部分。后者表明时间比一切其中的事物都长久，所以永恒的事物不存在于时间也不不能被时间计量。另外，时间也能计量静止（静止是本性运动却未运动者）。</p>
+				<p>时间总在不断地开始和终结，因而不会消灭。时间与其说是产生的原因不如说是灭亡的原因，但灭亡事物的不是时间而是随时间来的变化。</p>
+				<p>时间既然是被计量的数，就得依赖于计数者的意识，也就是说没有意识就没有时间（但仍可能有运动）。</p>
+			</div>
+		</section>
+
+		<section id="section85" class="note-section">
+			<h2 class="section-title">第五章 运动的分类与对反</h2>
+			<div class="section-content" id="section85-content">
+				<p>运动分三种，因偶性、因部分和因本性。运动有推动者、运动者和运动所趋向者（无论出发者），趋向者（形式）本身则是不运动的。非因偶性的变化只存在于有对反或矛盾关系的事物中，所以由否到否不是变化。由否到是是产生，由是到否是灭亡，只有由是到是是运动（与静止而非灭亡/产生相对）。因本性的运动有三种，质、量和空间。</p>
+				<p>实体与关系都没有运动，也没有运动的运动（无论运动是作为主体还是靠别的主体），但可以有偶然的变化。静止是指本该能动却没动的事物。</p>
+				<p>解释接触、连续、串联、贴切等名词，顺序是串联—〉接触—〉贴切—〉延续。（前三节在《形而上学》中基本原样重复了一遍。）</p>
+				<p>“一个”运动既可表示一类，也可以表示一种（不仅是起始一致，方式也一致），还可以指实体和数目为一（内容、时间和主体都是一）。两个运动之间必然不能连续（否则就成为一个运动了）。运动的快慢不是运动的种亦不是构成运动的种差。</p>
+				<p>讨论对立的运动。提出了五种可能。</p>
+				<ol>
+					<li>从一事物出发与趋向一事物（这是变化不是运动）。</li>
+					<li>从对立两事物发出（运动不因发出命名）。</li>
+					<li>趋向对立两事物（可以并入5）。</li>
+					<li>从对立一方出发和趋向对立另一方（这是同一运动-_-）。</li>
+					<li>从一方趋向另一方和从另一方趋向一方。</li>
+				</ol>
+				<p>结论只有5是对立的运动。</p>
+				<p>静止于某处和从某处发出运动是对反，而两个于对反处的静止也可以形成对反。产生和灭亡不是运动，也就不能是静止。静止必须是自然的，强制的运动不能说是趋向静止（？）。</p>
+			</div>
+		</section>
+
+		<section id="section86" class="note-section">
+			<h2 class="section-title">第六章 万物皆可分</h2>
+			<div class="section-content" id="section86-content">
+				<p>点与点不能连续只能接触，所以线非点组成，点只是线的限。量、时间和运动要么都可分要么都不可分。</p>
+				<p>先论证什么是快，就是在相等（或较少）的时间内通过较多的路程-_-!!然后就说明时间是连续且可分的了（因为任何一段时间都可以有运动……），所以一切的量都是可分的。无限有分起来的无限和数起来的无限，前者可以在有限的时间内达到（驳斥了芝诺的追龟论），而后者不行。</p>
+				<p>作为时点的“现在”是不可分的，没有任何事物能只在“现在”里运动或静止（只能在一段时间里）。无论何时何地，“现在”都只有一个。</p>
+				<p>变化者必可分。运动可按部分（本体的部分）、时间和内容分。长度也可分。</p>
+				<p>变成者必然已经达到目的，在变成的那第一瞬间必不可分，或说终结不可分。但开始变化的第一瞬间不存在，也没有第一开始变化的部分。结论是，只有质的运动里有自身的不可分性。</p>
+				<p>变化者在变化的那段时间中的每一段都在变化。所以运动着的事物之前必已完成过运动（运动有终无始），变成了的事物之前也必定是变化着的。</p>
+				<p>有限的运动不能在无限的时间里进行，有限的时间内也不能无限地运动。</p>
+				<p>趋向静止的过程必然也在时间中进行，和运动一样没有起始。</p>
+				<p>再次批驳芝诺，首先时间不是由无数的“现在”合起来的；其次有限的距离（量）只能对应有限的时间，但距离无限可分也能对应时间无限可分；最后存在相对速度，不变的是时间。</p>
+				<p>不具部分的事物（例如点）不能运动（除非因偶性），因为其不能一部分在起点一部分在终点，也不能全在终点，于是只能一直在起点了；而且运动需要先通过比自身小的距离，而不可分的事物没有比自身小的距离。变化不能是无限的，除了圆周运动（啥逻辑啊……）。</p>
+			</div>
+		</section>
+
+		<section id="section87" class="note-section">
+			<h2 class="section-title">第七章 运动必有推动者</h2>
+			<div class="section-content" id="section87-content">
+				<p>任何运动的事物都有其推动者。若可以无限寻求推动者，有限的时间内就可能有无限的运动了，这不可能，于是必有第一推动者。</p>
+				<p>运动有三种，推动者也有三种—使位移者、使质变者和使增减者。但无论哪种情况，都没有任何事物穿插在运动者与推动者之间。</p>
+				<p>任何质变都有可感知的特性。质变不是形式的产生，也不是状况（优劣）的得失，更不是智力的增减（这是啥-_-）。</p>
+				<p>不是所有的运动都可以互相比量（废话），很多疑问只是因为词语的多义性，只有同属一不可分的种的事物（包括运动）才能比量。</p>
+				<p>运动的部分只在总体中潜在存在，所以不一定和运动者成比例（三个人拉船走了30米，不能得出一人拉船能走10米的结论），但总可以和时间成比例。</p>
+			</div>
+		</section>
+
+		<section id="section88" class="note-section">
+			<h2 class="section-title">第八章 不动的推动者在球面上</h2>
+			<div class="section-content" id="section88-content">
+				<p>运动是否永恒？若有起始，则最初的推动者与被动者都只能静止，但静止是运动的潜在，不能先存在（逻辑似乎有点问题，要说最初的静止不能造出后来的运动我还可以接受一些）；同时运动不存在时间也就不存在（无限的时间无秩序，因而不自然）。同理运动也不灭。所以运动是永恒的。</p>
+				<p>指出反对者的论点：</p>
+				<ol>
+					<li>没有任何变化是会永恒发生的。</li>
+					<li>如果运动不生不灭，则静止的事物永远静止，运动的事物永远运动。</li>
+					<li>象生物就可以内在地自发产生运动。</li>
+				</ol>
+				<p>反驳2。首先相信万物皆静的是无益于学问的弱智（-_-！！！）；万物皆动也不可能，因为变化往往有转折点，在此处事物就是静止的；也不可能一些事物永远运动另一些永远静止，这是凭感觉得来的，有些事物一会儿运动一会儿静止（再次-_-！！！），所以动静是可以转换的（这节等于啥都没说）。</p>
+				<p>反驳3。运动有因偶性因本性之分，也有自然和反自然之分。因偶性和反自然都显然有推动者。因本性而自然运动者不能说是被自己推动（自身引起的运动只能有一种，如土下坠火上升；而且非生物无法推动自身；最后单一的事物不能接触自身，因而不能推动）。所以因本性的自然运动是事物本身具有的潜在（被推动的潜在），而这潜在的实现还是需要推动者，对生物而言就是环境。</p>
+				<p>第一推动者存在。如果第一推动者也被自己推动，要么这推动是因偶性的，那么运动便不必然存在；要么这是因本性的，那么它自身的运动和它引起他物的运动就只能是同一种（否则一种运动出于一种运动，就必然有起始）；另外这样继续推论，第一推动者就可以存在无限个。另外也不能第一推动者的两部分相互推动，否则仍可以追溯出一个单一的第一推动者。所以第一推动者既不能动也不可分。</p>
+				<p>第一推动者是永恒的，否则得有另一永恒的第一推动者来推动其产生和灭亡；也只能有一个（什么叫宁可认为有限不愿认为无限，而且一个就够了-_-），因为运动是可以连续追溯的，必有顶点。第一推动者只有一种推动方式（只有一个第一被动者），而之后的推动者视与被动者的关系不同而产生不同运动。</p>
+				<p>位移早于质变早于量变。在逻辑顺序（唯一可连续发生）、时间关系（第一推动者的唯一推动方式）和接近本质（丧失本性最少）三方面位移都是第一运动。</p>
+				<p>反驳1。圆周运动是唯一无限连续的运动。直线运动（他所谓的直线运动是往返运动）在折点处既是起点也是终点，所以运动者必得停留；圆周运动中虽然也可以人为地分割为上半圆和下半圆，但这分点只是潜在地存在，所以不影响运动。其他运动只是串联不是连续，所以可感知事物永在运动（不能两次踏入同一条河流）是错的。同时说明，时间上的分点应属于后一段而非两端皆含（不过根据运动有终无始的说法，应该属于前一段？？）</p>
+				<p>圆周运动在位移中位居第一，是一切其他运动的尺度（大概解释了为何以日出日落为计时基础）。</p>
+				<p>第一推动者没有部分也没有量，因为有限的能力不能存于无限的量中，无限的能力也不能存于有限的量中，而第一推动者有无限的能力。第一推动者推动第一被动者，然后其推动第二被动者。这时虽然第一推动者推动第一被动者的作用已经结束，即第一被动者停止运动，其推动第二被动者的能力仍然存在，以此类推，这样推动能力与运动能力的差异越来越小，直到运动和推动同时产生同时结束。最后一点，<strong>第一推动者位于球面上</strong>。</p>
+			</div>
+		</section>
+		
+		<header class="note-header">
+			<h1 class="note-title">《诗学》</h1>
+			<div class="note-author">亚里士多德</div>
+		</header>
+
+		<section id="section89" class="note-section">
+			<h2 class="section-title">第一卷：摹仿的本性与分类</h2>
+			<div class="section-content" id="section89-content">
+				<p>一切艺术本质上都是摹仿，但方式、对象和媒介各不相同。</p>
+				<p>诗的起源有两个原因：摹仿的本能和音调感、节奏感。</p>
+				<p>摹仿的对象有三种：</p>
+				<ol>
+					<li>比我们好的人（悲剧）</li>
+					<li>比我们差的人（喜剧）</li>
+					<li>与我们相似的人（某些史诗）</li>
+				</ol>
+				<p>摹仿的媒介包括：节奏、语言、音调（悲剧用全部，史诗只用语言）。</p>
+				<p>摹仿的方式：</p>
+				<ol>
+					<li>叙述（如史诗）</li>
+					<li>行动（如戏剧）</li>
+					<li>混合（少见）</li>
+				</ol>
+				<p>诗的分类依据：</p>
+				<ul>
+					<li>对象（好人/坏人）</li>
+					<li>媒介（语言/节奏/音调）</li>
+					<li>方式（叙述/表演）</li>
+				</ul>
+				<p>悲剧与喜剧的差异在于对象不同（悲剧摹仿严肃行动，喜剧摹仿滑稽人物）。</p>
+			</div>
+		</section>
+
+		<section id="section90" class="note-section">
+			<h2 class="section-title">第二卷：悲剧的构成要素</h2>
+			<div class="section-content" id="section90-content">
+				<p>悲剧的定义：对一个严肃、完整、有一定长度的行动的摹仿，通过语言和动作，引发怜悯与恐惧，使这类情感得到净化。</p>
+				<p>悲剧的六个要素：</p>
+				<ol>
+					<li>情节（最根本）</li>
+					<li>性格</li>
+					<li>思想</li>
+					<li>语言</li>
+					<li>音乐</li>
+					<li>场景</li>
+				</ol>
+				<p>情节的重要性：</p>
+				<ul>
+					<li>是悲剧的灵魂（没有情节就没有悲剧）</li>
+					<li>应完整（有开头、中间、结尾）</li>
+					<li>应有一定长度（能被记忆容纳）</li>
+				</ul>
+				<p>性格的塑造原则：</p>
+				<ul>
+					<li>应善良（不是完美，而是有道德选择）</li>
+					<li>应适合（女性不能表现勇敢，奴隶不能表现智慧）</li>
+					<li>应相似（与现实人物相似）</li>
+					<li>应一致（前后不矛盾）</li>
+				</ul>
+				<p>思想：通过语言表达论证、说服的能力。</p>
+				<p>突转与发现：</p>
+				<ol>
+					<li>突转：行动转向相反方向</li>
+					<li>发现：从不知到知的转变</li>
+					<li>二者结合产生最好效果</li>
+				</ol>
+				<p>苦难：毁灭性或痛苦的行动（如死亡、受伤）。</p>
+			</div>
+		</section>
+
+		<section id="section91" class="note-section">
+			<h2 class="section-title">第三卷：史诗与悲剧的差异</h2>
+			<div class="section-content" id="section91-content">
+				<p>史诗与悲剧的共同点：都是严肃行动的摹仿，都有情节、性格、思想、语言。</p>
+				<p>主要差异：</p>
+				<ol>
+					<li>长度：史诗无限制，悲剧有限制（一天之内）</li>
+					<li>媒介：史诗只用叙述，悲剧用动作和语言</li>
+					<li>格律：史诗用六音步，悲剧用多种格律</li>
+				</ol>
+				<p>史诗的优点：</p>
+				<ul>
+					<li>能描写同时发生的多件事</li>
+					<li>能插入无关内容（如荷马的插曲）</li>
+					<li>能使用不可能但可信的事件</li>
+				</ul>
+				<p>悲剧的优点：</p>
+				<ul>
+					<li>更集中、更有力</li>
+					<li>通过表演直接打动观众</li>
+					<li>音乐和场景增强效果</li>
+				</ul>
+				<p>可信与可能：</p>
+				<ul>
+					<li>诗应描写可能发生的事</li>
+					<li>不可能但可信的事优于可能但不可信的事</li>
+					<li>错误分类：
+						<ul>
+							<li>艺术本身的错误（严重）</li>
+							<li>偶然的错误（可原谅）</li>
+						</ul>
+					</li>
+				</ul>
+				<p>情节的统一性：</p>
+				<ul>
+					<li>一个行动，不是一个人的所有事</li>
+					<li>各部分有机联系，不能删除任何部分</li>
+				</ul>
+			</div>
+		</section>
+
+		<section id="section92" class="note-section">
+			<h2 class="section-title">第四卷：诗的效果与净化</h2>
+			<div class="section-content" id="section92-content">
+				<p>悲剧的效果：通过引发怜悯与恐惧，使这类情感得到净化。</p>
+				<p>怜悯：</p>
+				<ul>
+					<li>因他人遭受不应遭受的厄运而产生</li>
+					<li>对象是与我们相似的人</li>
+					<li>需要一定距离（不能太亲近也不能太遥远）</li>
+				</ul>
+				<p>恐惧：</p>
+				<ul>
+					<li>因想到自己可能遭受类似厄运而产生</li>
+					<li>需要主人公不是完全的好人也不是完全的坏人</li>
+				</ul>
+				<p>净化的含义：</p>
+				<ol>
+					<li>医学意义：清除、宣泄</li>
+					<li>宗教意义：涤罪</li>
+					<li>伦理意义：使情感适度</li>
+				</ol>
+				<p>最佳的悲剧情节：</p>
+				<ul>
+					<li>好人由顺境转入逆境（不可取，不引发怜悯）</li>
+					<li>坏人由逆境转入顺境（不可取，不引发恐惧）</li>
+					<li>不好不坏的人因过失由顺境转入逆境（最佳）</li>
+				</ul>
+				<p>过失的类型：</p>
+				<ol>
+					<li>无知（不知对方身份）</li>
+					<li>明知但被迫</li>
+					<li>明知且自愿（最差）</li>
+				</ol>
+				<p>诗与历史的区别：</p>
+				<ul>
+					<li>历史叙述已发生的事</li>
+					<li>诗叙述可能发生的事</li>
+					<li>诗比历史更哲学、更严肃</li>
+				</ul>
+			</div>
+		</section>
+
+		<section id="section93" class="note-section">
+			<h2 class="section-title">第五卷：诗的创作原则</h2>
+			<div class="section-content" id="section93-content">
+				<p>诗人应关注的：</p>
+				<ol>
+					<li>情节的安排（最重要）</li>
+					<li>性格的塑造</li>
+					<li>语言的运用</li>
+				</ol>
+				<p>情节的构造原则：</p>
+				<ul>
+					<li>从结局开始倒推</li>
+					<li>使用普遍性的事（某类人可能说的话、可能做的事）</li>
+					<li>使用发现与突转</li>
+				</ul>
+				<p>语言的运用：</p>
+				<ul>
+					<li>清晰而不平庸</li>
+					<li>使用隐喻、陌生词、修饰语</li>
+					<li>避免生僻词和拙劣隐喻</li>
+				</ul>
+				<p>批评的回应：</p>
+				<ul>
+					<li>不可能的事：如果效果更好，可以接受</li>
+					<li>不合理的事：可以用传统或观众期待解释</li>
+					<li>矛盾：看是艺术错误还是偶然错误</li>
+				</ul>
+				<p>悲剧优于史诗的理由：</p>
+				<ol>
+					<li>更集中</li>
+					<li>所有要素更完善</li>
+					<li>效果更直接</li>
+					<li>不需要表演也能产生效果（读剧本）</li>
+				</ol>
+				<p>诗的最终目的：通过摹仿引发适当的情感，使观众在审美中得到教育与愉悦。</p>
+				<p>总结：诗是比历史更哲学的艺术形式，通过构造可能的情节，摹仿普遍的人性，达到净化情感、提升灵魂的目的。（悲剧是最高的诗艺形式。）</p>
+			</div>
+		</section>
+		<header class="note-header">
+			<h1 class="note-title">《政治学》</h1>
+			<div class="note-author">亚里士多德</div>
+		</header>
+
+		<section id="section94" class="note-section">
+			<h2 class="section-title">第一卷：城邦的本质与家庭</h2>
+			<div class="section-content" id="section94-content">
+				<p>城邦是自然存在的共同体，人是天生的政治动物。</p>
+				<p>城邦的形成过程：</p>
+				<ol>
+					<li>家庭（满足日常生活需要）</li>
+					<li>村坊（若干家庭联合）</li>
+					<li>城邦（若干村坊联合，达到自足）</li>
+				</ol>
+				<p>家庭的组成部分：</p>
+				<ul>
+					<li>主奴关系（统治与被统治）</li>
+					<li>配偶关系（男女结合）</li>
+					<li>亲嗣关系（父母与子女）</li>
+				</ul>
+				<p>奴隶制问题：</p>
+				<ul>
+					<li>自然奴隶：缺乏理性，只能服从他人理性</li>
+					<li>法定奴隶：战争俘虏，可能不是自然奴隶</li>
+					<li>奴役方式：温和的奴役对双方都有益</li>
+				</ul>
+				<p>财产获取的方式：</p>
+				<ol>
+					<li>自然获取（农牧渔猎）</li>
+					<li>非自然获取（商业、高利贷）</li>
+				</ol>
+				<p>批评柏拉图《理想国》：</p>
+				<ul>
+					<li>财产公有削弱责任感和友谊</li>
+					<li>妻子公有破坏人伦关系</li>
+					<li>取消家庭使城邦失去多样性</li>
+				</ul>
+				<p>批评柏拉图《法律篇》：</p>
+				<ul>
+					<li>政体设计过于理想化</li>
+					<li>忽视现实条件</li>
+				</ul>
+			</div>
+		</section>
+
+		<section id="section95" class="note-section">
+			<h2 class="section-title">第二卷：理想政体的批判</h2>
+			<div class="section-content" id="section95-content">
+				<p>考察历史上的政治制度：</p>
+				<ul>
+					<li>斯巴达政体：
+						<ul>
+							<li>优点：重视军事训练</li>
+							<li>缺点：妇女权力过大，财产分配不均</li>
+						</ul>
+					</li>
+					<li>克里特政体：
+						<ul>
+							<li>类似斯巴达但更原始</li>
+							<li>内乱频繁</li>
+						</ul>
+					</li>
+					<li>迦太基政体：
+						<ul>
+							<li>混合政体，较为稳定</li>
+							<li>偏向寡头制</li>
+						</ul>
+					</li>
+				</ul>
+				<p>其他立法者的方案：</p>
+				<ul>
+					<li>法勒亚：平均财产但不控制人口增长</li>
+					<li>希波达莫斯：三分法设计过于机械</li>
+				</ul>
+				<p>理想政体的条件：</p>
+				<ol>
+					<li>公民内部平等</li>
+					<li>财产适度</li>
+					<li>教育统一</li>
+				</ol>
+				<p>政体变革的原因：</p>
+				<ul>
+					<li>不平等感</li>
+					<li>野心和贪婪</li>
+					<li>恐惧和蔑视</li>
+				</ul>
+			</div>
+		</section>
+
+		<section id="section96" class="note-section">
+			<h2 class="section-title">第三卷：公民与政体分类</h2>
+			<div class="section-content" id="section96-content">
+				<p>公民的定义：有权参与司法事务和治理机构的人。</p>
+				<p>好公民与好人的区别：</p>
+				<ul>
+					<li>好公民：在特定政体中发挥适当功能</li>
+					<li>好人：具有完善的德性</li>
+					<li>只有在理想政体中两者才可能统一</li>
+				</ul>
+				<p>政体分类标准：</p>
+				<ol>
+					<li>统治者人数（一人、少数、多数）</li>
+					<li>统治目的（公益、私利）</li>
+				</ol>
+				<p>六种政体类型：</p>
+				<ul>
+					<li>正宗政体（为公益）：
+						<ul>
+							<li>君主制（一人统治）</li>
+							<li>贵族制（少数优秀者统治）</li>
+							<li>共和制（多数人统治）</li>
+						</ul>
+					</li>
+					<li>变态政体（为私利）：
+						<ul>
+							<li>僭主制（君主制的变态）</li>
+							<li>寡头制（贵族制的变态）</li>
+							<li>民主制（共和制的变态）</li>
+						</ul>
+					</li>
+				</ul>
+				<p>寡头制与民主制的区别：</p>
+				<ul>
+					<li>寡头制：富人统治，穷人被排除</li>
+					<li>民主制：穷人统治，富人被排除</li>
+					<li>实际区别在于财产资格限制</li>
+				</ul>
+				<p>正义观念：</p>
+				<ul>
+					<li>民主制：数量平等</li>
+					<li>寡头制：比例平等</li>
+					<li>真正的正义：德性与贡献相称</li>
+				</ul>
+			</div>
+		</section>
+
+		<section id="section97" class="note-section">
+			<h2 class="section-title">第四卷：现实政体的研究</h2>
+			<div class="section-content" id="section97-content">
+				<p>政体研究的四个方面：</p>
+				<ol>
+					<li>最佳政体（理想条件）</li>
+					<li>适合大多数城邦的政体</li>
+					<li>现有政体的维持与改良</li>
+					<li>各种政体的具体组织方式</li>
+				</ol>
+				<p>政体的组成部分：</p>
+				<ul>
+					<li>议事机构</li>
+					<li>行政机构</li>
+					<li>司法机构</li>
+				</ul>
+				<p>议事机构的职能：</p>
+				<ul>
+					<li>战争与和平</li>
+					<li>法律制定</li>
+					<li>官员任免</li>
+				</ul>
+				<p>民主制的种类：</p>
+				<ol>
+					<li>最温和的民主制（尊重法律）</li>
+					<li>农民民主制（农民为主）</li>
+					<li>所有自由人参与的民主制</li>
+					<li>极端民主制（群众意志高于法律）</li>
+				</ol>
+				<p>寡头制的种类：</p>
+				<ol>
+					<li>温和寡头制（财产资格适中）</li>
+					<li>严格寡头制（高财产资格）</li>
+					<li>世袭寡头制</li>
+					<li>僭主式寡头制</li>
+				</ol>
+				<p>僭主制的形式：</p>
+				<ul>
+					<li>野蛮部落的君主式僭主</li>
+					<li>民选独裁者</li>
+					<li>篡位的君主</li>
+				</ul>
+				<p>共和制是寡头制与民主制的混合。</p>
+			</div>
+		</section>
+
+		<section id="section98" class="note-section">
+			<h2 class="section-title">第五卷：政体变革与保全</h2>
+			<div class="section-content" id="section98-content">
+				<p>政体变革的一般原因：</p>
+				<ul>
+					<li>心理原因：
+						<ul>
+							<li>对平等的追求</li>
+							<li>野心和贪婪</li>
+							<li>恐惧和蔑视</li>
+						</ul>
+					</li>
+					<li>具体原因：
+						<ul>
+							<li>选举舞弊</li>
+							<li>忽视小节</li>
+							<li>城邦扩张</li>
+						</ul>
+					</li>
+				</ul>
+				<p>民主制的变革：</p>
+				<ul>
+					<li>通常演变为僭主制（煽动家利用群众）</li>
+					<li>原因：富人受到不公正对待</li>
+				</ul>
+				<p>寡头制的变革：</p>
+				<ul>
+					<li>内部分裂导致革命</li>
+					<li>军事失败导致变革</li>
+				</ul>
+				<p>贵族制的变革：</p>
+				<ul>
+					<li>权力圈子太小</li>
+					<li>财富与德性不相称</li>
+				</ul>
+				<p>保全政体的方法：</p>
+				<ol>
+					<li>遵守法律（包括不成文习惯）</li>
+					<li>防止特权滥用</li>
+					<li>通过教育培养公民精神</li>
+					<li>保持中产阶级优势</li>
+				</ol>
+				<p>僭主制的保全：</p>
+					<ul>
+						<li>传统方法：镇压、分裂、削弱公民</li>
+						<li>较好方法：模仿君主，关注公益</li>
+					</ul>
+				<p>革命发生时机的判断：</p>
+				<ul>
+					<li>恐惧惩罚时</li>
+					<li>期待成功时</li>
+					<li>感到蔑视时</li>
+				</ul>
+			</div>
+		</section>
+
+		<section id="section99" class="note-section">
+			<h2 class="section-title">第六卷：民主制与寡头制的组织</h2>
+			<div class="section-content" id="section99-content">
+				<p>民主制的建立原则：</p>
+				<ul>
+					<li>自由和平等</li>
+					<li>轮流统治和被统治</li>
+					<li>多数人意志至上</li>
+				</ul>
+				<p>民主制的具体措施：</p>
+				<ol>
+					<li>所有公民参与治理</li>
+					<li>抽签选任官员</li>
+					<li>低财产资格或无资格限制</li>
+					<li>短期任职</li>
+					<li>陪审团制</li>
+				</ol>
+				<p>民主制的维持：</p>
+				<ul>
+					<li>保持农民为主（最稳定的民主）</li>
+					<li>法律高于群众意志</li>
+					<li>防止极端平等</li>
+				</ul>
+				<p>寡头制的建立原则：</p>
+				<ul>
+					<li>财富决定权力</li>
+					<li>不平等但符合比例</li>
+				</ul>
+				<p>寡头制的具体措施：</p>
+				<ol>
+					<li>高财产资格</li>
+					<li>选举而非抽签</li>
+					<li>长期任职</li>
+					<li>重要职位有更高资格</li>
+				</ol>
+				<p>寡头制的维持：</p>
+				<ul>
+					<li>军事训练由富人控制</li>
+					<li>防止内部派系斗争</li>
+					<li>适时改革避免革命</li>
+				</ul>
+				<p>行政机构的设置原则：</p>
+				<ul>
+					<li>市场监督</li>
+					<li>公共建筑管理</li>
+					<li>乡村监督</li>
+					<li>财政管理</li>
+					<li>军事指挥</li>
+					<li>宗教事务</li>
+					<li>司法审判</li>
+				</ul>
+			</div>
+		</section>
+
+		<section id="section100" class="note-section">
+			<h2 class="section-title">第七卷：理想城邦的构建</h2>
+			<div class="section-content" id="section100-content">
+				<p>最值得选择的生活：沉思生活与政治生活的结合。</p>
+				<p>理想城邦的条件：</p>
+				<ul>
+					<li>人口：足够自足但不过多</li>
+					<li>领土：能供应所有必需品</li>
+					<li>位置：易于防御，交通便利</li>
+					<li>气候：温和适中</li>
+				</ul>
+				<p>公民的品质：</p>
+				<ol>
+					<li>自由（不受奴役）</li>
+					<li>勇气（保卫城邦）</li>
+					<li>节制（控制欲望）</li>
+					<li>正义（公平分配）</li>
+					<li>智慧（治理能力）</li>
+				</ol>
+				<p>公民阶层的划分：</p>
+				<ul>
+					<li>农民和工匠（提供物质需要）</li>
+					<li>战士（保卫城邦）</li>
+					<li>统治者（治理城邦）</li>
+				</ul>
+				<p>财产制度：私有公用</p>
+				<ul>
+					<li>土地私有，但产品公用</li>
+					<li>防止极端贫富分化</li>
+				</ul>
+				<p>公共设施：</p>
+				<ul>
+					<li>公共食堂（促进团结）</li>
+					<li>神庙（宗教活动）</li>
+					<li>市场（贸易场所）</li>
+					<li>体育场（军事训练）</li>
+				</ul>
+				<p>城邦的防御：</p>
+				<ul>
+					<li>城墙必要但非主要依靠</li>
+					<li>公民军队优于雇佣军</li>
+				</ul>
+				<p>治理原则：</p>
+				<ul>
+					<li>法治而非人治</li>
+					<li>轮流执政</li>
+					<li>关注公民教育</li>
+				</ul>
+			</div>
+		</section>
+
+		<section id="section101" class="note-section">
+			<h2 class="section-title">第八卷：教育与公民培养</h2>
+			<div class="section-content" id="section101-content">
+				<p>教育的目的：培养好公民和好人。</p>
+				<p>教育的责任：城邦而非家庭。</p>
+				<p>教育的内容：</p>
+				<ol>
+					<li>读写和算术（实用技能）</li>
+					<li>体育（强健身体）</li>
+					<li>音乐（陶冶情操）</li>
+					<li>绘画（培养审美）</li>
+				</ol>
+				<p>教育阶段：</p>
+				<ul>
+					<li>0-7岁：家庭抚养，避免不良影响</li>
+					<li>7-14岁：学校学习基础课程</li>
+					<li>14-21岁：体育和军事训练</li>
+					<li>21岁以上：哲学和政治教育</li>
+				</ul>
+				<p>体育教育：</p>
+				<ul>
+					<li>目标：健康而非竞技</li>
+					<li>方法：适度训练</li>
+					<li>避免斯巴达式的过度训练</li>
+				</ul>
+				<p>音乐教育：</p>
+				<ul>
+					<li>目的：培养德性和闲暇能力</li>
+					<li>音乐类型：
+						<ul>
+							<li>伦理型（培养性格）</li>
+							<li>实践型（行动激励）</li>
+							<li>狂热型（情感宣泄）</li>
+						</ul>
+					</li>
+					<li>乐器选择：简单而非复杂</li>
+				</ul>
+				<p>闲暇的教育：</p>
+				<ul>
+					<li>闲暇是生活的目的</li>
+					<li>需要学习如何正确使用闲暇</li>
+					<li>音乐和哲学是闲暇活动</li>
+				</ul>
+				<p>教育的终极目标：</p>
+				<ul>
+					<li>使灵魂的理性部分支配非理性部分</li>
+					<li>培养全面发展的公民</li>
+					<li>实现城邦的共同善</li>
+				</ul>
+				<p>总结：最好的政体是能够培养最好公民的政体，教育是实现这一目标的关键手段。（政治学是伦理学的延续，关注如何在共同体中实现人的完善。）</p>
+			</div>
+		</section>
+		<header class="note-header">
+			<h1 class="note-title">《忏悔录》</h1>
+			<div class="note-author">奥古斯丁</div>
+		</header>
+
+		<section id="section102" class="note-section">
+			<h2 class="section-title">第一卷：上帝充塞天地</h2>
+			<div class="section-content" id="section102-content">
+				<p>上帝充塞天地却不被任何事物包容，因为其包容一切。</p>
+				<p>上帝超越空间，既在内也在外，既充满万有又不被局限。</p>
+			</div>
+		</section>
+
+		<section id="section103" class="note-section">
+			<h2 class="section-title">第三卷：正义与法律</h2>
+			<div class="section-content" id="section103-content">
+				<p>正义是上帝的法律，不因时空改变，但随时代地区不同而形成不同的风俗法令。</p>
+				<p>永恒法与世俗法的区分：</p>
+				<ul>
+					<li>永恒法：上帝心中的正义原则，永恒不变</li>
+					<li>世俗法：人类根据具体情境制定的法律，可变</li>
+				</ul>
+				<p>正义的实现需要适应具体的历史和社会条件。</p>
+			</div>
+		</section>
+
+		<section id="section104" class="note-section">
+			<h2 class="section-title">第四卷：灵魂与至善</h2>
+			<div class="section-content" id="section104-content">
+				<p>灵魂（理智）与肉体都变化不定并非至善，只有上帝是永恒的美。</p>
+				<p>善和美是上帝的本体而非属性。</p>
+				<p>受造物的美和善都是分有的、有限的，唯有上帝是美善本身。</p>
+			</div>
+		</section>
+
+		<section id="section105" class="note-section">
+			<h2 class="section-title">第五卷：知识与信仰</h2>
+			<div class="section-content" id="section105-content">
+				<p>掌握知识与认识上帝（真理）没有关系，真正的智慧是信仰。</p>
+				<p>理性知识与信仰智慧的区别：</p>
+				<ul>
+					<li>知识：关于受造物的认识</li>
+					<li>智慧：关于上帝的认识</li>
+				</ul>
+				<p>信仰先于理解，但理解可以深化信仰。</p>
+			</div>
+		</section>
+
+		<section id="section106" class="note-section">
+			<h2 class="section-title">第七卷：善恶与自由意志</h2>
+			<div class="section-content" id="section106-content">
+				<p>善是可朽坏的实体，至善则是不可朽坏的实体，而恶不是实体，只是不同善的组合让人觉得不协调罢了（但也可说是善的缺失，因为“不和谐”本身就是缺乏善的表现）。</p>
+				<p>恶的两种理解：</p>
+				<ol>
+					<li>不同善的不协调组合</li>
+					<li>善的缺失</li>
+				</ol>
+				<p>人的罪是自由意志叛离了上帝。</p>
+				<p>认识论的层次：</p>
+				<ol>
+					<li>肉体</li>
+					<li>感官</li>
+					<li>判断力</li>
+					<li>神性认识（靠顿悟且不能维持）</li>
+				</ol>
+				<p>一切以存在而论，都是真实。</p>
+			</div>
+		</section>
+
+		<section id="section107" class="note-section">
+			<h2 class="section-title">第八卷：意志的同一性</h2>
+			<div class="section-content" id="section107-content">
+				<p>意志的两面性不能表明有善恶两个灵魂。</p>
+				<p>意志的统一性论证：</p>
+				<ul>
+					<li>灵魂是单一的</li>
+					<li>意志的冲突是同一灵魂内部的张力</li>
+					<li>若每个倾向对应一个灵魂，则灵魂将无限多</li>
+				</ul>
+			</div>
+		</section>
+
+		<section id="section108" class="note-section">
+			<h2 class="section-title">第十卷：记忆与遗忘</h2>
+			<div class="section-content" id="section108-content">
+				<p>学问并非从感觉进入记忆，而只是在记忆中被唤醒。</p>
+				<p>知识是以本身进入记忆，而感官只是以影像的方式进入记忆。</p>
+				<p>记忆的疑难：人们怎么记住“遗忘”的？</p>
+				<ul>
+					<li>若记住遗忘本身，则遗忘应该已经消除了自身作为记忆的存在</li>
+					<li>若只是记住影像，则影像必须后于本体出现才能被记忆</li>
+				</ul>
+				<p>最后的结论，记忆来自上帝的恩赐，但要认识上帝需要超越记忆。</p>
+			</div>
+		</section>
+
+		<section id="section109" class="note-section">
+			<h2 class="section-title">第十一卷：创世与时间</h2>
+			<div class="section-content" id="section109-content">
+				<p>上帝从“无”中以“道”（永恒的智慧）造万物。</p>
+				<p>时间也是被造物，因而在创世之前没有时间无谓先后。</p>
+				<p>时间是思想的尺度（度量时间只有依靠心灵完成）：</p>
+				<ul>
+					<li>过去：现在的记忆，已经消亡</li>
+					<li>未来：现在的预期，尚未存在</li>
+					<li>现在：心灵的延展</li>
+				</ul>
+				<p>但对上帝来说，任何时候都是其现在。</p>
+			</div>
+		</section>
+
+		<section id="section110" class="note-section">
+			<h2 class="section-title">第十二卷：天外之天与混沌</h2>
+			<div class="section-content" id="section110-content">
+				<p>上帝从无中造出混沌和“天外之天”，又从混沌中造出万物（包括现世的天地），但两者是同时进行的（因为此时还没时间）。</p>
+				<p>“天外之天”是属于上帝的，被上帝永恒地照耀着。</p>
+				<p>二者的区别：</p>
+				<ul>
+					<li>“天外之天”：因被照耀而纯粹无变化</li>
+					<li>混沌：无形而无变化</li>
+				</ul>
+				<p>二者虽不受时间限制但都不是如上帝般自有永恒性。</p>
+				<p>对《圣经》的解读可以因人而异（人的智慧不同），只要相信自己理解的是向着真理。</p>
+				<p>“先后”有四种，永恒、时间、优劣和起源，四方面上帝都是最先的。</p>
+			</div>
+		</section>
+
+		<section id="section111" class="note-section">
+			<h2 class="section-title">第十三卷：三位一体与创世象征</h2>
+			<div class="section-content" id="section111-content">
+				<p>万物因上帝本性的善得以存在，而上帝自有。</p>
+				<p>上帝的三位一体类比于人的存在、认识和意志，纯一而不可分割。</p>
+				<p>我们不能认识上帝，就算因上帝而知道也只是上帝自知。</p>
+				<p>解读《创世纪》中的象征意义：</p>
+				<ul>
+					<li>“大水”：寓意痛苦</li>
+					<li>圣灵运行于大水之上：圣灵代表了上帝的爱，可说是最接近世人</li>
+					<li>海：现世的暂时幸福</li>
+					<li>陆地：向往上帝</li>
+					<li>“大的光体”（太阳）：智慧</li>
+					<li>“小的光体”（月亮）：知识</li>
+					<li>其他能力：星光</li>
+					<li>海里的鱼类：以神迹传道的圣人</li>
+					<li>鸟：以言语传道的圣人，二者均在海里，因为只有海里的人才需要用神迹或言语说服（但鸟已经能去地上，我想是说言语比神迹更接近信仰？），而陆地上的人自有信仰不用布道</li>
+					<li>按自己的肖像造人：指精神层面重新塑造人</li>
+					<li>人用理智可以管理“鱼”（礼仪）“飞鸟”（言论）等，但不能裁判人更不能裁判智慧/知识等</li>
+					<li>上帝只对水中生物和人说“孳生繁殖”：意指肉体和灵魂的双重性</li>
+					<li>地上的果实：象征各种善行，寓意人应抛弃口腹之欲而以行善（重在心意）为食</li>
+					<li>最后一天（安息日）永驻，因而没说“有早晨有晚上”</li>
+					<li>我们工作是上帝在我们身上工作，我们休息也同样是上帝在我们身上休息，所以上帝是永远工作永远休息</li>
+				</ul>
+				<p>顺便，女性应隶属于男性……@_@</p>
+			</div>
+		</section>
+		<header class="note-header">
+			<h1 class="note-title">《论三位一体》</h1>
+			<div class="note-author">奥古斯丁</div>
+		</header>
+
+		<section id="section112" class="note-section">
+			<h2 class="section-title">第一卷：三位一体信仰的基础</h2>
+			<div class="section-content" id="section112-content">
+				<p>三位一体是基督信仰的核心奥秘，既不能被完全理解，也不能被理性否定。</p>
+				<p>信仰与理性的关系：信仰寻求理解，但理解不能取代信仰。</p>
+				<p>反对异端的立场：</p>
+				<ul>
+					<li>反对阿里乌主义（否认子的神性）</li>
+					<li>反对撒伯流主义（混淆位格区别）</li>
+					<li>反对形态论（认为三位只是显现方式不同）</li>
+				</ul>
+				<p>三位一体的基本公式：一个本质，三个位格。</p>
+			</div>
+		</section>
+
+		<section id="section113" class="note-section">
+			<h2 class="section-title">第二卷：子与父的关系</h2>
+			<div class="section-content" id="section113-content">
+				<p>子是父的“道”（Logos），永恒地从父而生。</p>
+				<p>“生”与“造”的区别：</p>
+				<ul>
+					<li>生：从本质而出，同质同荣</li>
+					<li>造：从无到有，与被造物不同</li>
+				</ul>
+				<p>子的永恒性：父永恒地生，子永恒地被生，没有时间先后。</p>
+				<p>子的平等性：在神性、权能、荣耀上与父完全平等。</p>
+				<p>子的降卑：道成肉身是位格行动，不改变神圣本质。</p>
+			</div>
+		</section>
+
+		<section id="section114" class="note-section">
+			<h2 class="section-title">第三卷：圣灵的位格与工作</h2>
+			<div class="section-content" id="section114-content">
+				<p>圣灵是父与子之间爱的纽带，从父（和子）发出。</p>
+				<p>“发出”与“生”的微妙区别：都是永恒的内在行动。</p>
+				<p>圣灵的位格性：不是父与子的属性，而是独立的位格。</p>
+				<p>圣灵的工作：</p>
+				<ul>
+					<li>使人成圣</li>
+					<li>赐予恩赐</li>
+					<li>见证基督</li>
+					<li>引导教会</li>
+				</ul>
+				<p>圣灵的平等性：与父、子同质同荣。</p>
+			</div>
+		</section>
+
+		<section id="section115" class="note-section">
+			<h2 class="section-title">第四卷：救赎中的三一显明</h2>
+			<div class="section-content" id="section115-content">
+				<p>救赎历史是三一上帝的自我启示。</p>
+				<p>旧约中的三一暗示：创世中的复数“我们”，先知书中的智慧与灵。</p>
+				<p>新约中的三一显明：</p>
+				<ul>
+					<li>耶稣的洗礼：父说话，子受洗，灵降临</li>
+					<li>大使命：奉父子圣灵的名施洗</li>
+					<li>保罗的祝福：恩惠、慈爱、交通</li>
+				</ul>
+				<p>救赎工作的分配：</p>
+				<ul>
+					<li>父：计划救恩</li>
+					<li>子：完成救恩</li>
+					<li>圣灵：实施救恩</li>
+				</ul>
+				<p>分配是出于爱的秩序，不是本质差异。</p>
+			</div>
+		</section>
+
+		<section id="section116" class="note-section">
+			<h2 class="section-title">第五卷：本质同一与位格区分</h2>
+			<div class="section-content" id="section116-content">
+				<p>本质（ousia）与位格（hypostasis）的关系：</p>
+				<ul>
+					<li>本质：神性本身，父、子、灵完全共享</li>
+					<li>位格：存在的特殊方式，彼此区别</li>
+				</ul>
+				<p>位格的区别在于相互关系：</p>
+				<ul>
+					<li>父：生子的那位</li>
+					<li>子：被父生的那位</li>
+					<li>灵：从父（和子）发出的那位</li>
+				</ul>
+				<p>相互关系是永恒的、内在的，不依赖受造界。</p>
+				<p>不能用数量语言描述三一：不是“三个上帝”，也不是“上帝的三部分”。</p>
+			</div>
+		</section>
+
+		<section id="section117" class="note-section">
+			<h2 class="section-title">第六卷：关系与属性</h2>
+			<div class="section-content" id="section117-content">
+				<p>属性（attributes）属于神性本质，三个位格同等拥有。</p>
+				<p>永恒、全能、全知、全善等都是本质属性。</p>
+				<p>关系（relations）区分位格：</p>
+				<ul>
+					<li>父性：生的关系</li>
+					<li>子性：被生的关系</li>
+					<li>发出：被发的关系</li>
+				</ul>
+				<p>关系是真实的，不是名义上的。</p>
+				<p>行动（operations）外在地归于三个位格，但内在是统一的。</p>
+			</div>
+		</section>
+
+		<section id="section118" class="note-section">
+			<h2 class="section-title">第七卷：内在三一与经世三一</h2>
+			<div class="section-content" id="section118-content">
+				<p>内在三一（immanent Trinity）：上帝永恒的内在生命。</p>
+				<p>经世三一（economic Trinity）：上帝在历史中的显现与行动。</p>
+				<p>两者的对应原则：经世三一反映内在三一，但不是完全等同。</p>
+				<p>道成肉身的特殊性：</p>
+				<ul>
+					<li>只有子成为人</li>
+					<li>父和灵通过子工作</li>
+					<li>不意味着子的神性低于父</li>
+				</ul>
+				<p>救赎中的“指派”不是本质差异，而是爱的秩序。</p>
+			</div>
+		</section>
+
+		<section id="section119" class="note-section">
+			<h2 class="section-title">第八卷：爱的类比</h2>
+			<div class="section-content" id="section119-content">
+				<p>人的爱反映了三一结构。</p>
+				<p>爱的三要素：</p>
+				<ul>
+					<li>爱者（父）</li>
+					<li>被爱者（子）</li>
+					<li>爱本身（灵）</li>
+				</ul>
+				<p>爱的循环：爱在关系中流通，维持统一与区别。</p>
+				<p>这个类比不完美，因为：</p>
+				<ul>
+					<li>人的爱有缺乏</li>
+					<li>上帝的爱是完满的</li>
+					<li>上帝的爱是本质性的</li>
+				</ul>
+				<p>但类比有助于理解位格间的关系性。</p>
+			</div>
+		</section>
+
+		<section id="section120" class="note-section">
+			<h2 class="section-title">第九卷：心灵三一：记忆、理解、意志</h2>
+			<div class="section-content" id="section120-content">
+				<p>人的心灵是上帝形象的所在。</p>
+				<p>心灵的基本三一结构：</p>
+				<ul>
+					<li>记忆（memoria）：知识的储存</li>
+					<li>理解（intelligentia）：知识的把握</li>
+					<li>意志（voluntas）：知识的转向与爱</li>
+				</ul>
+				<p>三者的关系：</p>
+				<ul>
+					<li>相互包含</li>
+					<li>同时存在</li>
+					<li>本质同一（都是心灵）</li>
+					<li>功能区别</li>
+				</ul>
+				<p>这个类比比爱的类比更接近三一奥秘。</p>
+			</div>
+		</section>
+
+		<section id="section121" class="note-section">
+			<h2 class="section-title">第十卷：自我认识与三位一体</h2>
+			<div class="section-content" id="section121-content">
+				<p>自我认识的过程也呈现三一结构。</p>
+				<p>当心灵认识自己时：</p>
+				<ul>
+					<li>心灵本身（父）</li>
+					<li>心灵的自我概念（子）</li>
+					<li>心灵的自我爱（灵）</li>
+				</ul>
+				<p>自我认识的三一特征：</p>
+				<ul>
+					<li>产生者与被产生者同一本质</li>
+					<li>认识与爱同时产生</li>
+					<li>三者不可分割</li>
+				</ul>
+				<p>这个类比指向上帝对自己的永恒认识与爱。</p>
+			</div>
+		</section>
+
+		<section id="section122" class="note-section">
+			<h2 class="section-title">第十一卷：感官与内在三一</h2>
+			<div class="section-content" id="section122-content">
+				<p>从外在感官经验可以追溯三一印记。</p>
+				<p>视觉的三一结构：</p>
+				<ul>
+					<li>可见物体（父）</li>
+					<li>视觉印象（子）</li>
+					<li>视觉注意（灵）</li>
+				</ul>
+				<p>但感官类比不完美：</p>
+				<ul>
+					<li>物体与印象不同质</li>
+					<li>注意力可变</li>
+					<li>过程有时间性</li>
+				</ul>
+				<p>更高层的是内在记忆中的三一结构。</p>
+			</div>
+		</section>
+
+		<section id="section123" class="note-section">
+			<h2 class="section-title">第十二卷：智慧的等级</h2>
+			<div class="section-content" id="section123-content">
+				<p>智慧有两种：</p>
+				<ul>
+					<li>低级智慧：关于受造物的知识</li>
+					<li>高级智慧：关于上帝的知识</li>
+				</ul>
+				<p>只有高级智慧能真正反映上帝形象。</p>
+				<p>罪的后果：心灵转向低级智慧，扭曲了三一形象。</p>
+				<p>救赎：通过基督恢复对上帝的沉思。</p>
+				<p>心灵的更新：从低级转向高级，重新对准永恒真理。</p>
+			</div>
+		</section>
+
+		<section id="section124" class="note-section">
+			<h2 class="section-title">第十三卷：信望爱的三一结构</h2>
+			<div class="section-content" id="section124-content">
+				<p>信、望、爱是心灵转向上帝的方式。</p>
+				<p>三者的三一特征：</p>
+				<ul>
+					<li>信：对不可见的上帝的确信</li>
+					<li>望：对永恒幸福的期待</li>
+					<li>爱：对上帝本身的渴慕</li>
+				</ul>
+				<p>爱的优先性：爱是最大的，因为爱直接以上帝为对象。</p>
+				<p>信望爱的相互关系：</p>
+				<ul>
+					<li>信产生望</li>
+					<li>望激发爱</li>
+					<li>爱成全信</li>
+				</ul>
+				<p>通过信望爱，心灵逐渐恢复上帝形象。</p>
+			</div>
+		</section>
+
+		<section id="section125" class="note-section">
+			<h2 class="section-title">第十四卷：上帝形象与三一恢复</h2>
+			<div class="section-content" id="section125-content">
+				<p>人是按照上帝形象造的，这形象主要在心灵中。</p>
+				<p>形象的特征：</p>
+				<ul>
+					<li>能够认识上帝</li>
+					<li>能够爱上帝</li>
+					<li>具有三一结构</li>
+				</ul>
+				<p>罪的损害：形象被污染，但没有完全丧失。</p>
+				<p>恩典的修复：通过基督，形象被更新。</p>
+				<p>完全的恢复：在来世面对面见上帝时完成。</p>
+				<p>形象恢复的过程就是三一结构重新对准永恒真理的过程。</p>
+			</div>
+		</section>
+
+		<section id="section126" class="note-section">
+			<h2 class="section-title">第十五卷：超越类比与信仰奥秘</h2>
+			<div class="section-content" id="section126-content">
+				<p>所有类比都不足以完全表达三一奥秘。</p>
+				<p>类比的局限：</p>
+				<ul>
+					<li>受造物的有限性</li>
+					<li>心灵的受损状态</li>
+					<li>语言的不足</li>
+				</ul>
+				<p>但类比仍然有价值：</p>
+				<ul>
+					<li>驱除错误观念</li>
+					<li>提供思考方向</li>
+					<li>激发对奥秘的敬畏</li>
+				</ul>
+				<p>最终，三位一体是信仰的奥秘，需要谦卑接受。</p>
+				<p>知识的目的是爱：认识三一是为了更爱上帝。</p>
+				<p>结论：在永恒中，我们将面对面看见上帝，那时三一奥秘将以某种方式向得救者显明，但即使在那时，上帝的本质仍是不可穷尽的奥秘。（理解永远不能取代信仰。）</p>
+			</div>
+		</section>
+		
+		<header class="note-header">
+			<h1 class="note-title">《九章集》</h1>
+			<div class="note-author">普罗提诺</div>
+		</header>
+
+		<section id="section127" class="note-section">
+			<h2 class="section-title">第一卷：灵魂与美</h2>
+			<div class="section-content" id="section127-content">
+				<p>灵魂的本质是非物质的、永恒的，它属于更高的世界，但通过进入身体而暂时与物质结合。</p>
+				<p>美的定义：美是分享形式的结果，物质本身没有美，只有当形式赋予时才能成为美的事物。</p>
+				<p>美的等级：</p>
+				<ol>
+					<li>物质美：可感世界的美，是形式的影像</li>
+					<li>灵魂美：道德和性格的美</li>
+					<li>理智美：理念世界的美，纯粹而永恒</li>
+				</ol>
+				<p>审美过程：灵魂从感知物质美开始，逐渐上升至灵魂美，最终直观理智美。</p>
+				<p>爱的本质：爱是灵魂对美的向往，源于灵魂对其来源的怀念（anamnesis）。</p>
+				<p>幸福的获得：幸福在于灵魂转向内在，专注于其理智本性，摆脱身体欲望的束缚。</p>
+				<p>死亡的意义：死亡是灵魂从身体中解放，不是恶而是解脱，智者不畏惧死亡。</p>
+			</div>
+		</section>
+
+		<section id="section128" class="note-section">
+			<h2 class="section-title">第二卷：可感世界与天界</h2>
+			<div class="section-content" id="section128-content">
+				<p>可感世界的存在是必然的，它由灵魂的最低部分（自然灵魂）产生，作为理念世界的影像。</p>
+				<p>世界永恒存在的论证：</p>
+				<ul>
+					<li>理念世界永恒，其影像也必然永恒</li>
+					<li>世界是理念的完整反映，不会消失</li>
+					<li>时间是世界灵魂活动的度量，没有时间就没有世界</li>
+				</ul>
+				<p>天体的性质：天体是神圣的存在，由纯洁的质料构成，由世界灵魂直接推动。</p>
+				<p>星象学问题：星辰是神圣的，但不是命运的主宰，它们只是更高法则的指示者。</p>
+				<p>质料与恶的关系：质料是绝对的非存在，是形式的缺失，因此是恶的根源，但不是恶本身。</p>
+				<p>恶的本质：恶是善的缺失，就像黑暗是光的缺失，本身没有实体性。</p>
+				<p>宇宙的整体是美的，恶只是局部的不完美，是必然的阴影。</p>
+			</div>
+		</section>
+
+		<section id="section129" class="note-section">
+			<h2 class="section-title">第三卷：命运与自由意志</h2>
+			<div class="section-content" id="section129-content">
+				<p>命运与天意：天意是理智世界的理性法则，命运是这个法则在可感世界的实施。</p>
+				<p>星象影响的范围：星辰只影响身体和外在事件，不影响灵魂的内在选择。</p>
+				<p>自由意志的基础：灵魂属于理智世界，超越于自然因果链条，因此有真正的自由。</p>
+				<p>自由的程度：</p>
+				<ol>
+					<li>身体层面：受自然必然性支配</li>
+					<li>灵魂的情感部分：受习惯和欲望影响</li>
+					<li>理智灵魂：完全自由，与理智世界同一</li>
+				</ol>
+				<p>恶的选择：当灵魂转向身体和物质时，它选择了较低的存在方式，这是自由的滥用。</p>
+				<p>爱神（Eros）的分类：</p>
+				<ul>
+					<li>天界爱神：灵魂对美的向往，导向上升</li>
+					<li>凡间爱神：对物质美的沉迷，导向下降</li>
+				</ul>
+				<p>不死的证明：灵魂是非物质的、单纯的，因此不可分割，不会消亡。</p>
+			</div>
+		</section>
+
+		<section id="section130" class="note-section">
+			<h2 class="section-title">第四卷：灵魂本质与转世</h2>
+			<div class="section-content" id="section130-content">
+				<p>灵魂的本质论证：灵魂是非物质的，因为它能认识理念，而理念是非物质的。</p>
+				<p>灵魂的整体与部分：</p>
+				<ul>
+					<li>世界灵魂：是单一的，弥漫于整个宇宙</li>
+					<li>个体灵魂：是世界灵魂的“部分”，但不是量的分割，而是强度的分化</li>
+					<li>所有灵魂在本质上同一</li>
+				</ul>
+				<p>灵魂进入身体的方式：灵魂不“进入”身体，而是身体参与到灵魂的光中。</p>
+				<p>身体中的灵魂：灵魂不包含在身体内，反而是身体在灵魂内，就像物体在光中。</p>
+				<p>记忆问题：记忆属于灵魂的情感部分，理智灵魂没有记忆，因为它永远直观永恒真理。</p>
+				<p>转世学说：灵魂根据前世的行为选择新的身体，这是灵魂自身倾向的结果。</p>
+				<p>灵魂净化的方法：通过哲学思考转向理智，摆脱身体的束缚。</p>
+				<p>灵魂的最终归宿：与理智合一，甚至上升到太一。</p>
+			</div>
+		</section>
+
+		<section id="section131" class="note-section">
+			<h2 class="section-title">第五卷：理智世界与太一</h2>
+			<div class="section-content" id="section131-content">
+				<p>太一（the One）是万物的终极本源，超越存在和思想，是绝对的单纯。</p>
+				<p>太一的性质：</p>
+				<ul>
+					<li>不可言说，不能用范畴描述</li>
+					<li>超越存在，因为存在意味着多（本质与存在的区分）</li>
+					<li>超越思想，因为思想预设了主体与客体的区分</li>
+					<li>是绝对的善，万物皆向往它</li>
+				</ul>
+				<p>流溢说（emanation）：万物从太一流出，不是通过意志或运动，而是通过必然的满溢。</p>
+				<p>流溢的层次：</p>
+				<ol>
+					<li>太一（the One）→ 理智（Nous）</li>
+					<li>理智（Nous）→ 灵魂（Psyche）</li>
+					<li>灵魂（Psyche）→ 可感世界</li>
+				</ol>
+				<p>理智（Nous）的性质：</p>
+				<ul>
+					<li>是思想与存在的同一</li>
+					<li>包含所有理念（Forms）</li>
+					<li>是永恒不变的世界</li>
+					<li>是灵魂的直接来源</li>
+				</ul>
+				<p理念（Forms）的特征：每个理念都是一个具体的理智，所有理念在理智中彼此渗透。</p>
+				<p>灵魂的下降与上升：灵魂从理智世界“下降”到身体，但可以通过哲学“上升”回理智和太一。</p>
+				<p>神秘的合一（henosis）：通过净化（katharsis）和凝思（theoria），灵魂可以暂时与太一合一。</p>
+			</div>
+		</section>
+
+		<section id="section132" class="note-section">
+			<h2 class="section-title">第六卷：存在与范畴</h2>
+			<div class="section-content" id="section132-content">
+				<p>存在的种类（亚里士多德十个范畴的批判）：</p>
+				<ol>
+					<li>太一：超越存在</li>
+					<li>理智世界：真实存在，包含实体、性质、数量等，但这些范畴在理智世界中是统一的</li>
+					<li>可感世界：存在的影像，范畴在这里才真正分离</li>
+				</ol>
+				<p>实体的等级：</p>
+				<ul>
+					<li>首要实体：理智世界中的理念</li>
+					<li>次要实体：可感世界中的具体事物</li>
+					<li>最低实体：质料，几乎是非存在</li>
+				</ul>
+				<p>数字的性质：数字存在于灵魂中，是灵魂组织经验的工具，不是独立实体。</p>
+				<p>美的本体论基础：美是理念在物质中的显现，美的程度取决于分享理念的程度。</p>
+				<p>善与太一的关系：太一就是至善，善不是属性而是本源。</p>
+				<p>自由与必然的调和：在理智世界中，自由与必然同一，因为理智必然地思考其自身本质。</p>
+				<p>时间的本质：时间是灵魂活动的度量，是永恒（aion）的影像。</p>
+				<p>永恒的界定：永恒是理智世界的生命形式，是同时拥有的完整生命，没有过去和未来。</p>
+				<p>哲学的终极目标：通过辩证法上升，最终达到对太一的直观，这不仅是知识的完成，也是生命的转化和神化（theosis）。</p>
+			</div>
+		</section>
+		<header class="note-header">
+			<h1 class="note-title">伊壁鸠鲁作品集</h1>
+			<div class="note-author">伊壁鸠鲁</div>
+		</header>
+
+		<section id="section133" class="note-section">
+			<h2 class="section-title">自然哲学</h2>
+			<div class="section-content" id="section133-content">
+				<p>万物总量不变，因为宇宙之外没有存在，所以物质守恒。物质不能生于无也不能灭于无。</p>
+				<p>存在由物质和虚空构成，二者皆无限。</p>
+				<p>万物本原是不可分割的物质粒子（原子）。原子的数量无穷，形状却是有限的。原子有体积，而且不同原子的体积可能不同。</p>
+				<p>原子永恒地连续运动着，没有起点。不同原子运动速度一致，但组合成的事物运动速度不一样是因为原子运动方向不一定相同，因而滞缓了整体运动。</p>
+				<p>存在无数个世界，每个世界的形状可能不同。一个世界是从无限的宇宙中切下来的有限的存在，但我们看不到限，于是不能确定其形状。</p>
+				<p>“形式”虽然很稀薄（没有实体内容），却存在。“形状”产生的“影像”到达理智，就产生了视觉。“影像”的速度无限，从物体表面连续流出又被其他原子迅速补上，在路上可能受损。听觉嗅觉也都是原子流被接受产生的。</p>
+				<p>灵魂也由原子组成（因为灵魂不是虚空，就只能是物质），与身体缺一不可，都不能单独运作。</p>
+				<p>属性是整体的附属，无法分离。“偶性”既不是本性也不是属性。</p>
+				<p>时间是自明的概念，不需要解释。</p>
+				<p>事物的名称不是来自约定俗成而是来自语言。</p>
+				<p>天体运作不是神的作用，也与幸运无关，只是世界产生时最初的原子聚合。</p>
+				<p>一切判断必须出自直观和理性，像地狱或占星之类的概念并不事实存在。可以存在多种解释，只要与感性经验一致。</p>
+			</div>
+		</section>
+		<section id="section134" class="note-section">
+			<h2 class="section-title">伦理学</h2>
+			<div class="section-content" id="section134-content">
+				<p>神存在，不朽而美好。</p>
+				<p>死亡即不存在，所以活人与死人都与死亡无关。死不是一种恶。</p>
+				<p>未来既不是全不可把握，也不是全能把握，即命运不存在但偶然性存在。</p>
+				<p>欲望分三种：自然而必要的（口渴喝水），自然但不必要的（纵欲）和不自然的（成名欲）。</p>
+				<p>幸福的终极是身体健康和灵魂无烦恼。</p>
+				<p>快乐（不是肉体的快感，而是理性带来的摆脱痛苦）是诸善之首。但要注意避免可能带来更大痛苦的快乐，和追求会带来更大快乐的痛苦。</p>
+				<p>习惯简朴但不拒绝奢侈，因为只有不需要奢侈生活的人才能最好地享受奢侈。</p>
+				<p>最重要的德性是明智（记得《会饮篇》里面明智的定义吗？），甚至比哲学还可贵。</p>
+				<p>自然科学是为了消除对自然的恐惧感，所以也是为了快乐。</p>
+				<p>自然正义就是人们对彼此不伤害做出的承诺（个人利益的追求）。不存在“绝对正义”。不正义本身不是恶，但对其后果的担忧（这是人的本性）则是恶。</p>
+				<p>最后，性爱从来也不会带来好处，如果不带来伤害已经谢天谢地了-_-</p>
+			</div>
+		</section>		
+	</main>
+
+    <script>
+	// 修改展开/收起哲学家作品列表的功能
+	document.querySelectorAll('.philosopher-name').forEach(toggle => {
+		toggle.addEventListener('click', function() {
+			const targetId = this.id.replace('-toggle', '-works');
+			const worksList = document.getElementById(targetId);
+			const icon = this.querySelector('.toggle-icon');
+			
+			// 如果点击的是已展开的，则收起
+			if (worksList.classList.contains('expanded')) {
+				worksList.classList.remove('expanded');
+				icon.textContent = '▼';
+			} else {
+				// 收起其他所有哲学家作品列表
+				document.querySelectorAll('.philosopher-name').forEach(otherToggle => {
+					if (otherToggle !== this) {
+						const otherId = otherToggle.id.replace('-toggle', '-works');
+						const otherWorksList = document.getElementById(otherId);
+						const otherIcon = otherToggle.querySelector('.toggle-icon');
+						if (otherWorksList) {
+							otherWorksList.classList.remove('expanded');
+							otherIcon.textContent = '▼';
+						}
+					}
+				});
+				
+				// 展开当前作品列表
+				worksList.classList.add('expanded');
+				icon.textContent = '▲';
+			}
+		});
+	});
+
+	// 修改展开/收起某作品的子章节功能
+	document.querySelectorAll('.work-link').forEach(link => {
+		link.addEventListener('click', function(e) {
+			e.preventDefault();
+			
+			// 获取目标章节ID
+			const targetId = this.getAttribute('href').substring(1);
+			const targetElement = document.getElementById(targetId);
+			
+			// 收起其他所有作品的子章节
+			document.querySelectorAll('.work-link').forEach(otherLink => {
+				if (otherLink !== this) {
+					const otherWorkToggle = otherLink.querySelector('.work-toggle');
+					if (otherWorkToggle) {
+						const otherWorkItem = otherLink.parentElement;
+						const otherSubsections = otherWorkItem.querySelector('.subsections-list');
+						if (otherSubsections) {
+							otherSubsections.classList.remove('expanded');
+							otherWorkToggle.textContent = '▼';
+						}
+					}
+				}
+			});
+			
+			// 如果有子章节，则展开/收起当前作品的子章节
+			const workToggle = this.querySelector('.work-toggle');
+			if (workToggle) {
+				const workItem = this.parentElement;
+				const subsections = workItem.querySelector('.subsections-list');
+				if (subsections) {
+					// 切换展开/收起状态
+					if (subsections.classList.contains('expanded')) {
+						subsections.classList.remove('expanded');
+						workToggle.textContent = '▼';
+					} else {
+						subsections.classList.add('expanded');
+						workToggle.textContent = '▲';
+					}
+				}
+			}
+			
+			// 滚动到目标位置（如果是章节标题）
+			if (targetElement && targetElement.classList.contains('note-section')) {
+				window.scrollTo({
+					top: targetElement.offsetTop - 20,
+					behavior: 'smooth'
+				});
+			}
+			
+			// 更新活跃链接
+			document.querySelectorAll('.work-link').forEach(item => {
+				item.classList.remove('active');
+			});
+			this.classList.add('active');
+		});
+	});
+
+	// 修改初始化代码，确保只展开当前活跃的作品
+	document.addEventListener('DOMContentLoaded', function() {
+		// 默认展开柏拉图作品列表
+		const platoWorks = document.getElementById('plato-works');
+		const platoToggle = document.getElementById('plato-toggle');
+		if (platoWorks && platoToggle) {
+			platoWorks.classList.add('expanded');
+			platoToggle.querySelector('.toggle-icon').textContent = '▲';
+		}
+		
+		// 找到当前活跃的作品链接
+		const activeWorkLink = document.querySelector('.work-link.active');
+		if (activeWorkLink) {
+			// 展开当前活跃作品的子章节
+			const workToggle = activeWorkLink.querySelector('.work-toggle');
+			if (workToggle) {
+				const workItem = activeWorkLink.parentElement;
+				const subsections = workItem.querySelector('.subsections-list');
+				if (subsections) {
+					subsections.classList.add('expanded');
+					workToggle.textContent = '▲';
+				}
+			}
+		}
+		
+		// 设置当前活跃的子章节（第一个）
+		const activeSubsections = document.querySelector('.subsections-list.expanded');
+		if (activeSubsections) {
+			const firstSubsection = activeSubsections.querySelector('.subsection-link');
+			if (firstSubsection) {
+				firstSubsection.classList.add('active');
+			}
+		}
+	});
+    </script>
+</body>
+</html>

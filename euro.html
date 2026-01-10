@@ -1,0 +1,542 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>欧洲皇室谱系</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+    #cy {
+      width: 100%;
+      height: calc(100% - 60px);
+      display: block;
+    }
+    #toolbar {
+      height: 60px;
+      padding: 10px;
+      background: #f0f0f0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid #ccc;
+    }
+    #details {
+      position: absolute;
+      right: 10px;
+      top: 70px;
+      width: 260px;
+      background: white;
+      border: 1px solid #ccc;
+      padding: 10px;
+      font-size: 14px;
+      display: none;
+      box-shadow: 0 0 8px rgba(0,0,0,0.2);
+    }
+  </style>
+
+  <script src="https://unpkg.com/cytoscape@3.28.0/dist/cytoscape.min.js"></script>
+</head>
+
+<body>
+<div style="color:#e74c3c;font-weight:bold"><a href="/china.html">瓷器</a> | <a href="/sh_history.html">上海历史</a> | <a href="/philosophy.html">哲学笔记</a> | 欧洲皇室谱系 | <a href="/index.html">返回</a></div>
+
+<div id="search-container"
+     style="
+       position:absolute;
+       top:10px;
+       right:10px;
+       z-index:999;
+     ">
+  <input id="searchBox"
+         type="text"
+         placeholder="搜索…"
+         autocomplete="off"
+         style="
+           width:180px;
+           padding:6px 8px;
+           font-size:14px;
+           border:1px solid #aaa;
+           border-radius:4px;
+         ">
+  <div id="search-suggestions"
+       style="
+         position:absolute;
+         top:32px;
+         right:0;
+         width:180px;
+         background:white;
+         border:1px solid #ccc;
+         border-radius:4px;
+         display:none;
+         max-height:200px;
+         overflow-y:auto;
+         box-shadow:0 2px 6px rgba(0,0,0,0.15);
+         font-size:14px;
+         z-index:1000;
+       ">
+  </div>
+</div>
+
+
+<div id="legend" style="padding:10px; background:#fafafa; border-bottom:1px solid #ccc; display:flex; gap:20px;">
+  <div class="legend-item" data-country="England" style="cursor:pointer;">
+    <span style="display:inline-block; width:14px; height:14px; background:#4A90E2; margin-right:6px;"></span>
+    英格兰
+  </div>
+  <div class="legend-item" data-country="France" style="cursor:pointer;">
+    <span style="display:inline-block; width:14px; height:14px; background:#E94E77; margin-right:6px;"></span>
+    法国
+  </div>
+  <div class="legend-item" data-country="Spain" style="cursor:pointer;">
+    <span style="display:inline-block; width:14px; height:14px; background:#D4A017; margin-right:6px;"></span>
+    西班牙
+  </div>
+  <div class="legend-item" data-country="Austria" style="cursor:pointer;">
+    <span style="display:inline-block; width:14px; height:14px; background:#9B59B6; margin-right:6px;"></span>
+    奥地利
+  </div>
+  <div class="legend-item" data-country="Italy" style="cursor:pointer;">
+    <span style="display:inline-block; width:14px; height:14px; background:#1ABC9C; margin-right:6px;"></span>
+    意大利
+  </div>
+  <div class="legend-item" data-country="Portugal" style="cursor:pointer;">
+    <span style="display:inline-block; width:14px; height:14px; background:#E67E22; margin-right:6px;"></span>
+    葡萄牙
+  </div>
+  <div class="legend-item" data-country="Denmark" style="cursor:pointer;">
+    <span style="display:inline-block; width:14px; height:14px; background:#C0392B; margin-right:6px;"></span>
+    丹麦
+  </div>
+  <div class="legend-item" data-country="Germany" style="cursor:pointer;">
+    <span style="display:inline-block; width:14px; height:14px; background:#7D3C98; margin-right:6px;"></span>
+    德国
+  </div>
+  <div class="legend-item" data-country="other" style="cursor:pointer;">
+    <span style="display:inline-block; width:14px; height:14px; background:#777; margin-right:6px;"></span>
+    其他
+  </div>
+</div>
+
+<div id="cy"></div>
+<div id="details"></div>
+
+<script>
+fetch('gedcom_graph.json')
+  .then(r => r.json())
+  .then(data => {
+
+    /* -------------------------
+       工具函数：出生年份
+       ------------------------- */
+    function getBirthYear(str) {
+      if (!str) return null;
+      const m = str.match(/\d{4}/);
+      return m ? parseInt(m[0]) : null;
+    }
+
+    /* -------------------------
+       1. 构建关系索引
+       ------------------------- */
+    const parents = {}, children = {}, spouses = {};
+    const famMembers = {};
+
+    data.nodes.forEach(n => {
+      if (n.data.type === "person") {
+        parents[n.data.id] = [];
+        children[n.data.id] = [];
+        spouses[n.data.id] = [];
+      }
+      if (n.data.type === "family") {
+        famMembers[n.data.id] = {husb: [], wife: [], chil: []};
+      }
+    });
+
+    data.edges.forEach(e => {
+      const s = e.data.source;
+      const t = e.data.target;
+      const type = e.data.type;
+
+      if (type === "spouse" && famMembers[t]) {
+        const person = data.nodes.find(n => n.data.id === s);
+        if (person.data.sex === "男性") famMembers[t].husb.push(s);
+        else famMembers[t].wife.push(s);
+      }
+
+      if (type === "child" && famMembers[s]) {
+        famMembers[s].chil.push(t);
+      }
+    });
+
+    for (const fid in famMembers) {
+      const fam = famMembers[fid];
+
+      fam.husb.forEach(h => fam.wife.forEach(w => {
+        spouses[h].push(w);
+        spouses[w].push(h);
+      }));
+
+      fam.chil.forEach(c => {
+        fam.husb.forEach(h => parents[c].push(h));
+        fam.wife.forEach(w => parents[c].push(w));
+      });
+
+      fam.husb.concat(fam.wife).forEach(p => {
+        fam.chil.forEach(c => children[p].push(c));
+      });
+    }
+
+    /* -------------------------
+       2. 计算世代层级布局
+       ------------------------- */
+    let minYear = Infinity;
+    data.nodes.forEach(n => {
+      if (n.data.type === "person") {
+        const y = getBirthYear(n.data.birth);
+        if (y && y < minYear) minYear = y;
+      }
+    });
+
+    data.nodes.forEach(n => {
+      if (n.data.type === "person") {
+        const y = getBirthYear(n.data.birth);
+        if (y) {
+          const gen = Math.floor((y - minYear) / 30);
+          n.position = { x: Math.random() * 800, y: gen * 200 };
+        }
+      }
+    });
+
+    data.nodes.forEach(n => {
+      if (n.data.type === "family") {
+        const fid = n.data.id;
+        const fam = famMembers[fid];
+        const members = fam.husb.concat(fam.wife).concat(fam.chil);
+
+        const ys = members
+          .map(id => data.nodes.find(nn => nn.data.id === id))
+          .filter(nn => nn && nn.position)
+          .map(nn => nn.position.y);
+
+        if (ys.length > 0) {
+          const avg = ys.reduce((a,b)=>a+b,0) / ys.length;
+          n.position = { x: Math.random() * 800, y: avg };
+        }
+      }
+    });
+
+    /* -------------------------
+       3. 创建 Cytoscape 图
+       ------------------------- */
+    window.cy = cytoscape({
+      container: document.getElementById('cy'),
+      elements: data,
+      style: [
+
+		{
+		  selector: 'node[type="person"]',
+		  style: {
+			'shape': 'round-rectangle',
+			'background-color': ele => {
+			  const c = ele.data('country');
+			  if (c === 'England') return '#4A90E2';   // 蓝
+			  if (c === 'France')  return '#E94E77';   // 红
+			  if (c === 'Spain')   return '#D4A017';   // 金
+			  if (c === 'Austria') return '#9B59B6';   // 紫
+			  if (c === 'Italy') return '#1ABC9C';  // 青绿
+			  if (c === 'Portugal') return '#E67E22';  // 橙
+			  if (c === 'Denmark') return '#C0392B';   // 深红
+			  if (c === 'Germany') return '#7D3C98'; // 深紫
+			  return '#777';                           // 其他
+			},
+			'label': 'data(label)',
+			'font-size': 14,
+			'text-valign': 'center',
+			'text-halign': 'center',
+			'color': '#fff',
+			'padding': '12px',
+			'border-width': 2,
+			'border-color': '#333',
+			'width': 'label',
+			'height': 'label',
+			'min-width': 80,
+			'min-height': 30,
+			'text-wrap': 'wrap',
+			'text-max-width': 120
+		  }
+		},
+
+
+		{
+		  selector: 'node[type="family"]',
+		  style: {
+			'shape': 'ellipse',
+			'background-color': '#666',
+			'width': 10,
+			'height': 10
+		  }
+		},
+
+
+        {
+          selector: 'edge[type="spouse"]',
+          style: {
+            'line-color': '#1f77b4',
+            'width': 3
+          }
+        },
+
+        {
+          selector: 'edge[type="child"]',
+          style: {
+            'line-color': '#2ca02c',
+            'width': 2,
+            'target-arrow-shape': 'triangle',
+            'target-arrow-color': '#2ca02c'
+          }
+        },
+
+        {
+          selector: '.highlight',
+          style: {
+            'border-color': 'yellow',
+            'border-width': 4
+          }
+        },
+		{
+		  selector: '.highlight-country',
+		  style: {
+			'opacity': 1,
+			'border-width': 4,
+			'border-color': '#FFD700'
+		  }
+		},
+		{
+		  selector: '.dim-country',
+		  style: {
+			'opacity': 0.15
+		  }
+		}
+      ],
+
+      layout: { name: 'preset' },
+
+      ready: function(){
+        const cy = this;
+
+        const cose = cy.layout({
+          name: 'cose',
+          animate: false,
+          nodeRepulsion: 80000,
+          idealEdgeLength: 120,
+          gravity: 0.1,
+          numIter: 2000
+        });
+
+        cose.run();
+      }
+    });
+
+    /* -------------------------
+       4. 点击显示详情
+       ------------------------- */
+    cy.on('tap', 'node[type="person"]', function(evt){
+      const d = evt.target.data();
+      const id = d.id;
+
+      const box = document.getElementById('details');
+      box.style.display = 'block';
+
+      function names(arr) {
+        return arr.map(pid => cy.getElementById(pid).data('label')).join('、') || '无';
+      }
+
+      box.innerHTML = `
+        <b style="font-size:16px">${d.label}</b><br><br>
+        性别：${d.sex}<br>
+        出生：${d.birth || '未知'}<br>
+        死亡：${d.death || '未知'}<br><br>
+		<b>国家：</b> ${d.country || '未知'}<br>
+        <b>父母：</b> ${names(parents[id])}<br>
+        <b>配偶：</b> ${names(spouses[id])}<br>
+        <b>子女：</b> ${names(children[id])}<br>
+      `;
+    });
+
+	cy.on('tap', function(evt){
+	  if (evt.target === cy) {
+
+		// 隐藏详情框
+		document.getElementById('details').style.display = 'none';
+
+		// 恢复所有节点的正常样式
+		cy.elements().removeClass('highlight-country');
+		cy.elements().removeClass('dim-country');
+		cy.elements().removeClass('highlight');  // 搜索高亮也顺便清掉
+
+		// 可选：自动缩放回全图
+		// cy.fit(cy.elements(), 100);
+	  }
+	});
+
+	/* -------------------------
+	   国家高亮功能
+	   ------------------------- */
+	   // “其他”包含的国家列表
+	const OTHER_COUNTRIES = ["Scotland", "Poland_Hungary"];
+
+	document.querySelectorAll('.legend-item').forEach(item => {
+	  item.addEventListener('click', () => {
+		const country = item.dataset.country;
+
+		cy.elements().removeClass('highlight-country');
+		cy.elements().removeClass('dim-country');
+
+		cy.nodes().forEach(n => {
+		  if (n.data('type') !== 'person') return;
+
+		  const c = n.data('country');
+
+		  // 如果点击的是“其他”，匹配多个国家
+		  if (country === "other") {
+			if (OTHER_COUNTRIES.includes(c)) {
+			  n.addClass('highlight-country');
+			} else {
+			  n.addClass('dim-country');
+			}
+		  }
+
+		  // 普通国家：只匹配单一国家
+		  else {
+			if (c === country) {
+			  n.addClass('highlight-country');
+			} else {
+			  n.addClass('dim-country');
+			}
+		  }
+		});
+	  });
+	});
+	/* -------------------------
+	   自动补全候选项
+	   ------------------------- */
+	const searchBox = document.getElementById('searchBox');
+	const suggestionBox = document.getElementById('search-suggestions');
+
+	searchBox.addEventListener('input', () => {
+	  const text = searchBox.value.trim();
+	  suggestionBox.innerHTML = '';
+
+	  if (!text) {
+		suggestionBox.style.display = 'none';
+		return;
+	  }
+
+	  // 找到匹配的节点
+	const t = text.toLowerCase();
+
+	const matches = cy.nodes().filter(n => {
+	  if (n.data('type') !== 'person') return false;
+
+	  const label = n.data('label');
+	  const full = n.data('pinyin_full');
+	  const abbr = n.data('pinyin_abbr');
+	  const by = n.data('birth_year');
+	  const dy = n.data('death_year');
+
+	  // 年份匹配
+	  const yearMatch =
+		(by && by.toString().includes(t)) ||
+		(dy && dy.toString().includes(t)) ||
+		// 输入“70”匹配“1470”
+		(by && by.toString().slice(2).includes(t)) ||
+		(dy && dy.toString().slice(2).includes(t));
+
+	  return (
+		label.includes(text) ||
+		(full && full.includes(t)) ||
+		(abbr && abbr.includes(t)) ||
+		yearMatch
+	  );
+	});
+
+
+	  if (matches.length === 0) {
+		suggestionBox.style.display = 'none';
+		return;
+	  }
+
+	  // 显示候选项
+	  matches.forEach(n => {
+		const div = document.createElement('div');
+		const by = n.data('birth_year');
+		const dy = n.data('death_year');
+
+		const yearText = (by || dy)
+		  ? ` (${by || "?"} - ${dy || "?"})`
+		  : "";
+
+		div.textContent = n.data('label') + yearText;
+		div.style.padding = '6px 8px';
+		div.style.cursor = 'pointer';
+
+		div.addEventListener('mouseover', () => {
+		  div.style.background = '#eee';
+		});
+		div.addEventListener('mouseout', () => {
+		  div.style.background = 'white';
+		});
+
+		// 点击候选项
+		div.addEventListener('click', () => {
+		  searchBox.value = n.data('label');
+		  suggestionBox.style.display = 'none';
+		  highlightNode(n);
+		});
+
+		suggestionBox.appendChild(div);
+	  });
+
+	  suggestionBox.style.display = 'block';
+	});
+	function highlightNode(node) {
+	  cy.elements().removeClass('highlight');
+	  node.addClass('highlight');
+	  cy.fit(node, 100);
+
+	  // 显示详情
+	  const d = node.data();
+	  const id = d.id;
+
+	  const box = document.getElementById('details');
+	  box.style.display = 'block';
+
+	  function names(arr) {
+		return arr.map(pid => cy.getElementById(pid).data('label')).join('、') || '无';
+	  }
+
+	  box.innerHTML = `
+		<b style="font-size:16px">${d.label}</b><br><br>
+		性别：${d.sex}<br>
+		出生：${d.birth || '未知'}<br>
+		死亡：${d.death || '未知'}<br><br>
+		<b>国家：</b> ${d.country || '未知'}<br>
+		<b>父母：</b> ${names(parents[id])}<br>
+		<b>配偶：</b> ${names(spouses[id])}<br>
+		<b>子女：</b> ${names(children[id])}<br>
+	  `;
+	}
+
+
+
+  });
+</script>
+
+</body>
+</html>

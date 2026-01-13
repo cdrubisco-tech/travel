@@ -18,15 +18,6 @@
       height: calc(100% - 60px);
       display: block;
     }
-    #toolbar {
-      height: 60px;
-      padding: 10px;
-      background: #f0f0f0;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      border-bottom: 1px solid #ccc;
-    }
     #details {
       position: absolute;
       right: 10px;
@@ -39,13 +30,65 @@
       display: none;
       box-shadow: 0 0 8px rgba(0,0,0,0.2);
     }
+	#toolbar {
+	  display: flex;
+	  flex-direction: row;
+	  align-items: center;
+	  gap: 8px;
+	}
+
+	.input-wrapper {
+	  position: relative;
+	  grid: 1;
+	}
+
+	.dropdown {
+	  position: absolute;
+	  top: 100%;
+	  left: 0;
+	  width: 100%;
+	  background: white;
+	  border: 1px solid #ccc;
+	  max-height: 200px;
+	  overflow-y: auto;
+	  z-index: 9999;
+	  display: none;
+	}
+
+	.dropdown-item {
+	  padding: 6px 10px;
+	  cursor: pointer;
+	}
+
+	.dropdown-item:hover {
+	  background: #eee;
+	}
+	.path-btn {
+	  margin-right: 8px;
+	  padding: 4px 8px;
+	  cursor: pointer;
+	}
+	.detail-btn-row {
+	  display: flex;
+	  justify-content: space-between;
+	  align-items: center;
+	}
+	.legend-item.active {
+	  padding-left: 4px;
+	  padding-right: 4px;
+	  box-shadow: 0 0 5px rgba(0,0,0,2);
+	  font-weight: bold;
+	  transform: scale(1.2);
+	  color: #ff0000;
+	}
+
   </style>
 
   <script src="https://unpkg.com/cytoscape@3.28.0/dist/cytoscape.min.js"></script>
 </head>
 
 <body>
-<div style="color:#e74c3c;font-weight:bold"><a href="/china.html">瓷器</a> | <a href="/sh_history.html">上海历史</a> | <a href="/philosophy.html">哲学笔记</a> | 欧洲皇室谱系 | <a href="/index.html">返回</a></div>
+<div style="color:#e74c3c;font-weight:bold"><a href="/china.html">瓷器</a> | <a href="/sh_history.html">上海历史</a> | <a href="/philosophy.html">哲学笔记</a> | 欧洲贵族谱系 | <a href="/index.html">返回</a></div>
 
 <div id="search-container"
      style="
@@ -86,35 +129,35 @@
 
 
 <div id="legend" style="padding:10px; background:#fafafa; border-bottom:1px solid #ccc; display:flex; gap:20px;">
-  <div class="legend-item" data-country="England" style="cursor:pointer;">
+  <div class="legend-item" data-country="英国" style="cursor:pointer;">
     <span style="display:inline-block; width:14px; height:14px; background:#4A90E2; margin-right:6px;"></span>
-    英格兰
+    英国
   </div>
-  <div class="legend-item" data-country="France" style="cursor:pointer;">
+  <div class="legend-item" data-country="法国" style="cursor:pointer;">
     <span style="display:inline-block; width:14px; height:14px; background:#E94E77; margin-right:6px;"></span>
     法国
   </div>
-  <div class="legend-item" data-country="Spain" style="cursor:pointer;">
+  <div class="legend-item" data-country="西班牙" style="cursor:pointer;">
     <span style="display:inline-block; width:14px; height:14px; background:#D4A017; margin-right:6px;"></span>
     西班牙
   </div>
-  <div class="legend-item" data-country="Austria" style="cursor:pointer;">
+  <div class="legend-item" data-country="奥地利" style="cursor:pointer;">
     <span style="display:inline-block; width:14px; height:14px; background:#9B59B6; margin-right:6px;"></span>
     奥地利
   </div>
-  <div class="legend-item" data-country="Italy" style="cursor:pointer;">
+  <div class="legend-item" data-country="意大利" style="cursor:pointer;">
     <span style="display:inline-block; width:14px; height:14px; background:#1ABC9C; margin-right:6px;"></span>
     意大利
   </div>
-  <div class="legend-item" data-country="Portugal" style="cursor:pointer;">
+  <div class="legend-item" data-country="葡萄牙" style="cursor:pointer;">
     <span style="display:inline-block; width:14px; height:14px; background:#E67E22; margin-right:6px;"></span>
     葡萄牙
   </div>
-  <div class="legend-item" data-country="Denmark" style="cursor:pointer;">
+  <div class="legend-item" data-country="丹麦" style="cursor:pointer;">
     <span style="display:inline-block; width:14px; height:14px; background:#C0392B; margin-right:6px;"></span>
     丹麦
   </div>
-  <div class="legend-item" data-country="Germany" style="cursor:pointer;">
+  <div class="legend-item" data-country="德国" style="cursor:pointer;">
     <span style="display:inline-block; width:14px; height:14px; background:#7D3C98; margin-right:6px;"></span>
     德国
   </div>
@@ -122,7 +165,71 @@
     <span style="display:inline-block; width:14px; height:14px; background:#777; margin-right:6px;"></span>
     其他
   </div>
+  
+	<div id="help-icon" style="cursor:pointer; width:24px; height:24px; border-radius:50%; border:1px solid #666; display:flex; align-items:center; justify-content:center; font-weight:bold; color:#666;" title="查看图例">
+		?
+	</div>
 </div>
+
+<div id="diagram-overlay" style="display:none; position:absolute; top:50px; background:white; border:1px solid #ccc; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index:1000; padding:20px; border-radius:8px;">
+    <div id="close-diagram" style="position:absolute; top:5px; right:10px; cursor:pointer; font-size:20px; color:#999;">&times;</div>
+    
+    <svg width="500" height="380" viewBox="0 0 600 450" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100%" height="100%" fill="white" />
+        <style>
+            .label-text { font-family: sans-serif; font-size: 14px; fill: #333; text-anchor: middle; dominant-baseline: central; }
+            .rel-text { font-family: sans-serif; font-size: 12px; fill: #666; text-anchor: middle; }
+            .box { fill: #fff; stroke: #999; stroke-width: 1; rx: 4; ry: 4; }
+            line { stroke-width: 1; }
+        </style>
+        <defs>
+            <g id="person-box"><rect x="-30" y="-15" width="60" height="30" class="box" /></g>
+        </defs>
+
+        <g transform="translate(80, 50)"><use href="#person-box" /><text class="label-text">祖分</text></g>
+        <g transform="translate(180, 50)"><use href="#person-box" /><text class="label-text">祖母</text></g>
+        <g transform="translate(420, 50)"><use href="#person-box" /><text class="label-text">外祖父</text></g>
+        <g transform="translate(520, 50)"><use href="#person-box" /><text class="label-text">外祖母</text></g>
+        <line x1="80" y1="65" x2="130" y2="110" stroke="red" /><line x1="180" y1="65" x2="130" y2="110" stroke="red" />
+        <circle cx="130" cy="110" r="3" fill="black" /><text x="130" y="85" class="rel-text">配偶关系</text>
+        <line x1="420" y1="65" x2="470" y2="110" stroke="red" /><line x1="520" y1="65" x2="470" y2="110" stroke="red" />
+        <circle cx="470" cy="110" r="3" fill="black" />
+        <line x1="130" y1="110" x2="60" y2="185" stroke="green" /><line x1="130" y1="110" x2="200" y2="185" stroke="green" />
+        <g transform="translate(60, 200)"><use href="#person-box" /><text class="label-text">姑妈</text></g>
+        <g transform="translate(200, 200)"><use href="#person-box" /><text class="label-text">父亲</text></g>
+        <line x1="470" y1="110" x2="400" y2="185" stroke="green" /><line x1="470" y1="110" x2="540" y2="185" stroke="green" />
+        <g transform="translate(400, 200)"><use href="#person-box" /><text class="label-text">母亲</text></g>
+        <g transform="translate(540, 200)"><use href="#person-box" /><text class="label-text">舅舅</text></g>
+        <line x1="200" y1="215" x2="300" y2="280" stroke="red" /><line x1="400" y1="215" x2="300" y2="280" stroke="red" />
+        <circle cx="300" cy="280" r="3" fill="black" />
+        <line x1="300" y1="280" x2="220" y2="365" stroke="green" /><line x1="300" y1="280" x2="380" y2="365" stroke="green" />
+        <g transform="translate(220, 380)"><use href="#person-box" /><text class="label-text">儿子</text></g>
+        <g transform="translate(380, 380)"><use href="#person-box" /><text class="label-text">女儿</text></g>
+        <text x="300" y="330" class="rel-text">子女关系</text>
+    </svg>
+</div>
+
+<div id="toolbar">
+  <label><input type="checkbox" class="titleOption" value="royal"> 皇帝/国王</label>
+  <label><input type="checkbox" class="titleOption" value="royal_family"> 王室成员</label>
+  <label><input type="checkbox" class="titleOption" value="noble"> 高等贵族</label>
+  <button id="clearAllTitles">复原</button>
+  <span></span>
+  <div class="input-wrapper">
+    <input id="pathStart" class="path-input" placeholder="起点">
+    <div id="pathStartDropdown" class="dropdown"></div>
+  </div>
+
+  <div class="input-wrapper">
+    <input id="pathEnd" class="path-input" placeholder="终点">
+    <div id="pathEndDropdown" class="dropdown"></div>
+  </div>
+
+  <button id="findPathBtn">查找路径</button>
+
+</div>
+
+
 
 <div id="cy"></div>
 <div id="details"></div>
@@ -230,6 +337,356 @@ fetch('gedcom_graph.json')
         }
       }
     });
+	
+	/*为title增加索引*/
+const nodeById = {};
+data.nodes.forEach(n => {
+  nodeById[n.data.id] = n.data;   // 注意是 n.data.id
+});
+
+function redrawGraph() {
+  cy.nodes().forEach(n => {
+    const hidden = n.data("hidden") === true;
+    const h = n.data("highlight") === true;
+    const d = n.data("dim") === true;
+    
+	if (hidden) {
+      n.style("display", "none");
+      return; // 不需要再处理 opacity
+    } else {
+      n.style("display", "element");
+    }
+    
+	if (h) {
+      n.style("opacity", 1);
+    } else if (d) {
+      n.style("opacity", 0.15);
+    } else {
+      n.style("opacity", 1);
+    }
+  });
+
+  cy.edges().forEach(e => {
+    const hidden = e.data("hidden") === true;
+    const h = e.data("highlight") === true;
+    const d = e.data("dim") === true;
+    
+	if (hidden) {
+      e.style("display", "none");
+      return;
+    } else {
+      e.style("display", "element");
+    }
+	
+    if (h) {
+      e.style("opacity", 1);
+    } else if (d) {
+      e.style("opacity", 0.1);
+    } else {
+      e.style("opacity", 1);
+    }
+  });
+}
+
+const titleGroups = {
+  royal: ["皇帝", "国王", "女王", "公主"],
+  royal_family: ["皇后", "王后", "王夫", "王子", "公主", "王太子", "王太子妃"],
+  noble: ["选侯", "大公", "女大公", "公爵", "女公爵", "藩侯", "伯爵"]
+};
+
+function filterByTitles(selectedGroups) {
+
+  // 将组名展开成所有 title
+  const expandedTitles = new Set();
+  selectedGroups.forEach(g => {
+    const titles = titleGroups[g] || [];
+    titles.forEach(t => expandedTitles.add(t));
+  });
+  
+  // 如果没有选择任何 title → 显示全部
+  if (expandedTitles.size === 0) {
+    data.nodes.forEach(n => n.data.hidden = false);
+    data.edges.forEach(e => e.data.hidden = false);
+	
+	cy.nodes().forEach(n => n.data("highlight", false));
+	cy.edges().forEach(e => e.data("highlight", false));
+	cy.nodes().forEach(n => n.data("dim", false));
+	cy.edges().forEach(e => e.data("dim", false));
+	document.getElementById('details').style.display = 'none';
+
+	
+    redrawGraph();
+    return;
+  }
+
+  // 1. 节点筛选
+  data.nodes.forEach(n => {
+    const t = n.data.title;
+    n.data.hidden = !expandedTitles.has(t);
+  });
+
+  // 2. 边筛选：只显示连接两个可见节点的边
+  data.edges.forEach(e => {
+    const s = nodeById[e.data.source];
+    const t = nodeById[e.data.target];
+
+    const sHidden = s ? s.hidden : true;
+    const tHidden = t ? t.hidden : true;
+
+    e.data.hidden = (sHidden || tHidden);
+  });
+
+  redrawGraph();
+}
+
+const graph = {};
+
+data.nodes.forEach(n => {
+  graph[n.data.id] = [];
+});
+
+data.edges.forEach(e => {
+  const s = e.data.source;
+  const t = e.data.target;
+  graph[s].push(t);
+  graph[t].push(s);
+});
+
+const searchList = data.nodes
+  .filter(n => n.data.type === "person")
+  .map(n => ({
+    id: n.data.id,
+    name: n.data.label,
+	birth: n.data.birth_year.toString(),
+	death: n.data.death_year.toString(),
+    full: n.data.pinyin_full,
+    abbr: n.data.pinyin_abbr
+  }));
+function matchPerson(keyword) {
+  keyword = keyword.toLowerCase();
+
+  return searchList.filter(p =>
+    p.name.includes(keyword) ||
+    p.full.includes(keyword) ||
+    p.abbr.includes(keyword) ||
+	p.birth.includes(keyword) ||
+	p.death.includes(keyword) ||
+    p.id.toLowerCase().includes(keyword)
+  );
+}
+function showDropdown(inputEl, dropdownEl, results, onSelect) {
+  dropdownEl.innerHTML = "";
+
+  if (results.length === 0) {
+    dropdownEl.style.display = "none";
+    return;
+  }
+
+  results.forEach(p => {
+    const item = document.createElement("div");
+  
+    item.className = "dropdown-item";
+    item.textContent = `${p.name} (${p.birth}-${p.death})`;
+    item.addEventListener("click", () => {
+      onSelect(p);
+      dropdownEl.style.display = "none";
+    });
+    dropdownEl.appendChild(item);
+  });
+
+  dropdownEl.style.display = "block";
+}
+function bindPathInput(inputId, dropdownId, callback) {
+  const inputEl = document.getElementById(inputId);
+  const dropdownEl = document.getElementById(dropdownId);
+
+  inputEl.addEventListener("input", () => {
+    const keyword = inputEl.value.trim();
+    if (!keyword) {
+      dropdownEl.style.display = "none";
+      return;
+    }
+
+    const results = matchPerson(keyword);
+    showDropdown(inputEl, dropdownEl, results, p => {
+      inputEl.value = p.name;
+      callback(p.id);
+    });
+  });
+}
+
+
+function findShortestPath(startId, endId) {
+  console.log("FIND PATH:", startId, endId);
+
+  if (!graph[startId]) {
+    console.error("Start node not in graph:", startId);
+    return null;
+  }
+  if (!graph[endId]) {
+    console.error("End node not in graph:", endId);
+    return null;
+  }
+
+  const queue = [[startId]];
+  const visited = new Set([startId]);
+
+  while (queue.length > 0) {
+    const path = queue.shift();
+    const last = path[path.length - 1];
+
+    console.log("Visiting:", last, "Neighbors:", graph[last]);
+
+    for (const next of graph[last] || []) {
+      if (!visited.has(next)) {
+        visited.add(next);
+        const newPath = [...path, next];
+
+        if (next === endId) {
+          console.log("FOUND PATH:", newPath);
+          return newPath;
+        }
+
+        queue.push(newPath);
+      }
+    }
+  }
+
+  console.warn("NO PATH FOUND");
+  return null;
+}
+
+function highlightPath(path) {
+  cy.nodes().forEach(n => {
+    n.data("highlight", false);
+    n.data("dim", true);
+  });  
+  
+  cy.edges().forEach(e => {
+    e.data("highlight", false);
+    e.data("dim", true);
+  });
+
+  path.forEach(id => {
+    cy.getElementById(id).data("highlight", true);
+    cy.getElementById(id).data("dim", false);
+  });
+  
+  // 高亮边
+  for (let i = 0; i < path.length - 1; i++) {
+    const a = path[i];
+    const b = path[i + 1];
+
+    cy.edges().forEach(e => {
+      const s = e.data("source");
+      const t = e.data("target");
+
+      if ((s === a && t === b) || (s === b && t === a)) {
+        e.data("highlight", true);
+		e.data("dim", false);
+      }
+    });
+  }
+  
+  redrawGraph();
+  
+  // ⭐ 路径居中显示
+  const pathNodes = path.map(id => cy.getElementById(id));
+  cy.fit(pathNodes, 0);  // padding，可调
+
+}
+
+function highlightRelatives(node) {
+
+  // 1. 清除旧状态
+  cy.nodes().forEach(n => {
+    n.data("highlight", false);
+    n.data("dim", false);
+  });
+  cy.edges().forEach(e => {
+    e.data("highlight", false);
+    e.data("dim", false);
+  });
+
+  // 2. 高亮搜索节点
+  node.data("highlight", true);
+
+  // 3. 找到 family 节点（一级）
+  const families = node.neighborhood('node[type = "family"]');
+
+  // 4. 找到所有相关人物（二级）
+  const persons = families.neighborhood('node[type = "person"]');
+
+  persons.forEach(n => {
+    n.data("highlight", true);
+  });
+
+  // 5. 高亮相关边
+  const edges = families.connectedEdges().union(node.connectedEdges());
+  edges.forEach(e => {
+    e.data("highlight", true);
+  });
+
+  // 6. 其他全部 dim
+  cy.nodes().forEach(n => {
+    if (!n.data("highlight")) n.data("dim", true);
+  });
+  cy.edges().forEach(e => {
+    if (!e.data("highlight")) e.data("dim", true);
+  });
+
+  // 7. 更新透明度
+  redrawGraph();
+}
+
+
+function renderDetailBox(d, id) {
+  document.querySelectorAll('.legend-item').forEach(i => i.classList.remove('active'));
+  const box = document.getElementById("details");
+  box.style.display = 'block';
+  
+  function names(arr) {
+        return arr.map(pid => cy.getElementById(pid).data('label')).join('、') || '无';
+      }
+  
+	box.innerHTML = `
+	  <b style="font-size:16px">${d.label}</b><br>
+	  <i>${d.title}</i><br>
+	  性别：${d.sex}<br>
+	  出生：${d.birth || '未知'}<br>
+	  死亡：${d.death || '未知'}<br><br>
+	  <b>国家：</b> ${d.country || '未知'}<br>
+	  <b>父母：</b> ${names(parents[id])}<br>
+	  <b>配偶：</b> ${names(spouses[id])}<br>
+	  <b>子女：</b> ${names(children[id])}<br><br>
+	  ${d.memo || ''}<br><br>
+
+	  <div class="detail-btn-row">
+		<button id="setAsStartBtn" class="path-btn">设为起点</button>
+		<button id="setAsEndBtn" class="path-btn">设为终点</button>
+		<button id="highlightRelativesBtn" class="path-btn">
+		  高亮亲属
+		</button>
+	  </div>
+	`;
+
+
+  // ⭐ 绑定按钮事件
+	document.getElementById("setAsStartBtn").onclick = () => {
+	  document.getElementById("pathStart").value = d.label;
+	  selectedStartId = id;
+	};
+
+	document.getElementById("setAsEndBtn").onclick = () => {
+	  document.getElementById("pathEnd").value = d.label;
+	  selectedEndId = id;
+	};
+    const node = cy.getElementById(id);
+	document.getElementById("highlightRelativesBtn").onclick = () => {
+	  highlightRelatives(node);
+	};
+
+}
 
     /* -------------------------
        3. 创建 Cytoscape 图
@@ -245,18 +702,18 @@ fetch('gedcom_graph.json')
 			'shape': 'round-rectangle',
 			'background-color': ele => {
 			  const c = ele.data('country');
-			  if (c === 'England') return '#4A90E2';   // 蓝
-			  if (c === 'France')  return '#E94E77';   // 红
-			  if (c === 'Spain')   return '#D4A017';   // 金
-			  if (c === 'Austria') return '#9B59B6';   // 紫
-			  if (c === 'Italy') return '#1ABC9C';  // 青绿
-			  if (c === 'Portugal') return '#E67E22';  // 橙
-			  if (c === 'Denmark') return '#C0392B';   // 深红
-			  if (c === 'Germany') return '#7D3C98'; // 深紫
+			  if (c === '英国') return '#4A90E2';   // 蓝
+			  if (c === '法国')  return '#E94E77';   // 红
+			  if (c === '西班牙')   return '#D4A017';   // 金
+			  if (c === '奥地利') return '#9B59B6';   // 紫
+			  if (c === '意大利') return '#1ABC9C';  // 青绿
+			  if (c === '葡萄牙') return '#E67E22';  // 橙
+			  if (c === '丹麦') return '#C0392B';   // 深红
+			  if (c === '德国') return '#7D3C98'; // 深紫
 			  return '#777';                           // 其他
 			},
 			'label': 'data(label)',
-			'font-size': 14,
+			'font-size': 18,
 			'text-valign': 'center',
 			'text-halign': 'center',
 			'color': '#fff',
@@ -265,29 +722,17 @@ fetch('gedcom_graph.json')
 			'border-color': '#333',
 			'width': 'label',
 			'height': 'label',
-			'min-width': 80,
-			'min-height': 30,
+			'min-width': 100,
+			'min-height': 40,
 			'text-wrap': 'wrap',
 			'text-max-width': 120
 		  }
 		},
 
-
-		{
-		  selector: 'node[type="family"]',
-		  style: {
-			'shape': 'ellipse',
-			'background-color': '#666',
-			'width': 10,
-			'height': 10
-		  }
-		},
-
-
         {
           selector: 'edge[type="spouse"]',
           style: {
-            'line-color': '#1f77b4',
+            'line-color': '#ff8888',
             'width': 3
           }
         },
@@ -301,31 +746,39 @@ fetch('gedcom_graph.json')
             'target-arrow-color': '#2ca02c'
           }
         },
-
-        {
-          selector: '.highlight',
-          style: {
-            'border-color': 'yellow',
-            'border-width': 4
-          }
-        },
 		{
-		  selector: '.highlight-country',
+		  selector: 'node[highlight = "true"]',
 		  style: {
-			'opacity': 1,
-			'border-width': 4,
-			'border-color': '#FFD700'
+		    'border-color': 'yellow',
+            'border-width': 4,
+			'font-size': 36,
+			'min-width': 200,          // 节点变大
+			'min-height': 80,
+			'border-width': 3
 		  }
 		},
 		{
-		  selector: '.dim-country',
+		  selector: 'node[type="family"]',
 		  style: {
-			'opacity': 0.15
+			'shape': 'ellipse',
+			'background-color': '#666',
+			'width': 10,
+			'height': 10
+		  }
+		},
+		{
+		  selector: 'node[dim = "true"]',
+		  style: {
+		  }
+		},
+		{
+		  selector: 'edge[dim = "true"]',
+		  style: {
 		  }
 		}
       ],
 
-      layout: { name: 'preset' },
+      layout: { name: 'breadthfirst' },
 
       ready: function(){
         const cy = this;
@@ -343,30 +796,43 @@ fetch('gedcom_graph.json')
       }
     });
 
+    const helpIcon = document.getElementById('help-icon');
+    const diagramOverlay = document.getElementById('diagram-overlay');
+    const closeBtn = document.getElementById('close-diagram');
+
+    // 点击问号图标：切换显示/隐藏
+    helpIcon.addEventListener('click', (e) => {
+        const isHidden = diagramOverlay.style.display === 'none';
+        diagramOverlay.style.display = isHidden ? 'block' : 'none';
+        // 阻止事件冒泡，防止点击图标时触发其他可能的全局点击事件
+        e.stopPropagation();
+    });
+
+    // 点击关闭按钮：强制隐藏
+    closeBtn.addEventListener('click', () => {
+        diagramOverlay.style.display = 'none';
+    });
+
+    // 点击页面其他地方时自动收起图例 (可选增强体验)
+    document.addEventListener('click', (e) => {
+        if (!diagramOverlay.contains(e.target) && e.target !== helpIcon) {
+            diagramOverlay.style.display = 'none';
+        }
+    });
+
     /* -------------------------
        4. 点击显示详情
        ------------------------- */
     cy.on('tap', 'node[type="person"]', function(evt){
-      const d = evt.target.data();
+      const node = evt.target;
+	  
+	  
+	  if (node.data("dim") === "true" || node.data("dim") === true) {return; }
+	  
+	  const d = node.data();
       const id = d.id;
 
-      const box = document.getElementById('details');
-      box.style.display = 'block';
-
-      function names(arr) {
-        return arr.map(pid => cy.getElementById(pid).data('label')).join('、') || '无';
-      }
-
-      box.innerHTML = `
-        <b style="font-size:16px">${d.label}</b><br><br>
-        性别：${d.sex}<br>
-        出生：${d.birth || '未知'}<br>
-        死亡：${d.death || '未知'}<br><br>
-		<b>国家：</b> ${d.country || '未知'}<br>
-        <b>父母：</b> ${names(parents[id])}<br>
-        <b>配偶：</b> ${names(spouses[id])}<br>
-        <b>子女：</b> ${names(children[id])}<br>
-      `;
+      renderDetailBox(d, id);
     });
 
 	cy.on('tap', function(evt){
@@ -375,13 +841,13 @@ fetch('gedcom_graph.json')
 		// 隐藏详情框
 		document.getElementById('details').style.display = 'none';
 
-		// 恢复所有节点的正常样式
-		cy.elements().removeClass('highlight-country');
-		cy.elements().removeClass('dim-country');
-		cy.elements().removeClass('highlight');  // 搜索高亮也顺便清掉
-
-		// 可选：自动缩放回全图
-		// cy.fit(cy.elements(), 100);
+		cy.nodes().forEach(n => n.data("highlight", false));
+		cy.edges().forEach(e => e.data("highlight", false));
+		cy.nodes().forEach(n => n.data("dim", false));
+		cy.edges().forEach(e => e.data("dim", false));
+		document.querySelectorAll('.legend-item').forEach(i => i.classList.remove('active'));
+		
+		redrawGraph();
 	  }
 	});
 
@@ -389,40 +855,111 @@ fetch('gedcom_graph.json')
 	   国家高亮功能
 	   ------------------------- */
 	   // “其他”包含的国家列表
-	const OTHER_COUNTRIES = ["Scotland", "Poland_Hungary"];
+	const OTHER_COUNTRIES = ["苏格兰", "波兰", "尼德兰"];
 
-	document.querySelectorAll('.legend-item').forEach(item => {
-	  item.addEventListener('click', () => {
-		const country = item.dataset.country;
+document.querySelectorAll('.legend-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const country = item.dataset.country;
 
-		cy.elements().removeClass('highlight-country');
-		cy.elements().removeClass('dim-country');
+    // ⭐ 让当前点击的图例变active
+    document.querySelectorAll('.legend-item').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
 
-		cy.nodes().forEach(n => {
-		  if (n.data('type') !== 'person') return;
-
-		  const c = n.data('country');
-
-		  // 如果点击的是“其他”，匹配多个国家
-		  if (country === "other") {
-			if (OTHER_COUNTRIES.includes(c)) {
-			  n.addClass('highlight-country');
-			} else {
-			  n.addClass('dim-country');
-			}
-		  }
-
-		  // 普通国家：只匹配单一国家
-		  else {
-			if (c === country) {
-			  n.addClass('highlight-country');
-			} else {
-			  n.addClass('dim-country');
-			}
-		  }
-		});
-	  });
+    // 先清除所有的 highlight/dim
+    cy.nodes().forEach(n => {
+      n.data("highlight", false);
+      n.data("dim", true);
+    });
+	// 隐藏边
+	cy.edges().forEach(e => {
+	  e.data("highlight", false);
+	  e.data("dim", true);
 	});
+	
+    cy.nodes().forEach(n => {
+      if (n.data('type') !== 'person') return;
+
+      const c = n.data('country');
+
+      // “其他”国家组
+      if (country === "other") {
+        if (OTHER_COUNTRIES.includes(c)) {
+          n.data("highlight", true);
+		  n.data("dim", false);
+        }
+      }
+
+      // 单一国家
+      else {
+        if (c === country) {
+          n.data("highlight", true);
+          n.data("dim", false);
+        }
+      }
+    });
+
+    redrawGraph();
+  });
+});
+
+	
+document.querySelectorAll(".titleOption").forEach(cb => {
+  cb.addEventListener("change", () => {
+    const selected = Array.from(document.querySelectorAll(".titleOption:checked"))
+                          .map(x => x.value);
+    filterByTitles(selected);
+  });
+});
+
+document.getElementById("clearAllTitles").addEventListener("click", () => {
+  document.querySelectorAll(".titleOption").forEach(cb => cb.checked = false);
+  document.querySelectorAll('.legend-item').forEach(i => i.classList.remove('active'));
+  filterByTitles([]);  // 空数组 → 显示全部
+});
+
+let selectedStartId = null;
+let selectedEndId = null;
+
+bindPathInput("pathStart", "pathStartDropdown", id => {
+  selectedStartId = id;
+});
+
+bindPathInput("pathEnd", "pathEndDropdown", id => {
+  selectedEndId = id;
+});
+
+document.getElementById("findPathBtn").addEventListener("click", () => {
+  if (!selectedStartId || !selectedEndId) {
+    alert("请选择起点和终点");
+    return;
+  }
+
+  const path = findShortestPath(selectedStartId, selectedEndId);
+
+  if (!path) {
+    alert("两人之间没有路径");
+    return;
+  }
+  document.querySelectorAll('.legend-item').forEach(i => i.classList.remove('active'));
+  highlightPath(path);
+});
+
+cy.on('tap', 'node', evt => {
+  const node = evt.target;	  
+  if (node.data("dim") === "true" || node.data("dim") === true) {return; }
+  const id = node.id();
+
+  // 清除旧高亮
+  cy.nodes().forEach(n => n.data("highlight", false));
+  cy.edges().forEach(e => e.data("highlight", false)); 
+  
+  // 高亮当前节点
+  cy.getElementById(id).data("highlight", "true");
+
+
+  redrawGraph();
+});
+
 	/* -------------------------
 	   自动补全候选项
 	   ------------------------- */
@@ -505,37 +1042,20 @@ fetch('gedcom_graph.json')
 
 	  suggestionBox.style.display = 'block';
 	});
+	
 	function highlightNode(node) {
-	  cy.elements().removeClass('highlight');
-	  node.addClass('highlight');
-	  cy.fit(node, 100);
+	  highlightRelatives(node);
+	  
+	  // 居中到搜索节点
+	  cy.fit(node, 300);
+
 
 	  // 显示详情
 	  const d = node.data();
 	  const id = d.id;
-
-	  const box = document.getElementById('details');
-	  box.style.display = 'block';
-
-	  function names(arr) {
-		return arr.map(pid => cy.getElementById(pid).data('label')).join('、') || '无';
-	  }
-
-	  box.innerHTML = `
-		<b style="font-size:16px">${d.label}</b><br><br>
-		性别：${d.sex}<br>
-		出生：${d.birth || '未知'}<br>
-		死亡：${d.death || '未知'}<br><br>
-		<b>国家：</b> ${d.country || '未知'}<br>
-		<b>父母：</b> ${names(parents[id])}<br>
-		<b>配偶：</b> ${names(spouses[id])}<br>
-		<b>子女：</b> ${names(children[id])}<br>
-	  `;
-	}
-
-
-
-  });
+      renderDetailBox(d, id);
+  };
+});
 </script>
 
 </body>

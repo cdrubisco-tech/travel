@@ -13,21 +13,32 @@
             font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
         }
         
-        body {
-            background-color: #f5f5f5;
-            color: #333;
-            line-height: 1.6;
-            display: flex;
-            min-height: 100vh;
-        }
-        
+		body {
+			background-color: #f5f5f5;
+			color: #333;
+			line-height: 1.6;
+			display: flex;
+			flex-direction: column; /* 纵向排列：导航栏在上，内容在下 */
+			min-height: 100vh;
+			justify-content: flex-start; /* 确保从最顶部开始 */
+		}
+		
+        .page-container {
+			display: flex; 
+			flex-direction: row; /* 恢复横向排列 */
+			flex: 1;            /* 占据剩余的全部高度 */
+			height: calc(100vh - 30px);;
+			width: 100%;
+			align-items: flex-start;
+		}
+		
         .sidebar {
             width: 280px;
             background-color: #fff;
             padding: 20px;
             position: sticky;
-            top: 0;
-            height: 100vh;
+            top: 25px;
+            height: calc(100vh - 30px);;
             overflow-y: auto;
             box-shadow: 2px 0 10px rgba(0,0,0,0.05);
             border-right: 1px solid #ddd;
@@ -160,7 +171,6 @@
             max-width: 900px;
             margin: 0 auto;
         }
-        
         .note-header {
             margin-bottom: 40px;
             padding-bottom: 20px;
@@ -279,44 +289,173 @@
             body {
                 flex-direction: column;
             }
-            
-            .sidebar {
-                width: 100%;
-                height: auto;
-                max-height: 60vh;
-                position: relative;
-            }
+			.page-container {
+				flex-direction: column;
+			}
             
             .main-content {
                 padding: 30px;
             }
         }
         
-        @media (max-width: 768px) {
-            .main-content {
-                padding: 20px;
-            }
-            
-            .note-title {
-                font-size: 1.8rem;
-            }
-            
-            .note-section {
-                padding: 15px;
-            }
-        }
-		.red-title {
-            color: #e74c3c;
-            font-weight: bold;
-        }
+/* 基础控制 */
+.side-handle, .sidebar-mobile-header { display: none; }
+
+@media (max-width: 768px) {
+    /* 1. 侧边栏容器 */
+    aside#sidebar.sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 280px !important;
+        height: 100vh !important;
+        background-color: #ffffff !important;
+        z-index: 10000 !important;
+        transform: translateX(-100%) !important;
+        display: flex !important; /* 改为 flex 布局方便管理头部和滚动区 */
+        flex-direction: column;
+        transition: transform 0.3s ease-in-out !important;
+        box-shadow: 5px 0 15px rgba(0,0,0,0.2) !important;
+        padding: 0 !important; /* 清除默认 padding */
+        visibility: visible !important;
+    }
+
+    body aside#sidebar.sidebar.active {
+        transform: translateX(0) !important;
+    }
+
+    /* 2. 内部滚动区域：解决内容显示不全 */
+    .sidebar-scroll-area {
+        flex: 1;
+        overflow-y: auto !important; /* 允许内部滚动 */
+        padding: 20px;
+        display: block !important;
+    }
+
+	.sidebar .works-list, 
+    .sidebar .subsections-list {
+        display: block !important; /* 确保不是 none */
+        max-height: 0;             /* 恢复初始高度为 0 */
+        overflow: hidden;          /* 隐藏超出部分 */
+        transition: max-height 0.3s ease-out; /* 保持平滑动画 */
+    }
+
+    /* 2. 当拥有 .expanded 类时，允许展开 */
+    .sidebar .works-list.expanded, 
+    .sidebar .subsections-list.expanded {
+        max-height: 1000px !important; /* 给一个足够大的值 */
+    }
+
+    /* 3. 修正侧边栏内部排版 */
+    .sidebar-scroll-area {
+        flex: 1;
+        overflow-y: auto !important;
+        padding: 10px 20px 40px 20px; /* 底部多给点留白，防止被手机底栏挡住 */
+    }
+
+    /* 4. 解决目录文字颜色和点击范围 */
+    .philosopher-name, .work-link {
+        padding: 12px 15px !important; /* 手机端点击范围大一点更友好 */
+    }
+
+    /* 4. 手机端按钮样式 */
+    .side-handle {
+        display: block !important;
+        position: fixed;
+        left: 0;
+        top: 20%;
+        background: #e74c3c;
+        color: white;
+        padding: 15px 8px;
+        z-index: 9999;
+        writing-mode: vertical-lr;
+        border-radius: 0 8px 8px 0;
+        box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+    }
+
+    .sidebar-mobile-header {
+        display: flex !important;
+        padding: 50px 20px 15px !important;
+        background: #f8f9fa;
+        border-bottom: 1px solid #eee;
+    }
+
+    .close-btn-style {
+        background: #e74c3c;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-weight: bold;
+    }
+
+    /* 5. 隐藏桌面端的某些修饰，防止干扰 */
+    .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 20px !important;
+    }
+	
+	body:has(.sidebar.active) .main-content {
+        filter: brightness(0.7);
+        pointer-events: none; /* 侧边栏开启时，主内容不响应点击（只触发收起） */
+        user-select: none;
+    }
+    
+    /* 确保 sidebar 内部是可以点击的 */
+    .sidebar.active {
+        pointer-events: auto !important;
+    }
+}
     </style>
 </head>
-<body>
-<div style="color:#e74c3c;font-weight:bold"><a href="/china.html">瓷器</a> | <a href="/sh_history.html">上海历史</a> | 哲学笔记 | <a href="/euro.html">欧洲贵族谱系</a> | <a href="/index.html">返回</a></div>
+<script>
+// 核心切换函数
+function toggleSidebar(open) {
+    const sidebar = document.getElementById('sidebar');
+    const openBtn = document.getElementById('sidebar-open-btn');
     
-	<!-- 左侧目录 -->
-    <aside class="sidebar" id="sidebar">
+    if (open) {
+        sidebar.classList.add('active');
+        if(openBtn) openBtn.style.visibility = 'hidden';
+    } else {
+        sidebar.classList.remove('active');
+        if(openBtn) openBtn.style.visibility = 'visible';
+    }
+}
+
+// 新增：点击正文区域自动收起
+document.addEventListener('click', function(event) {
+    const sidebar = document.getElementById('sidebar');
+    const openBtn = document.getElementById('sidebar-open-btn');
+    
+    // 只有在手机端（宽度小于等于768px）且侧边栏处于打开状态时才处理
+    if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
         
+        // 如果点击的目标：
+        // 1. 不在 sidebar 内部 ( !sidebar.contains(event.target) )
+        // 2. 也不是那个打开按钮 ( !openBtn.contains(event.target) )
+        if (!sidebar.contains(event.target) && !openBtn.contains(event.target)) {
+            toggleSidebar(false);
+        }
+    }
+});
+</script>
+<body>
+<div style="color:#e74c3c;font-weight:bold;position: sticky; top: 0; z-index: 1001;"><a href="/china.html">瓷器</a> | <a href="/sh_history.html">上海历史</a> | 哲学笔记 | <a href="/euro.html">欧洲贵族谱系</a> | <a href="/index.html">返回</a></div>
+
+
+<div id="sidebar-open-btn" class="side-handle" onclick="toggleSidebar(true)"> 目录 ❯ </div>
+<div class="page-container">
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-mobile-header">
+        <button onclick="toggleSidebar(false)" class="close-btn-style"> ❮ 收起目录 </button>
+    </div>
+
+    <div class="sidebar-scroll-area">
+        <div class="sidebar-header">
+            <h2 class="sidebar-title">哲学笔记</h2>
+        </div>
         <!-- 柏拉图作品 -->
         <div class="philosopher-category">
             <div class="philosopher-name" id="plato-toggle">
@@ -325,184 +464,249 @@
             </div>
             <ul class="works-list" id="plato-works">
                 <li class="work-item">
+                    <a href="#phaedo" class="work-link active">
                         《斐多篇》
                         <span class="work-toggle">▼</span>
                     </a>
                     <ul class="subsections-list" id="phaedo-subsections">
                         <li class="subsection-item">
+                            <a href="#section1" class="subsection-link">关于死亡</a>
                         </li>
                         <li class="subsection-item">
+                            <a href="#section2" class="subsection-link">灵魂不灭</a>
                         </li>
                         <li class="subsection-item">
+                            <a href="#section3" class="subsection-link">灵魂不朽</a>
                         </li>
                         <li class="subsection-item">
+                            <a href="#section4" class="subsection-link">番外：地球设想</a>
                         </li>
                     </ul>
                 </li>
                 <li class="work-item">
+                    <a href="#phaedrus" class="work-link active">
                         《斐德若篇》
                         <span class="work-toggle">▼</span>
                     </a>
                     <ul class="subsections-list" id="phaedrus-subsections">
                         <li class="subsection-item">
+                            <a href="#section5" class="subsection-link">对爱情的批判与辩护</a>
                         </li>
                         <li class="subsection-item">
+                            <a href="#section6" class="subsection-link">灵魂的性质与等级</a>
                         </li>
                         <li class="subsection-item">
+                            <a href="#section7" class="subsection-link">爱情的迷狂</a>
                         </li>
                         <li class="subsection-item">
+                            <a href="#section8" class="subsection-link">修辞学与写作</a>
                         </li>
                     </ul>
                 </li>
 				<li class="work-item">
+					<a href="#republic" class="work-link">
 						《理想国》
 						<span class="work-toggle">▼</span>
 					</a>
 					<ul class="subsections-list" id="republic-subsections">
 						<li class="subsection-item">
+							<a href="#section9" class="subsection-link">第一卷：何为正义</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section10" class="subsection-link">第二-三卷：护卫者的条件</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section11" class="subsection-link">第四卷：正义是正确分工</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section12" class="subsection-link">第五卷：爱智者</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section13" class="subsection-link">第六卷：善即真理</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section14" class="subsection-link">第七卷：洞穴人</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section15" class="subsection-link">第八卷：共和最高</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section16" class="subsection-link">第九卷：快乐等级</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section17" class="subsection-link">第十卷：拒绝模仿&灵魂永在</a>
 						</li>
 					</ul>
 				</li>
 				<li class="work-item">
+					<a href="#symposium" class="work-link">
 						《会饮篇》
 						<span class="work-toggle">▼</span>
 					</a>
 					<ul class="subsections-list" id="symposium-subsections">
 						<li class="subsection-item">
+							<a href="#section18" class="subsection-link">斐德若的讲辞：EROS的荣耀</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section19" class="subsection-link">泡赛尼阿斯的讲辞：两个爱神</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section20" class="subsection-link">厄里克希马库斯的讲辞：爱的和谐</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section21" class="subsection-link">阿里斯托芬的讲辞：球形人的神话</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section22" class="subsection-link">阿迦通的讲辞：爱神之美</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section23" class="subsection-link">苏格拉底的诘难与回忆</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section24" class="subsection-link">蒂俄提玛的对话:爱的阶梯</a>
 						</li>
 					</ul>
 				</li>
 				<li class="work-item">
+					<a href="#theaetetus" class="work-link">
 						《泰阿泰德篇》
 						<span class="work-toggle">▼</span>
 					</a>
 					<ul class="subsections-list" id="theaetetus-subsections">
 						<li class="subsection-item">
+							<a href="#section25" class="subsection-link">开篇：知识定义的方法论</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section26" class="subsection-link">知识是知觉</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section27" class="subsection-link">哲学家在社会中的处境</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section28" class="subsection-link">知识是真实的论断</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section29" class="subsection-link">知识是带理由的真实意见</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section30" class="subsection-link">结论</a>
 						</li>
 					</ul>
 				</li>
 				<li class="work-item">
+					<a href="#timaeus" class="work-link">
 						《蒂迈欧篇》
 						<span class="work-toggle">▼</span>
 					</a>
 					<ul class="subsections-list" id="timaeus-subsections">
 						<li class="subsection-item">
+							<a href="#section31" class="subsection-link">宇宙的创造与本性</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section32" class="subsection-link">宇宙的结构与秩序</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section33" class="subsection-link">时间、灵魂与天界诸神</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section34" class="subsection-link">必然性与理智的相互作用</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section35" class="subsection-link">存在的基本范畴</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section36" class="subsection-link">一些有趣的说法</a>
 						</li>
 					</ul>
 				</li>
 				<li class="work-item">
+					<a href="#sophist" class="work-link">
 						《智者篇》
 						<span class="work-toggle">▼</span>
 					</a>
 					<ul class="subsections-list" id="sophist-subsections">
 						<li class="subsection-item">
+							<a href="#section38" class="subsection-link">智者与摹仿术</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section39" class="subsection-link">"非存在"与"存在"</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section40" class="subsection-link">通种论：存在、动、静、同、异</a>
 						</li>
 					</ul>
 				</li>
 				<li class="work-item">
+					<a href="#parmenides" class="work-link">
 						《巴门尼德篇》
 						<span class="work-toggle">▼</span>
 					</a>
 					<ul class="subsections-list" id="parmenides-subsections">
 						<li class="subsection-item">
+							<a href="#section41" class="subsection-link">对理念论的第一轮批判</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section42" class="subsection-link">对理念论的第二轮批判</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section43" class="subsection-link">对理念论的第三轮批判</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section44" class="subsection-link">八组假设的辩证练习</a>
 						</li>
 					</ul>
 				</li>
 
 				<li class="work-item">
+					<a href="#philebus" class="work-link">
 						《菲利布篇》
 						<span class="work-toggle">▼</span>
 					</a>
 					<ul class="subsections-list" id="philebus-subsections">
 						<li class="subsection-item">
+							<a href="#section45" class="subsection-link">形而上学方法论</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section46" class="subsection-link">快乐和痛苦的探讨</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section47" class="subsection-link">理智和知识的探讨</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section48" class="subsection-link">善的等级</a>
 						</li>
 					</ul>
 				</li>
 
 				<li class="work-item">
+                    <a href="#minor-dialogues" class="work-link">
                         其他对话录
                         <span class="work-toggle">▼</span>
                     </a>
 					<ul class="subsections-list" id="apology-subsections">
 						<li class="subsection-item">
+							<a href="#section49" class="subsection-link">《申辩篇》</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section50" class="subsection-link">《美诺篇》：美德</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section51" class="subsection-link">《大希庇亚篇》：美</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section52" class="subsection-link">《卡尔米德篇》：节制</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section53" class="subsection-link">《克里托篇》：公民义务</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section54" class="subsection-link">《游绪弗伦篇》：虔诚</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section55" class="subsection-link">《伊安篇》：诗歌</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section56" class="subsection-link">《高尔吉亚篇》：修辞</a>
 						</li>
 					</ul>
                 </li>
@@ -517,127 +721,177 @@
             </div>
             <ul class="works-list" id="aristotle-works">
 				<li class="work-item">
+					<a href="#metaphysics" class="work-link">
 						《形而上学》
 						<span class="work-toggle">▼</span>
 					</a>
 					<ul class="subsections-list" id="metaphysics-subsections">
 						<li class="subsection-item">
+							<a href="#section57" class="subsection-link">第一卷：四因说</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section58" class="subsection-link">第二卷：元一存在</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section59" class="subsection-link">第三卷：哲学主题</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section60" class="subsection-link">第四卷：矛盾律/排中律</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section61" class="subsection-link">第五卷：名词解释</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section62" class="subsection-link">第六卷：本性之是</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section63" class="subsection-link">第七卷：何为本体</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section64" class="subsection-link">第八卷：形式优先</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section65" class="subsection-link">第九卷：潜能与实现</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section66" class="subsection-link">第十卷：一非本体</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section67" class="subsection-link">第十一卷：总结归纳</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section68" class="subsection-link">第十二卷：不动的推动者</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section69" class="subsection-link">第十三卷：理念不存在</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section70" class="subsection-link">第十四卷：续论数非本体</a>
 						</li>
 					</ul>
 				</li>
 				<li class="work-item">
+					<a href="#nichomachean-ethics" class="work-link">
 						《尼各马可伦理学》
 						<span class="work-toggle">▼</span>
 					</a>
 					<ul class="subsections-list" id="nichomachean-ethics-subsections">
 						<li class="subsection-item">
+							<a href="#section71" class="subsection-link">第一卷：最高善是幸福</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section72" class="subsection-link">第二卷：道德德性是在实践中选择适度的品质</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section73" class="subsection-link">第三卷：行为</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section74" class="subsection-link">第四卷：德性追求高尚而不带痛苦</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section75" class="subsection-link">第五卷：公正在于平等</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section76" class="subsection-link">第六卷：理智德性——明智</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section77" class="subsection-link">第七卷：自制低于善，是知而不行</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section78" class="subsection-link">第八卷：最高的友爱来自善的需求和相似</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section79" class="subsection-link">第九卷：友爱是自爱的延伸</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section80" class="subsection-link">第十卷：幸福在于沉思</a>
 						</li>
 					</ul>
 				</li>
 				<li class="work-item">
+					<a href="#physics" class="work-link">
 						《物理学》
 						<span class="work-toggle">▼</span>
 					</a>
 					<ul class="subsections-list" id="physics-subsections">
 						<li class="subsection-item">
+							<a href="#section81" class="subsection-link">第一章 本原为二或三</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section82" class="subsection-link">第二章 目的论</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section83" class="subsection-link">第三章 可感无限不存在</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section84" class="subsection-link">第四章 空间是限/虚空不存在/时间是数</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section85" class="subsection-link">第五章 运动的分类与对反</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section86" class="subsection-link">第六章 万物皆可分</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section87" class="subsection-link">第七章 运动必有推动者</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section88" class="subsection-link">第八章 不动的推动者在球面上</a>
 						</li>
 					</ul>
 				</li>
 				<li class="work-item">
+					<a href="#poetics" class="work-link">
 						《诗学》
 						<span class="work-toggle">▼</span>
 					</a>
 					<ul class="subsections-list" id="poetics-subsections">
 						<li class="subsection-item">
+							<a href="#section89" class="subsection-link">第一卷：摹仿的本性与分类</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section90" class="subsection-link">第二卷：悲剧的构成要素</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section91" class="subsection-link">第三卷：史诗与悲剧的差异</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section92" class="subsection-link">第四卷：诗的效果与净化</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section93" class="subsection-link">第五卷：诗的创作原则</a>
 						</li>
 					</ul>
 				</li>
 				<li class="work-item">
+					<a href="#politics" class="work-link">
 						《政治学》
 						<span class="work-toggle">▼</span>
 					</a>
 					<ul class="subsections-list" id="politics-subsections">
 						<li class="subsection-item">
+							<a href="#section94" class="subsection-link">第一卷：城邦的本质与家庭</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section95" class="subsection-link">第二卷：理想政体的批判</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section96" class="subsection-link">第三卷：公民与政体分类</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section97" class="subsection-link">第四卷：现实政体的研究</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section98" class="subsection-link">第五卷：政体变革与保全</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section99" class="subsection-link">第六卷：民主制与寡头制的组织</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section100" class="subsection-link">第七卷：理想城邦的构建</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section101" class="subsection-link">第八卷：教育与公民培养</a>
 						</li>
 					</ul>
 				</li>
@@ -652,102 +906,166 @@
             </div>
             <ul class="works-list" id="others-works">
 				<li class="work-item">
+					<a href="#confessiones" class="work-link">
 						奥古斯丁《忏悔录》
 						<span class="work-toggle">▼</span>
 					</a>
 					<ul class="subsections-list" id="confessiones-subsections">
 						<li class="subsection-item">
+							<a href="#section102" class="subsection-link">第一卷：上帝充塞天地</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section103" class="subsection-link">第三卷：正义与法律</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section104" class="subsection-link">第四卷：灵魂与至善</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section105" class="subsection-link">第五卷：知识与信仰</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section106" class="subsection-link">第七卷：善恶与自由意志</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section107" class="subsection-link">第八卷：意志的同一性</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section108" class="subsection-link">第十卷：记忆与遗忘</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section109" class="subsection-link">第十一卷：创世与时间</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section110" class="subsection-link">第十二卷：天外之天与混沌</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section111" class="subsection-link">第十三卷：三位一体与创世象征</a>
 						</li>
 					</ul>
 				</li>
 				<li class="work-item">
+					<a href="#de-trinitate" class="work-link">
 						奥古斯丁《论三位一体》
 						<span class="work-toggle">▼</span>
 					</a>
 					<ul class="subsections-list" id="de-trinitate-subsections">
 						<li class="subsection-item">
+							<a href="#section112" class="subsection-link">一：三位一体信仰的基础</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section113" class="subsection-link">二：子与父的关系</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section114" class="subsection-link">三：圣灵的位格与工作</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section115" class="subsection-link">四：救赎中的三一显明</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section116" class="subsection-link">五：本质同一与位格区分</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section117" class="subsection-link">六：关系与属性</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section118" class="subsection-link">七：内在三一与经世三一</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section119" class="subsection-link">八：爱的类比</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section120" class="subsection-link">九：心灵三一：记忆、理解、意志</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section121" class="subsection-link">十：自我认识与三位一体</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section122" class="subsection-link">十一：感官与内在三一</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section123" class="subsection-link">十二：智慧的等级</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section124" class="subsection-link">十三：信望爱的三一结构</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section125" class="subsection-link">十四：上帝形象与三一恢复</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section126" class="subsection-link">十五：超越类比与信仰奥秘</a>
 						</li>
 					</ul>
 				</li>
 				<li class="work-item">
+					<a href="#enneads" class="work-link">
 						普罗提诺《九章集》
 						<span class="work-toggle">▼</span>
 					</a>
 					<ul class="subsections-list" id="enneads-subsections">
 						<li class="subsection-item">
+							<a href="#section127" class="subsection-link">第一卷：灵魂与美</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section128" class="subsection-link">第二卷：可感世界与天界</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section129" class="subsection-link">第三卷：命运与自由意志</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section130" class="subsection-link">第四卷：灵魂本质与转世</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section131" class="subsection-link">第五卷：理智世界与太一</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section132" class="subsection-link">第六卷：存在与范畴</a>
 						</li>
 					</ul>
 				</li>
                 <li class="work-item">
+                    <a href="#epicurus" class="work-link">
                         伊壁鸠鲁
                         <span class="work-toggle">▼</span>
 					</a>
 					<ul class="subsections-list" id="epicurus-subsections">
 						<li class="subsection-item">
+							<a href="#section133" class="subsection-link">自然哲学</a>
 						</li>
 						<li class="subsection-item">
+							<a href="#section134" class="subsection-link">伦理学</a>
 						</li>
 					</ul>
                 </li>
+				<li class="work-item">
+					<a href="#medieval-bestiary" class="work-link">
+						《中世纪动物图鉴》
+						<span class="work-toggle">▼</span>
+					</a>
+					<ul class="subsections-list" id="medieval-bestiary-subsections">
+						<li class="subsection-item">
+							<a href="#section135" class="subsection-link">基本原则与阐释体系</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section136" class="subsection-link">野生四足兽</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section137" class="subsection-link">家养四足兽</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section138" class="subsection-link">鸟</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section139" class="subsection-link">鱼类与水生动物</a>
+						</li>
+						<li class="subsection-item">
+							<a href="#section140" class="subsection-link">蛇与虫</a>
+						</li>
+					</ul>
+				</li>
             </ul>
         </div>
-    </aside>
+    </div>
+</aside>
     
     <!-- 右侧内容区域 -->
     <main class="main-content">
@@ -808,6 +1126,7 @@
                 </ol>
                 
                 <p><i>注意地下河流的划分与柏拉图的伦理学相关：不同品质的灵魂在死后会去往不同的地方。</i></p>
+			</div>
         </section>
 		
         <header class="note-header">
@@ -1375,6 +1694,7 @@
 				
 				<p>最后提出观点：<strong>知识 = 正确意见 + 对其他事物相异之处的认识</strong></p>
 				<i>但其实并不是最终结论，苏格拉底赶着受审去了-_-</i>
+			</div>
 		</section>
 
 		<header class="note-header">
@@ -1673,6 +1993,7 @@
 					<li>如果范畴都不相通，则万物都不存在（因为"存在"与他们所拥有的元素不相通）。</li>
 					<li>如果范畴都相通，则矛盾便不存在（一切都可以是其他）；</li>
 					<li>所以只能是部分相通，哲学就是考察这部分相通的学术。</li>
+				</ul>
 				
 				<p>进一步思考得出，"非存在"其实只是一种<strong>"异"</strong>，即<strong>异于"存在"者</strong>，而不是与"存在"绝对相反。这样就能得出作为"异"的"非存在"也是一种存在。</p>
 				
@@ -2188,6 +2509,7 @@
 				<p>人不会自愿作恶，因为作恶是伤害自己，即使在遇到外界的恶待时也不能以恶报恶。</p>
 				
 				<p>法律是一种义务（社会契约？），必须遵守；法律与个人的关系并不平等，哪怕法律本身错了，也应该坚持遵守，因为违法本身就是重罪。</p>
+			</div>
 		</section>		
 
 		<section id="section54" class="note-section">
@@ -2196,6 +2518,7 @@
 				<p>虔诚不是做神喜欢的事，因为神之间也有争执，没有一致的喜好。</p>				
 				<p>是由于虔诚才被神喜爱，而不是被神喜爱才显得虔诚。</p>				
 				<p>虔诚不是与侍奉神有关的公正，因为神不需要侍奉而得到好处。</p>
+			</div>
 		</section>
 		
 		<section id="section55" class="note-section">
@@ -2209,15 +2532,17 @@
 				</ul>
 				
 				<p>艺术既不靠某种专门知识，也不能给人带来某种专门知识，但却能像磁铁吸引铁一样吸引人。</p>
+			</div>
 		</section>
 		
 		<section id="section56" class="note-section">
 			<h2 class="section-title">《高尔吉亚篇》：修辞</h2>
 			<div class="section-content" id="section55-content">
 				<p>修辞学只关心说服，不关心真理，因而不是技艺，而是谄媚。</p>
-				<p><i>注意《克拉底鲁篇》中提到哲学研究的对象是事物本身而非描述它们的语言</i><p>				
+				<p><i>注意《克拉底鲁篇》中提到哲学研究的对象是事物本身而非描述它们的语言</i></p>				
 				<p>作恶远比无辜受害更糟糕，所以哲学家比暴君和修辞家更幸福。</p>
 				<p>作恶而逍遥法外又比单纯作恶更坏，所以作恶者应该寻求惩罚（净化灵魂）。</p>
+			</div>
 		</section>
 		
 		<header class="note-header">
@@ -2318,7 +2643,7 @@
 					<li>属性之是：具有某种偶然属性</li>
 					<li>本性之是：表范畴、表判断、表潜能</li>
 				</ul>
-				<p>"本体"：<p>
+				<p>"本体"：</p>
 				<ul>
 					<li>单纯物体</li>
 					<li>内在原因</li>
@@ -4006,7 +4331,7 @@
 					<li>是永恒不变的世界</li>
 					<li>是灵魂的直接来源</li>
 				</ul>
-				<p理念（Forms）的特征：每个理念都是一个具体的理智，所有理念在理智中彼此渗透。</p>
+				<p>理念（Forms）的特征：每个理念都是一个具体的理智，所有理念在理智中彼此渗透。</p>
 				<p>灵魂的下降与上升：灵魂从理智世界“下降”到身体，但可以通过哲学“上升”回理智和太一。</p>
 				<p>神秘的合一（henosis）：通过净化（katharsis）和凝思（theoria），灵魂可以暂时与太一合一。</p>
 			</div>
@@ -4073,8 +4398,407 @@
 				<p>自然正义就是人们对彼此不伤害做出的承诺（个人利益的追求）。不存在“绝对正义”。不正义本身不是恶，但对其后果的担忧（这是人的本性）则是恶。</p>
 				<p>最后，性爱从来也不会带来好处，如果不带来伤害已经谢天谢地了-_-</p>
 			</div>
+		</section>
+		
+		<header class="note-header">
+			<h1 class="note-title">《中世纪动物图鉴》</h1>
+			<div class="note-author">中世纪手抄本汇编</div>
+		</header>
+
+		<section id="section135" class="note-section">
+			<h2 class="section-title">基本原则与阐释体系</h2>
+			<div class="section-content" id="section135-content">
+				<p>精确不代表真实，更不代表进步。真理不来自外表，而来自玄妙。</p>
+				<p>描绘动物的目的不在于博物，而在于赞颂造物的神奇、造物主的伟大，并传授信仰的真谛。</p>
+				<ul>
+					<li>动物与人对立：不洁净、不完美，反衬人的高级。</li>
+					<li>动物也可以成为人的榜样（中世纪才引起重视）。</li>
+				</ul>
+				<p>描绘步骤：描绘外形 – （运用类比）寻找并揭示隐义 – 道德伦理/宗教教诲。</p>
+				<p>外形符不符合实际不重要，重要的是“特征”，包括“特征链”（一同出现的他物）。</p>
+				<ul>
+					<li>举例：鸵鸟衔着马蹄铁，鹤抓着石头，鹳筑巢；猫旁边有老鼠，老鼠旁边有奶酪。</li>
+				</ul>
+				<p>五感象征体系：</p>
+				<ul>
+					<li>视觉 - 猞猁</li>
+					<li>听觉 - 鼹鼠</li>
+					<li>嗅觉 - 秃鹫</li>
+					<li>味觉 - 猴子</li>
+					<li>触觉 - 蜘蛛</li>
+				</ul>
+			</div>
+		</section>
+
+		<section id="section136" class="note-section">
+			<h2 class="section-title">野生四足兽</h2>
+			<div class="section-content" id="section136-content">
+				<ul>
+					<li><strong>狮子</strong>：圣经中的狮子有两面性（危险&勇敢），但狮为百兽之王的传统来自东方，受大部分基督教早期教父推崇，直至12世纪最终取代熊成为兽王。
+						<ul>
+							<li>狮子被追捕时会用尾巴扫去脚印骗过猎人，正如耶稣隐藏神性骗过魔鬼。</li>
+							<li>狮子对手下败将不会赶尽杀绝（？），正如主宽恕悔改的罪人。</li>
+							<li>狮子睁眼睡觉，正如墓中基督肉身已死神性长存。</li>
+							<li>狮子吹口气能让三天内的死胎复活，正如……</li>
+							<li>狮子狩猎时用尾巴画圈，圈内动物便不想出去，正如神的公正裁决。</li>
+							<li>狮子害怕白公鸡，正如彼得（常被比作狮子）三次不认主时响起了鸡啼。</li>
+						</ul>
+					</li>
+					<li><strong>熊</strong>：旧时代的兽王，因为姿态（尤其sex姿势）类似人，而让教会恐惧。
+						<ul>
+							<li>熊为欧洲原生动物，宣扬熊不如（书籍中的）狮子利于教会控制。</li>
+							<li>熊的品德：愤怒、懒惰、暴食、淫欲（熊孕期短被认为是母熊迫不及待想产下熊崽，好和公熊交合），唯一的好品性是母性。</li>
+							<li>圣人征服熊成为常见题材，耍熊也被教会默许。</li>
+						</ul>
+					</li>
+					<li><strong>鹿</strong>：被古罗马人看轻，却在基督教被颂扬（可能来自凯尔特/日耳曼传统）。
+						<ul>
+							<li>鹿的品德：敏捷、长寿、复活，因重生的鹿角被视为基督的象征。</li>
+							<li>性欲旺盛但被教会刻意淡化。</li>
+							<li>古希腊/罗马人视鹿为胆小怯懦，不屑于捕猎；猎鹿在中世纪才因“较不野蛮”而被王室推行（之前流行的猎野猪造成多位国王丧命）。</li>
+						</ul>
+					</li>
+					<li><strong>野猪</strong>：与鹿正好相反，古典时期因为宁死不屈斗争到底而受喜爱，中世纪式微。
+						<ul>
+							<li>野猪的品德：不洁、丑恶，勇敢是唯一的美德（但被说成鲁莽）。</li>
+							<li>贪吃、懒惰、肮脏等缺点在中世纪前期只见于家猪，后期才加给野猪。</li>
+						</ul>
+					</li>
+					<li><strong>狼</strong>：和野猪一样邪恶，常被比作巧取豪夺的贪婪地主。
+						<ul>
+							<li>狼的品德：奸诈、残暴、贪婪、吝啬，唯一的美德是谨慎（不在窝附近狩猎）。</li>
+							<li>若人先看见狼则狼力气尽失，若狼先看见人则人动弹不得，正如恋爱男女……</li>
+							<li>中世纪的人其实并不怕狼（他们怕龙和怪兽），狼常作为被取笑的对象，现代社会（～18世纪）才产生惧怕狼的文化现象。</li>
+						</ul>
+					</li>
+					<li><strong>豹</strong>：温柔善良，豹克龙，象征基督克魔鬼。
+						<ul>
+							<li>毛色为七色，身上有各种斑点或条纹作为象征，是神圣的标志。</li>
+							<li>吐气如兰，吸引百兽，象征众人跟随基督，唯独龙/蛇受不了其气息。</li>
+							<li>吐气吸引百兽后会挑最喜欢的吃掉……象征传道者让善男信女皈依，成为传道者的食粮和生命-_-</li>
+							<li>注意以上美好品质仅限雌豹；雄豹有鬃毛和大角，残忍淫荡，会与雌狮交媾。</li>
+						</ul>
+					</li>
+					<li><strong>虎</strong>：描写较少，常带有异域（东方）风情，一般较为负面。
+						<ul>
+							<li>常见用镜子拖住虎的描绘，一说母虎因虚荣陷入自我欣赏，一说因母爱被欺骗。</li>
+						</ul>
+					</li>
+					<li><strong>独角兽</strong>：纯洁，角能避邪，独角象征圣父圣子乃是一体，无需两角。
+						<ul>
+							<li>原型来自犀牛或独角鲸，中世纪前已有大量描述。</li>
+							<li>被童贞女（象征圣母，其大腿象征教会）的气息吸引，当然不童贞则会被刺死……</li>
+							<li>生性骄傲，被捕前会自杀。</li>
+							<li>注意也有负面描述说其残忍野蛮，对大象恨之入骨见之即杀。</li>
+						</ul>
+					</li>
+					<li><strong>大象</strong>：贞洁、仁慈、勇敢、耐心、善良、诚实、慷慨、正义、智慧、力量……
+						<ul>
+							<li>象龙相争是常见的主题。</li>
+							<li>雌象知羞耻，于水中产子避免被看见，但常被龙盯上。</li>
+							<li>象和狮子一样也非欧洲原生动物，不过动物园和马戏团中仍常见。</li>
+						</ul>
+					</li>
+					<li><strong>猴</strong>：刻意模仿人，如魔鬼伪装成上帝，虚伪、卑鄙、丑陋、令人厌恶。
+						<ul>
+							<li>像人的动物：熊、猪、猴。</li>
+							<li>孕妇看到猴子，孩子会和猴子一样丑。</li>
+							<li>外表和性情多变，正如魔鬼幻化成多种样子。</li>
+							<li>常见主题：母猴一胎两子，逃跑时把喜欢的抱着，不喜欢的驮着，但累了的时候不自觉松手，反而喜欢的掉下去了。
+								<ol>
+									<li>父母应同等地爱孩子。</li>
+									<li>人注重身体胜过灵魂，但被死亡追捕时应放弃身体爱惜灵魂。</li>
+								</ol>
+							</li>
+						</ul>
+					</li>
+					<li><strong>其他</strong>：
+						<ul>
+							<li>骆驼：双峰驼为主，被认为是顺从的驴，交配欲望（尤其母骆驼）强烈。</li>
+							<li>羚羊：锯齿的角被认为是魔鬼的工具，角被枝蔓缠住象征困于恶习的罪人。</li>
+							<li>野驴：有的认为节操高尚（许多母驴只需一匹公驴），有的认为贪图享乐。</li>
+							<li>鬣狗：不洁而血腥，擅长模仿人声和变性，象征人心口不一暗地崇拜魔鬼。</li>
+							<li>河狸：睾丸入药，被追捕时会自己咬下睾丸奉上，象征罪人放弃魔鬼喜欢的恶行。</li>
+							<li>刺猬：小偷，糟蹋了天主的葡萄园，还吝啬。</li>
+							<li>松鼠：懒惰、贪婪、愚蠢，棕红色的毛像犹大的头发……</li>
+						</ul>
+					</li>
+				</ul>
+			</div>
+		</section>
+
+		<section id="section137" class="note-section">
+			<h2 class="section-title">家养四足兽</h2>
+			<div class="section-content" id="section137-content">
+				<ul>
+					<li><strong>马</strong>：常被视为人的伙伴，地位特殊，可作为劳动工具但不可食用。
+						<ul>
+							<li>雌马失去孩子会收养孩子，道德上启发人？</li>
+							<li>母马性欲旺盛（雌性性欲排行：野生 母狼>母狮>母豹 家养 母马>母狗>母牛）。</li>
+							<li>毛色：白色最美，其次黑色；枣红快，灰色慢；丑的马包括红棕（犹大）和半黑半白。</li>
+						</ul>
+					</li>
+					<li><strong>驴</strong>：脏、粗心、懒惰、愚蠢、胆小，而且臭！优点是朴实坚毅、吃苦耐劳。
+						<ul>
+							<li>母驴风评较好，因为圣经中的几次描写，例如圣家族出埃及骑的母驴，骑驴象征谦逊。</li>
+							<li>牛和驴一起在牲口棚观看耶稣诞生。
+								<ol>
+									<li>纯粹是为了表现“牲口棚”的特征，驴是圣母坐骑，牛是路上准备交的税。</li>
+									<li>象征同钉十字架的两个强盗，也象征多神教民族（偶像崇拜）和犹太人（固执）。</li>
+									<li>象征善和恶两种品质，也有说都是善，象征基督不同特征的。</li>
+								</ol>
+							</li>
+						</ul>
+					</li>
+					<li><strong>牛</strong>：普遍认为优于驴，顺从而聪明（能预报天气）。
+						<ul>
+							<li>某种牛的近亲（bonnacon）用灼热呛人的粪便作为武器自卫……</li>
+							<li>母牛在中世纪不负责产奶（绵羊负责），只负责干活和产仔。</li>
+							<li>公牛常被视为野生动物，因为生殖能力强（母牛常受不了-_-），中世纪不再颂扬。</li>
+							<li>注意区分公牛和犍牛：公牛被拉下神坛后，犍牛则取代其在圣经中的“好”意象。</li>
+						</ul>
+					</li>
+					<li><strong>山羊</strong>：主要描述公山羊，公绵羊>公山羊（母山羊会找公绵羊，反之则不然）。
+						<ul>
+							<li>公山羊在某些国家即指妻子出轨。</li>
+							<li>注意野生和家养雌山羊不同，前者聪慧且视力出众，象征先知，后者……会发羊癫疯。</li>
+							<li>公山羊污秽而淫荡，目光歪斜，象征恶魔，常与巫术联系。</li>
+						</ul>
+					</li>
+					<li><strong>绵羊</strong>：温厚、顺从、平和，睾丸明显是其特征。
+						<ul>
+							<li>公绵羊性欲旺盛但不如公山羊，常较为正面（象征繁殖力）。</li>
+							<li>母绵羊温柔但胆小呆傻，只会盲目跟着公绵羊或牧羊人（圣经中羊群的意象）。</li>
+							<li>母绵羊能在一群羔羊中认出自己的孩子，如同上帝能认出每一个人并慷慨施爱。</li>
+							<li>羔羊象征耶稣，在启示录里也象征审判者、复仇者。</li>
+						</ul>
+					</li>
+					<li><strong>猪</strong>：没有鬃毛和獠牙，常绘为深色，一般负面，代表魔鬼和犹太人（从讽刺逐渐变为象征）。
+						<ul>
+							<li>被认为内部构造最像人，当时的解剖学通过解剖猪传授。</li>
+							<li>古希腊/罗马、凯尔特、日耳曼传统中其实猪都是正面形象（象征财富、多产、繁荣）。</li>
+							<li>基督教中有时也有好猪（与犹太教、伊斯兰教不同）。</li>
+						</ul>
+					</li>
+					<li><strong>狗</strong>：混合风评，早期负面 -> 后期正面。
+						<ul>
+							<li>缺点：不洁（污秽中打滚、食腐）、贪食、淫荡，象征已经忏悔又再犯罪的罪人。</li>
+							<li>优点：聪明、勇敢、忠诚。</li>
+						</ul>
+					</li>
+					<li><strong>猫</strong>：黑夜出没，被视为异端（其实更主要的原因是埃及和罗马都尚猫）。
+						<ul>
+							<li>优点：爱干净，不好情欲（公猫丁丁有倒刺），爱子。</li>
+							<li>中世纪末期，因捕鼠有利于控制黑死病，而逐渐风评好转，尤其是灰猫。</li>
+						</ul>
+					</li>
+					<li><strong>其他</strong>：
+						<ul>
+							<li>狐狸：靠毛色与狼区分，诡计多端，代表虚伪和背叛（同样是因为棕红色）。</li>
+							<li>黄鼠狼：罗马时期曾被驯养捕鼠，是蛇和巴西利克斯的克星，常与复活联系。</li>
+							<li>野兔：敏捷但不跑直线（所以罪恶），多产但淫荡（也是罪恶）。</li>
+							<li>老鼠：常被视为“虫”，由腐土而生，同样擅长交配，需要靠主教驱逐。</li>
+							<li>水獭：因囤鱼被视为贪婪，有记录东方的驯化经历。</li>
+						</ul>
+					</li>
+				</ul>
+			</div>
+		</section>
+
+		<section id="section138" class="note-section">
+			<h2 class="section-title">鸟</h2>
+			<div class="section-content" id="section138-content">
+				<ul>
+					<li><strong>鹰</strong>：天空之王，上帝和基督的象征，有返老还童的传说，象征受洗而获新生。
+						<ul>
+							<li>唯一能正视太阳的鸟，据说如果雏鹰不能直视太阳就会被立刻杀死或扔掉，象征上帝只认相信自己的人为孩子（被扔掉的雏鹰会被高尚的骨顶鸡抚养长大……这象征啥？）。</li>
+							<li>注意区分秃鹫：贪婪，食腐，常被认为最后会死于痛风（？）。</li>
+							<li>狮鹫：来自东方，有时被看作兽，雄鹰+母狮，强大，常（被上帝）作为宝藏守护者。</li>
+							<li>其他品性：
+								<ol>
+									<li>专横、粗暴，象征王权，常与熊/狮对立。</li>
+									<li>聪明，视线锐利，象征高尚卓越的灵魂。</li>
+									<li>慷慨（与其他动物分享猎物，和狮子类似），与秃鹫对比。</li>
+									<li>骄傲，常与骆驼、狮子、孔雀并列。</li>
+									<li>象征约翰（人：马太，狮：马可，牛：路加），也象征基督诞生- 牺牲- 复活- 升天。</li>
+								</ol>
+							</li>
+						</ul>
+					</li>
+					<li><strong>隼</strong>（虹膜黑色，和瞳孔几乎无法区分，尾部纤细，翅膀弯折）：
+						<ul>
+							<li>常用于贵族狩猎而备受喜爱，有专门的训隼书籍，但死后无用所以常被遗弃-_-</li>
+							<li>特性：勇敢、聪明、顺从，没抓住猎物会感到羞愧，能重生但仅限一次……</li>
+						</ul>
+					</li>
+					<li><strong>乌鸦</strong>：在罗马、凯尔特、日耳曼体系均被认为是神鸟，但基督教视为不祥，象征黑化的罪人。
+						<ul>
+							<li>食腐，且先吃眼睛再吸食脑髓，象征魔鬼让人盲目再夺走灵魂。</li>
+							<li>小乌鸦生下来是白色的，因而父母不认，直到变黑才开始照顾；因而长大后乌鸦会报复，任老乌鸦饿死甚至主动啄死（对比中国的乌鸦反哺……）。</li>
+							<li>其他缺点：小偷小摸，贪食，骄傲（自认为很美），虚伪（假装愚钝），狡猾。</li>
+							<li>因狡猾而常与狐狸结伴出现，但在猎人追捕狐狸时会因跟着狐狸飞而泄密。</li>
+							<li>注意区分渡鸦和小嘴乌鸦：以上说的都是渡鸦，小嘴乌鸦作为平衡，象征孝敬和忠诚。</li>
+						</ul>
+					</li>
+					<li><strong>白鸽</strong>：代表圣灵，各种美德的象征，敌人是龙（即魔鬼）。
+						<ul>
+							<li>圣经中的三大意象：诺亚方舟（和平）、大卫（力量）、圣灵（希望）。</li>
+							<li>雄鸽子（columbus）淫荡而通奸，会被好鸽子（columba，但这就是columbus的雌性形式啊）集体处刑啄死。</li>
+							<li>斑鸠与白鸽类似，忠贞而远离尘世，栖身棕榈树如同人栖身教会。</li>
+						</ul>
+					</li>
+					<li><strong>天鹅</strong>：注意圣经中完全没有提过天鹅！神秘，常在故事中扮演被巫术变形的可怜人。
+						<ul>
+							<li>天鹅鸣叫婉转优美，被视为布道宣讲的象征；天鹅之死则象征幸福地归向上帝。</li>
+							<li>也有人认为天鹅白羽下掩盖的黑肉，象征虚伪与骄傲。</li>
+						</ul>
+					</li>
+					<li><strong>公鸡</strong>：褒贬不一，勇敢（还记得白公鸡克狮子吗），慷慨，警觉，但虚荣而纵欲。
+						<ul>
+							<li>公鸡鸣叫（常与天鹅对比）单调但准时，象征报时的神父，也象征圣彼得。</li>
+							<li>公鸡打鸣迎接白昼，也象征驱赶魔鬼的胜利，迎接永生的曙光。</li>
+							<li>缺点：爱吃醋（引起打斗，并且战胜者会强奸战败者，真鸡奸），纵欲（睾丸入药）。</li>
+							<li>老公鸡会变得健忘，还会下蛋（忘了自己是公鸡吗），被蛇孵化即成巴西利克斯。</li>
+							<li>母鸡护崽一般象征圣母庇护人类。</li>
+						</ul>
+					</li>
+					<li><strong>鸵鸟、鹤、鹳</strong>（还记得区别吗）：
+						<ul>
+							<li>鸵鸟什么都能消化（暴食），所以衔马蹄铁或钉子（能消化就一定要吃这个吗）。</li>
+							<li>鸵鸟下了蛋就不管了，一说其懒惰健忘，一说其一心看天放弃世间享受。</li>
+							<li>鸵鸟蛋被阳光孵化，象征圣母生产，圣子无原罪降生。</li>
+							<li>鸵鸟爱与野马争斗（嫉妒），但惧怕狮和豹，会把头埋进沙里。</li>
+							<li>鹤高尚团结，站岗时会抓着石子，这样自己如果睡着会被石子砸醒。</li>
+							<li>鹳和鹤类似但没舌头，品德在于忠贞与孝（长幼互助），也象征神父与信众。</li>
+						</ul>
+					</li>
+					<li><strong>其他</strong>：
+						<ul>
+							<li>鹅：会用扑扇翅膀日夜报时，但叫声不好听；公鹅讨厌红色，狂躁而嫉妒心重。</li>
+							<li>孔雀：虚荣（漂亮但脚丑而叫声难听），肉很难吃，上席只是为了观赏！</li>
+							<li>山鹑：偷其他鸟的蛋，小鸟出生后会逃走回到生母身边，象征人类逃离魔鬼飞向上帝。</li>
+							<li>八哥：全身漆黑，只有喙为金黄，代表其歌喉，但只在夏季两个月歌唱。</li>
+							<li>夜莺：娇小而歌喉婉转，象征渺小的人类全力歌颂上帝；只在夜晚歌唱，背景常画星星。</li>
+							<li>猫头鹰：夜行动物=罪恶，常象征巫师和（待在黑暗中的）犹太人，和小嘴乌鸦为死敌。</li>
+							<li>白鹮：尼罗河畔不洁的天鹅（？），懒于捕鱼而食腐导致便秘，但善于灌肠……</li>
+							<li>鹈鹕：会以喙啄胸，将血洒在死雏身上使之复活，象征基督在十字架上流血。</li>
+							<li>蝙蝠：完全负面，同样象征犹太人，脸……像猴子。</li>
+						</ul>
+					</li>
+				</ul>
+			</div>
+		</section>
+
+		<section id="section139" class="note-section">
+			<h2 class="section-title">鱼类与水生动物</h2>
+			<div class="section-content" id="section139-content">
+				<p>注意中世纪的海滩、水手都是负面形象，因为溺亡没有墓地也无法做临终圣事。</p>
+				<ul>
+					<li><strong>鲸</strong>：注意海豚才是海洋之王，常被误认为岛屿然后人被吞食；13世纪已有专职批量捕鲸。</li>
+					<li><strong>海鱼</strong>：认为和魔鬼签订了契约才能在海里生存，中世纪很少吃海鱼。
+						<ul>
+							<li>鲻鱼：害怕时只把头藏起来。</li>
+							<li>䲟鱼：会用吸盘操纵船的前进方向。</li>
+							<li>鲟鱼：鳞片倒生，可以假装往某个方向游，象征魔鬼骗人。</li>
+							<li>鲱鱼：仅以海水为食（其他四大元素：鼹鼠&蟾蜍食土，蝾螈食火，变色龙食气）。</li>
+							<li>剑鱼：好斗，剑鱼 vs 渔夫 = 骑士 vs 官吏。</li>
+							<li>海鳝：不长鳞，仅有雌性，常与先卸下毒的蛇交配，象征被假装美好的魔鬼引诱的人类。</li>
+							<li>鹦嘴鱼：有鳞无牙，靠反刍消化。用雌鱼能轻松吸引雄鱼从而捕捉。</li>
+							<li>白鲷鱼：同样能用雌鱼吸引雄鱼加以捕捉，象征魔鬼的色诱……</li>
+							<li>叉牙鲷：用其他鱼的排泄物作饵……</li>
+							<li>金枪鱼：好斗，但打斗是作为比武而非战争，也常跟随船只为水手表演。</li>
+							<li>海蜈蚣（沙蚕？）：有毒，会把内脏吐出逃生然后再吞回去，象征反复犯罪的人。</li>
+						</ul>
+					</li>
+					<li><strong>牡蛎</strong>：长在贝壳里的鱼，象征圣母（孕育珍珠——基督）。
+						<ul>
+							<li>牡蛎的死敌是龙虾/螃蟹，象征魔鬼。</li>
+							<li>注意区分牡蛎和其他贝类，仅有牡蛎产珍珠（最贵重的珍宝，超过其他宝石）。</li>
+						</ul>
+					</li>
+					<li><strong>海豹</strong>：叫声犹如呻吟，代表死期将近，为魔鬼造物。</li>
+					<li><strong>淡水鱼</strong>：比海水鱼高贵，可食用。
+						<ul>
+							<li>鳟鱼：让水孵卵，象征遵循上帝的法则。</li>
+							<li>鲤鱼：自己孵蛋，雌鱼吞入雄鱼的“奶”而受孕。</li>
+							<li>鲑鱼：河流之王！将死之际会逆流回到出生之地死去，象征人类回到主的怀抱。</li>
+							<li>梭鱼：鲑鱼的竞争者，和魔鬼学得隐藏之术，十分贪食，甚至同类相食。</li>
+							<li>鳗鱼：死后化为污泥，然后化为小鳗鱼，曾因数量太多被主教驱逐233。</li>
+							<li>鳌虾：水中的魔鬼，会冬眠，与蝰蛇为友。</li>
+							<li>青蛙：在夜间群体交欢，象征魔鬼的夜间密会。</li>
+							<li>蟾蜍：厌恶光明，比青蛙还吝啬、自私，贪婪、淫欲、傲慢、愤怒于一身，魔鬼！</li>
+						</ul>
+					</li>
+					<li><strong>鳄鱼</strong>：魔鬼！长得像兽，诡诈、暴力、贪婪、懒惰，哭泣一说伪善，一说因煎熬而忏悔。</li>
+					<li><strong>河马</strong>：喜欢乱伦，喜欢隐藏自己，恰如魔鬼。</li>
+				</ul>
+			</div>
+		</section>
+
+		<section id="section140" class="note-section">
+			<h2 class="section-title">蛇与虫</h2>
+			<div class="section-content" id="section140-content">
+				<ul>
+					<li><strong>蛇</strong>：蛇中之王即巴西利斯克。
+						<ul>
+							<li>眼镜蛇：毒液只会让人沉睡而非死亡，所以被咬不被认为是自杀；传说头中有红宝石。唱歌奏乐能迷倒眼镜蛇，但眼镜蛇可以用尾巴堵住耳朵来抗拒。</li>
+							<li>蝰蛇：冬眠前会排出毒；雄蝰蛇交配后会被雌蝰蛇咬掉头，所以更喜欢和雌海鳝交配。</li>
+							<li>草蛇：喜欢喝奶，吸奶前会排出毒液，象征人去教堂聆听圣言时要放下恶欲。</li>
+							<li>双头蛇：蛇中将领，群蛇行动时发号施令，喜欢寒凉。</li>
+							<li>角蝰：有两只羊角，用来制造陷阱（用角模拟蚯蚓，引诱鸟）。</li>
+						</ul>
+					</li>
+					<li><strong>龙</strong>：最大的蛇！有爪有鳞，背上有凸起，可能有翼，也可能有多个头。
+						<ul>
+							<li>生于埃塞俄比亚&印度；鳞片有鱼腥味但无毒；尾巴为最致命的武器，能死死缠住对手。</li>
+							<li>龙常见黄色、绿色、黄绿色，甚至彩色或者能变色，但不会是黑色或深色。</li>
+							<li>龙克象，但往往死去的象会把龙砸死，象征善终会战胜恶。</li>
+							<li>也有说法是龙永远不会死，只会陷入沉睡。</li>
+							<li>龙克白鸽，但白鸽受树荫庇护，龙无法触碰；豹克龙，闪电克龙。</li>
+							<li>龙血鲜红，常被比作魔鬼的身体及地狱之火，能硬化成甲胄（齐格飞）。</li>
+						</ul>
+					</li>
+					<li><strong>半蛇半虫</strong>：
+						<ul>
+							<li>蜥蜴：比蛇好一些，但比蛇笨，记不得卵产在哪里；年老会失明，但面向东方能复明。</li>
+							<li>星蜥：一种五彩小蜥蜴，和蛇一样诡诈有毒，泡过星蜥的酒会让人毁容。</li>
+							<li>蝾螈：一种无足大蜥蜴，全身有毒，常用于给苹果下毒（白雪公主：？！），体寒克火。</li>
+							<li>变色龙：以空气为食，无血，克乌鸦（因为变黑时比乌鸦还亮），象征虚伪多变的人。</li>
+							<li>蝎子：被归为蜥蜴或虫，晚上毒性比早上低，大的比小的低（但对童贞女都很毒）。雌蝎一次产11子，吃掉10子只留1子，这只长大后会吃掉母亲给兄弟报仇……</li>
+							<li>蜗牛：分类混杂，好像跟现代的理解差不多。</li>
+						</ul>
+					</li>
+					<li><strong>虫</strong>：
+						<ul>
+							<li>猞猁：白色巨虫！视力极好，眼睛会喷火，尿和空气接触会变成宝石。健忘，吃着嘴里想着锅里，象征不知足的人。</li>
+							<li>水蛭：印度的水蛭会飞。</li>
+							<li>瘿蜂：怕血，自己也无血，跑到冬青树上会死。</li>
+							<li>毛毛虫：会变成飞蛾，飞蛾的排泄物又会变成毛毛虫。</li>
+							<li>蝗虫：由南风而生，遇北风则亡，同类相食，繁殖力出众；蟋蟀是一种大蝗虫。</li>
+							<li>蝉：不吃腐肉的苍蝇，贪图鸣叫而忘记进食（蟋蟀也是），象征随心所欲无视正道的人。</li>
+							<li>蜘蛛：织网象征魔鬼捕捉灵魂。</li>
+							<li>跳蚤：体毛过多的人会招跳蚤，咬痕在雨天会变大变痛，除蚤要在身上贴大片卷心菜叶。</li>
+							<li>臭虫、虱子：注意中世纪的人其实受害较少，欧洲卫生习惯是16世纪起才变差的。</li>
+						</ul>
+					</li>
+					<li><strong>蚂蚁</strong>：难得的好虫，勇敢、干净、贞洁、聪明、互助、有远见。
+						<ul>
+							<li>蚂蚁会把收集的粮食一分为二防止其发芽，象征教徒应将福音书的字面和精神分开理解。</li>
+							<li>埃塞俄比亚有狗那么大的巨型蚂蚁，善于收集黄金，但往往最后被人用诡计骗取。</li>
+						</ul>
+					</li>
+					<li><strong>蜜蜂</strong>：最被赞颂的虫，纯洁高尚。
+						<ul>
+							<li>蜜蜂给人类蜜（椴树蜜为最佳），又为同伴牺牲自己，象征基督。</li>
+							<li>蜜蜂从不交配，象征圣母的贞洁（它们生于发酵后的牛肉，马肉则生马蜂）。</li>
+							<li>中世纪认为蜂群顶端是蜂王而非蜂后，违背王命的蜜蜂要自决。</li>
+						</ul>
+					</li>
+				</ul>
+			</div>
 		</section>		
 	</main>
+</div>
 
     <script>
 	// 修改展开/收起哲学家作品列表的功能

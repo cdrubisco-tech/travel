@@ -118,7 +118,73 @@
 	@keyframes spin {
 	  to { transform: rotate(360deg); }
 	}
+	/* 容器布局 */
+	.layout-switch-container {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 5px;
+		background: #fff;
+		border-radius: 8px;
+		box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+		width: fit-content;
+	}
 
+	.switch-label {
+		font-size: 14px;
+		font-weight: bold;
+		color: #666;
+	}
+
+	/* 开关核心样式 */
+	.switch {
+		position: relative;
+		display: inline-block;
+		width: 50px;
+		height: 24px;
+	}
+
+	.switch input {
+		opacity: 0;
+		width: 0;
+		height: 0;
+	}
+
+	.slider {
+		position: absolute;
+		cursor: pointer;
+		top: 0; left: 0; right: 0; bottom: 0;
+		background-color: #3498db; /* Dagre 颜色 (左) */
+		transition: .4s;
+	}
+
+	.slider:before {
+		position: absolute;
+		content: "";
+		height: 18px;
+		width: 18px;
+		left: 3px;
+		bottom: 3px;
+		background-color: white;
+		transition: .4s;
+	}
+
+	/* 选中状态 (右侧) */
+	input:checked + .slider {
+		background-color: #2ecc71; /* fcose 颜色 (右) */
+	}
+
+	input:checked + .slider:before {
+		transform: translateX(26px);
+	}
+
+	/* 圆角 */
+	.slider.round {
+		border-radius: 34px;
+	}
+	.slider.round:before {
+		border-radius: 50%;
+	}
 
   </style>
 
@@ -126,6 +192,9 @@
 <script src="https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/layout-base/2.0.1/layout-base.min.js"></script>
 <script src="https://unpkg.com/cose-base/cose-base.js"></script>
 <script src="https://unpkg.com/cytoscape-fcose/cytoscape-fcose.js"></script>
+<script src="https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/dagre/0.8.5/dagre.min.js"></script>
+<script src="https://cytoscape.org/cytoscape.js-dagre/cytoscape-dagre.js"></script>
+
 
 <script>
   cytoscape.use(cytoscapeFcose);
@@ -272,6 +341,15 @@
   </div>
 
   <button id="findPathBtn">查找路径</button>
+  
+  <div class="layout-switch-container">
+    <span class="switch-label">紧凑</span>
+    <label class="switch">
+        <input type="checkbox" id="layout-toggle">
+        <span class="slider round"></span>
+    </label>
+    <span class="switch-label">分层</span>
+  </div>
 
 </div>
 
@@ -747,7 +825,29 @@ function renderDetailBox(d, id) {
 }
 
 const isMobile = screen.width < 600;
+let originalPositionsMap = new Map();	
+let dagrePositionsMap = new Map();
+let isDagreInitialized = false;
 
+function runInitialDagre() {
+		setTimeout(() => {
+		cy.layout({
+			name: 'dagre',
+			rankDir: isMobile ? 'LR' : 'TB', 
+			nodeSep: 1,          // 节点之间的水平间距
+			rankSep: isMobile ? 120 : 80,         // 层与层之间的垂直间距
+			edgeWeight: function( edge ){ return 10; }, // 连线权重
+			spacingFactor: 0.5,
+			animate:false,
+			fit: true,
+			stop: function() {
+				cy.nodes().forEach(n => {
+					dagrePositionsMap.set(n.id(), { x: n.position('x'), y: n.position('y') });
+				});
+				isDagreInitialized = true;
+			}
+		}).run();}, 50);
+}
     /* -------------------------
        3. 创建 Cytoscape 图
        ------------------------- */
@@ -759,6 +859,7 @@ const isMobile = screen.width < 600;
 		{
 		  selector: 'node[type="person"]',
 		  style: {
+		    'ghost': 'no',
 			'shape': 'round-rectangle',
 			'background-color': ele => {
 			  const c = ele.data('country');
@@ -776,6 +877,7 @@ const isMobile = screen.width < 600;
 			'font-size': 18,
 			'text-valign': 'center',
 			'text-halign': 'center',
+			'text-outline-width': 0,
 			'color': '#fff',
 			'padding': '12px',
 			'border-width': 2,
@@ -792,7 +894,9 @@ const isMobile = screen.width < 600;
         {
           selector: 'edge[type="spouse"]',
           style: {
-            'line-color': '#ff8888',
+            'curve-style': 'haystack',
+			'haystack-radius': 0,
+			'line-color': '#ff8888',
             'width': 3,
 			'events': 'no'
           }
@@ -801,10 +905,10 @@ const isMobile = screen.width < 600;
         {
           selector: 'edge[type="child"]',
           style: {
+		    'curve-style': 'haystack',
+			'haystack-radius': 0,
             'line-color': '#2ca02c',
             'width': 2,
-            'target-arrow-shape': 'triangle',
-            'target-arrow-color': '#2ca02c',
 			'events': 'no'
           }
         },
@@ -846,17 +950,31 @@ const isMobile = screen.width < 600;
       ],
 
 	  layout: {name: 'preset'},
-	  
+
       ready: function(){
         const cy = this;
 
         const cose = cy.layout({
           name: 'fcose',
 		  randomize: !isMobile,
+		  numIter: 1000,
+		  initialTemp: 100,
+		  sampleSize: 50, 
+		  quality: 'default',
         });
 
         cose.run();
-      }
+		
+		// 获取初始位置	
+		originalPositionsMap.clear();
+        
+        cy.nodes().forEach(n => {
+            originalPositionsMap.set(n.id(), { 
+                x: n.position('x'), 
+                y: n.position('y') 
+            });
+      });
+	  }
     });
 
     const helpIcon = document.getElementById('help-icon');
@@ -965,7 +1083,34 @@ document.querySelectorAll('.legend-item').forEach(item => {
   });
 });
 
-	
+document.getElementById('layout-toggle').addEventListener('change', function(e) {
+    let layoutConfig;
+
+    if (e.target.checked) {
+        // --- 拨到右侧：运行 Dagre---
+        if (isDagreInitialized) {
+            // 直接用 preset 还原
+            cy.layout({
+                name: 'preset',
+                positions: (node) => dagrePositionsMap.get(node.id()),
+                animate: true,
+                fit: true
+            }).run();
+        } else {
+            // 如果还没缓存过，就跑一次初始布局
+            runInitialDagre();
+        }
+    } else {
+        // --- 拨到左侧：还原 Fcose ---
+		cy.layout({
+			name: 'preset',
+			positions: (node) => originalPositionsMap.get(node.id()),
+			animate: true,
+			fit: true
+		}).run();
+    }
+});
+
 document.querySelectorAll(".titleOption").forEach(cb => {
   cb.addEventListener("change", () => {
     const selected = Array.from(document.querySelectorAll(".titleOption:checked"))

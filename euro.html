@@ -122,7 +122,15 @@
 
   </style>
 
-  <script src="https://unpkg.com/cytoscape@3.28.0/dist/cytoscape.min.js"></script>
+<script src="https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/cytoscape/3.33.1/cytoscape.min.js"></script>
+<script src="https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/layout-base/2.0.1/layout-base.min.js"></script>
+<script src="https://unpkg.com/cose-base/cose-base.js"></script>
+<script src="https://unpkg.com/cytoscape-fcose/cytoscape-fcose.js"></script>
+
+<script>
+  cytoscape.use(cytoscapeFcose);
+</script>
+
 </head>
 
 <body>
@@ -738,6 +746,8 @@ function renderDetailBox(d, id) {
 
 }
 
+const isMobile = screen.width < 600;
+
     /* -------------------------
        3. 创建 Cytoscape 图
        ------------------------- */
@@ -828,18 +838,14 @@ function renderDetailBox(d, id) {
 		}
       ],
 
-      layout: { name: 'breadthfirst' },
-
+	  layout: {name: 'preset'},
+	  
       ready: function(){
         const cy = this;
 
         const cose = cy.layout({
-          name: 'cose',
-          animate: false,
-          nodeRepulsion: 80000,
-          idealEdgeLength: 120,
-          gravity: 0.1,
-          numIter: 2000
+          name: 'fcose',
+		  randomize: !isMobile,
         });
 
         cose.run();

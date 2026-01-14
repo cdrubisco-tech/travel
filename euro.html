@@ -793,7 +793,8 @@ const isMobile = screen.width < 600;
           selector: 'edge[type="spouse"]',
           style: {
             'line-color': '#ff8888',
-            'width': 3
+            'width': 3,
+			'events': 'no'
           }
         },
 
@@ -803,7 +804,8 @@ const isMobile = screen.width < 600;
             'line-color': '#2ca02c',
             'width': 2,
             'target-arrow-shape': 'triangle',
-            'target-arrow-color': '#2ca02c'
+            'target-arrow-color': '#2ca02c',
+			'events': 'no'
           }
         },
 		{
@@ -815,8 +817,7 @@ const isMobile = screen.width < 600;
 			'min-width': 200,          // 节点变大
 			'min-height': 80,
 			'border-width': 3,
-			'z-index-compare': 'manual', 
-		    'z-index': 9999,
+			'z-compound-depth': 'top'
 		  }
 		},
 		{
@@ -831,16 +832,14 @@ const isMobile = screen.width < 600;
 		{
 		  selector: 'node[dim = "true"]',
 		  style: {
-		  'z-index-compare': 'manual', 
-		  'z-index': 1,
+		  'z-compound-depth': 'bottom',
 		  'events': 'no'
 		  }
 		},
 		{
 		  selector: 'edge[dim = "true"]',
 		  style: {
-		  'z-index-compare': 'manual', 
-		  'z-index': 1,
+		  'z-compound-depth': 'bottom',
 		  'events': 'no'
 		  }
 		}
@@ -1014,12 +1013,11 @@ cy.on('tap', 'node', evt => {
   const id = node.id();
 
   // 清除旧高亮
-  cy.nodes().forEach(n => n.data("highlight", false));
-  cy.edges().forEach(e => e.data("highlight", false)); 
+  cy.nodes().forEach(n => n.data("highlight", "false"));
+  cy.edges().forEach(e => e.data("highlight", "false")); 
   
   // 高亮当前节点
   cy.getElementById(id).data("highlight", "true");
-
 
   redrawGraph();
 });

@@ -237,7 +237,7 @@
         <g transform="translate(420, 50)"><use href="#person-box" /><text class="label-text">外祖父</text></g>
         <g transform="translate(520, 50)"><use href="#person-box" /><text class="label-text">外祖母</text></g>
         <line x1="80" y1="65" x2="130" y2="110" stroke="red" /><line x1="180" y1="65" x2="130" y2="110" stroke="red" />
-        <circle cx="130" cy="110" r="3" fill="black" /><text x="130" y="85" class="rel-text" color="red">配偶关系</text>
+        <circle cx="130" cy="110" r="3" fill="black" /><text x="130" y="85" class="rel-text" stroke="red">配偶关系</text>
         <line x1="420" y1="65" x2="470" y2="110" stroke="red" /><line x1="520" y1="65" x2="470" y2="110" stroke="red" />
         <circle cx="470" cy="110" r="3" fill="black" />
         <line x1="130" y1="110" x2="60" y2="185" stroke="green" /><line x1="130" y1="110" x2="200" y2="185" stroke="green" />
@@ -251,7 +251,7 @@
         <line x1="300" y1="280" x2="220" y2="365" stroke="green" /><line x1="300" y1="280" x2="380" y2="365" stroke="green" />
         <g transform="translate(220, 380)"><use href="#person-box" /><text class="label-text">儿子</text></g>
         <g transform="translate(380, 380)"><use href="#person-box" /><text class="label-text">女儿</text></g>
-        <text x="300" y="330" class="rel-text" color="green">子女关系</text>
+        <text x="300" y="330" class="rel-text" stroke="green">子女关系</text>
     </svg>
 </div>
 
@@ -407,8 +407,8 @@ data.nodes.forEach(n => {
 function redrawGraph() {
   cy.nodes().forEach(n => {
     const hidden = n.data("hidden") === true;
-    const h = n.data("highlight") === true;
-    const d = n.data("dim") === true;
+    const h = n.data("highlight") === "true";
+    const d = n.data("dim") === "true";
     
 	if (hidden) {
       n.style("display", "none");
@@ -428,8 +428,8 @@ function redrawGraph() {
 
   cy.edges().forEach(e => {
     const hidden = e.data("hidden") === true;
-    const h = e.data("highlight") === true;
-    const d = e.data("dim") === true;
+    const h = e.data("highlight") === "true";
+    const d = e.data("dim") === "true";
     
 	if (hidden) {
       e.style("display", "none");
@@ -468,10 +468,10 @@ function filterByTitles(selectedGroups) {
     data.nodes.forEach(n => n.data.hidden = false);
     data.edges.forEach(e => e.data.hidden = false);
 	
-	cy.nodes().forEach(n => n.data("highlight", false));
-	cy.edges().forEach(e => e.data("highlight", false));
-	cy.nodes().forEach(n => n.data("dim", false));
-	cy.edges().forEach(e => e.data("dim", false));
+	cy.nodes().forEach(n => n.data("highlight", "false"));
+	cy.edges().forEach(e => e.data("highlight", "false"));
+	cy.nodes().forEach(n => n.data("dim", "false"));
+	cy.edges().forEach(e => e.data("dim", "false"));
 	document.getElementById('details').style.display = 'none';
 
 	
@@ -618,18 +618,18 @@ function findShortestPath(startId, endId) {
 
 function highlightPath(path) {
   cy.nodes().forEach(n => {
-    n.data("highlight", false);
-    n.data("dim", true);
+    n.data("highlight", "false");
+    n.data("dim", "true");
   });  
   
   cy.edges().forEach(e => {
-    e.data("highlight", false);
-    e.data("dim", true);
+    e.data("highlight", "false");
+    e.data("dim", "true");
   });
 
   path.forEach(id => {
-    cy.getElementById(id).data("highlight", true);
-    cy.getElementById(id).data("dim", false);
+    cy.getElementById(id).data("highlight", "true");
+    cy.getElementById(id).data("dim", "false");
   });
   
   // 高亮边
@@ -642,8 +642,8 @@ function highlightPath(path) {
       const t = e.data("target");
 
       if ((s === a && t === b) || (s === b && t === a)) {
-        e.data("highlight", true);
-		e.data("dim", false);
+        e.data("highlight", "true");
+		e.data("dim", "false");
       }
     });
   }
@@ -660,16 +660,16 @@ function highlightRelatives(node) {
 
   // 1. 清除旧状态
   cy.nodes().forEach(n => {
-    n.data("highlight", false);
-    n.data("dim", false);
+    n.data("highlight", "false");
+    n.data("dim", "false");
   });
   cy.edges().forEach(e => {
-    e.data("highlight", false);
-    e.data("dim", false);
+    e.data("highlight", "false");
+    e.data("dim", "false");
   });
 
   // 2. 高亮搜索节点
-  node.data("highlight", true);
+  node.data("highlight", "true");
 
   // 3. 找到 family 节点（一级）
   const families = node.neighborhood('node[type = "family"]');
@@ -678,21 +678,21 @@ function highlightRelatives(node) {
   const persons = families.neighborhood('node[type = "person"]');
 
   persons.forEach(n => {
-    n.data("highlight", true);
+    n.data("highlight", "true");
   });
 
   // 5. 高亮相关边
   const edges = families.connectedEdges().union(node.connectedEdges());
   edges.forEach(e => {
-    e.data("highlight", true);
+    e.data("highlight", "true");
   });
 
   // 6. 其他全部 dim
   cy.nodes().forEach(n => {
-    if (!n.data("highlight")) n.data("dim", true);
+    if (n.data("highlight") != "true") n.data("dim", "true");
   });
   cy.edges().forEach(e => {
-    if (!e.data("highlight")) e.data("dim", true);
+    if (e.data("highlight") != "true") e.data("dim", "true");
   });
 
   // 7. 更新透明度
@@ -814,7 +814,9 @@ const isMobile = screen.width < 600;
 			'font-size': 36,
 			'min-width': 200,          // 节点变大
 			'min-height': 80,
-			'border-width': 3
+			'border-width': 3,
+			'z-index-compare': 'manual', 
+		    'z-index': 9999,
 		  }
 		},
 		{
@@ -829,11 +831,17 @@ const isMobile = screen.width < 600;
 		{
 		  selector: 'node[dim = "true"]',
 		  style: {
+		  'z-index-compare': 'manual', 
+		  'z-index': 1,
+		  'events': 'no'
 		  }
 		},
 		{
 		  selector: 'edge[dim = "true"]',
 		  style: {
+		  'z-index-compare': 'manual', 
+		  'z-index': 1,
+		  'events': 'no'
 		  }
 		}
       ],
@@ -897,10 +905,10 @@ const isMobile = screen.width < 600;
 		// 隐藏详情框
 		document.getElementById('details').style.display = 'none';
 
-		cy.nodes().forEach(n => n.data("highlight", false));
-		cy.edges().forEach(e => e.data("highlight", false));
-		cy.nodes().forEach(n => n.data("dim", false));
-		cy.edges().forEach(e => e.data("dim", false));
+		cy.nodes().forEach(n => n.data("highlight", "false"));
+		cy.edges().forEach(e => e.data("highlight", "false"));
+		cy.nodes().forEach(n => n.data("dim", "false"));
+		cy.edges().forEach(e => e.data("dim", "false"));
 		document.querySelectorAll('.legend-item').forEach(i => i.classList.remove('active'));
 		
 		redrawGraph();
@@ -923,13 +931,13 @@ document.querySelectorAll('.legend-item').forEach(item => {
 
     // 先清除所有的 highlight/dim
     cy.nodes().forEach(n => {
-      n.data("highlight", false);
-      n.data("dim", true);
+      n.data("highlight", "false");
+      n.data("dim", "true");
     });
 	// 隐藏边
 	cy.edges().forEach(e => {
-	  e.data("highlight", false);
-	  e.data("dim", true);
+	  e.data("highlight", "false");
+	  e.data("dim", "true");
 	});
 	
     cy.nodes().forEach(n => {
@@ -940,16 +948,16 @@ document.querySelectorAll('.legend-item').forEach(item => {
       // “其他”国家组
       if (country === "other") {
         if (OTHER_COUNTRIES.includes(c)) {
-          n.data("highlight", true);
-		  n.data("dim", false);
+          n.data("highlight", "true");
+		  n.data("dim", "false");
         }
       }
 
       // 单一国家
       else {
         if (c === country) {
-          n.data("highlight", true);
-          n.data("dim", false);
+          n.data("highlight", "true");
+          n.data("dim", "false");
         }
       }
     });

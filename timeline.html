@@ -245,8 +245,18 @@
             return x + (pct * widths[rIdx]);
         }
 
-        window.changeScale = (f) => { Y_SCALE *= f; draw(); };
-        window.autoReset = () => { initWidths(); draw(); drawControls(); };
+        window.changeScale = (f) => {
+            const viewCenterY = window.scrollY + (window.innerHeight / 2);
+            const currentYear = (viewCenterY / Y_SCALE) - Y_OFFSET;
+            Y_SCALE *= f;
+            draw();
+            const newTargetY = (currentYear + Y_OFFSET) * Y_SCALE;
+            window.scrollTo({
+                top: newTargetY - (window.innerHeight / 2),
+                behavior: 'auto'
+            });
+        };
+        window.autoReset = () => { initWidths(); Y_SCALE = 4; draw(); drawControls(); window.scrollTo({ top: (Y_OFFSET+100) * Y_SCALE + 100});};
         
         let showLines = false; // 默认不显示
 
@@ -450,6 +460,7 @@
         initWidths();
         draw();
         drawControls();
+		window.scrollTo({ top: (Y_OFFSET+100) * Y_SCALE + 100});
 
         // 监听窗口大小变化
         window.addEventListener('resize', () => {

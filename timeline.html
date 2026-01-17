@@ -208,7 +208,7 @@
                 const totalW = widths.reduce((a, b) => a + b, 0);
 
                 // 2. 约束：边界不能超出总范围，且要给左右留出最小宽度
-                const minW = 50;
+                const minW = 30;
                 const leftLimit = minW * (idx + 1);
                 const rightLimit = totalW - (minW * (NumRegions - 1 - idx));
                 

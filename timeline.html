@@ -123,7 +123,12 @@
                 stroke-width: 2;
                 stroke-dasharray: 5,5;
                 pointer-events: none; /* 线条不干扰鼠标事件 */
-            }
+            }			
+			.stop-scrolling {
+			  height: 100%;
+			  overflow: hidden;
+			}
+			
         </style>
     </head>
     <body>
@@ -180,7 +185,7 @@
         // --- 自动计算初始宽度：填满屏幕 ---
         function initWidths() {
             const screenW = window.innerWidth;
-            const availableW = Math.max(900, screenW - LEFT_MARGIN - 50);
+            const availableW = Math.max(1450, screenW - LEFT_MARGIN - 50);
             widths = Array(NumRegions).fill(availableW / NumRegions);
         }
 
@@ -191,6 +196,10 @@
 
         // --- 比例联动算法 ---
         const dragHandler = d3.drag()
+			.on("start", function() {
+				// 关键：拖动开始，禁用页面滚动
+				document.body.classList.add('stop-scrolling');
+			})
             .on("drag", function(event, d) {
                 let mouseX = event.x; // 当前鼠标在横轴上的绝对位置
                 let idx = d.index;    // 当前拖动的是哪条线 (0 代表 R0|R1 之间)
@@ -232,7 +241,11 @@
                     draw();
                     drawControls();
                 });
-            });
+            })
+			.on("end", function() {
+        // 拖动结束，恢复页面滚动
+				document.body.classList.remove('stop-scrolling');
+			});
 
         // --- 核心绘制逻辑 ---
         function getX(logicX) {
@@ -377,8 +390,16 @@
                     cumulativeX += widths[i];
                     controlSvg.append("path")
                         .attr("class", "divider-handle")
-                        .attr("d", `M ${cumulativeX-8} 5 L ${cumulativeX+8} 5 L ${cumulativeX} 25 Z`)
-                        .datum({index: i})
+                        .attr("d", `M ${cumulativeX-8} 5 L ${cumulativeX+8} 5 L ${cumulativeX} 25 Z`);
+						
+                    controlSvg.append("rect")
+						.attr("x", cumulativeX - 25) // 左右各扩展 25px 的点击范围
+						.attr("y", 0)
+						.attr("width", 50)
+						.attr("height", 50)
+						.attr("fill", "transparent") // 看不见但点得到
+						.style("cursor", "ew-resize") 
+						.datum({index: i})
                         .call(dragHandler);
                 }
             }
